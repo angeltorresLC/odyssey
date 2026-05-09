@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health vocabulary</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap');
+
+        :root {
+            --bg-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            --header-blue: #00d2ff;
+            --header-purple: #3a7bd5;
+            --text-dark: #2d3436;
+            --card-blue: #c7ecee;
+            --card-pink: #f8c291;
+            --card-yellow: #fbe28d;
+            --card-purple: #e0b4f5;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        }
+
+        header {
+            background: linear-gradient(to right, var(--header-blue), var(--header-purple));
+            color: white;
+            text-align: center;
+            padding: 20px 10px;
+            border-bottom: 5px solid #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        header h1 {
+            font-family: 'Fredoka One', cursive;
+            margin: 0;
+            font-size: 2.5em;
+            letter-spacing: 2px;
+            text-shadow: 3px 3px 0px #000;
+        }
+
+        nav {
+            background-color: #7b2cbf;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 20px;
+            font-weight: bold;
+            font-size: 1.1em;
+            text-transform: uppercase;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Toggle Button */
+        .toggle-btn {
+            background-color: #7b2cbf;
+            color: white;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2em;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto 30px auto;
+            box-shadow: 0 6px 0 #5a189a;
+            transition: all 0.1s;
+        }
+
+        .toggle-btn:active {
+            transform: translateY(6px);
+            box-shadow: none;
+        }
+
+        /* Flashcard Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 10px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            border: 3px dashed #fff;
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: scale(1.03);
+        }
+
+        /* Card Colors matching the screenshot */
+        .card.blue { background-color: var(--card-blue); border-color: #81ecec; }
+        .card.pink { background-color: #ffcccc; border-color: #ff7675; }
+        .card.yellow { background-color: var(--card-yellow); border-color: #fdcb6e; }
+        .card.purple { background-color: var(--card-purple); border-color: #a29bfe; }
+
+        .card-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.3em;
+            margin: 10px 0 0 0;
+            color: #2d3436;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card-phonetic {
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.9em;
+            color: #7b2cbf;
+            margin-bottom: 10px;
+            font-style: italic;
+            font-weight: bold;
+        }
+
+        /* Speak Button Styling */
+        .speak-btn {
+            cursor: pointer;
+            font-size: 1.1em;
+            margin-left: 10px;
+            transition: transform 0.2s;
+            display: inline-block;
+            user-select: none;
+        }
+        
+        .speak-btn:hover {
+            transform: scale(1.3);
+        }
+
+        .speak-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* Icon Container styling */
+        .icon-container {
+            font-size: 5.5em;
+            margin: 5px 0 15px 0;
+            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2));
+        }
+
+        .card-def {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 5px;
+            padding: 0 10px;
+        }
+
+        .card-example {
+            font-size: 1.0em;
+            color: #444;
+            background: rgba(255,255,255,0.5);
+            padding: 8px;
+            border-radius: 8px;
+            margin: 0 5px 5px 5px;
+            text-align: left;
+        }
+
+        /* Quiz Section */
+        .quiz-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 4px solid #7b2cbf;
+        }
+
+        .quiz-header {
+            font-family: 'Fredoka One', cursive;
+            color: #7b2cbf;
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .quiz-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .question-box {
+            background: #f1f2f6;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 5px solid #3a7bd5;
+        }
+
+        .question-box p {
+            margin-top: 0;
+            font-weight: bold;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-family: 'Nunito', sans-serif;
+            box-sizing: border-box;
+        }
+
+        .submit-btn {
+            background-color: #00d2ff;
+            color: #2d3436;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.5em;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            display: block;
+            margin: 40px auto 10px;
+            box-shadow: 0 6px 0 #0097e6;
+            transition: all 0.1s;
+        }
+
+        .submit-btn:active {
+            transform: translateY(6px);
+            box-shadow: none;
+        }
+
+        .result {
+            text-align: center;
+            font-size: 1.5em;
+            font-family: 'Fredoka One', cursive;
+            margin-top: 20px;
+            color: #7b2cbf;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>👩‍⚕️ HEALTH VOCABULARY - FRESHMEN 👨‍⚕️</h1>
+    </header>
+
+    <div class="container">
+        
+        <button id="toggleBtn" class="toggle-btn">👁️ Hide Flashcards & Start Exam</button>
+
+        <div class="grid" id="flashcardGrid">
+            <div class="card blue">
+                <div class="card-title">Fit as a fiddle <span class="speak-btn" onclick="speakWord('Fit as a fiddle')" title="Listen">🔊</span></div>
+                <div class="card-phonetic">/fɪt əz ə ˈfɪd.əl/</div>
+                <div class="icon-container">💪</div>
+                <div class="card-def">To be in perfect health and physical condition.</div>
+                <div class="card-example"><strong>Example:</strong> She exercises daily and is fit as a fiddle.</div>
+            </div>
+
+            <div class="card pink">
+                <div class="card-title">Under the weather <span class="speak-btn" onclick="speakWord('Under the weather')" title="Listen">🔊</span></div>
+                <div class="card-phonetic">/ˈʌn.də ðə ˈweð.ər/</div>
+                <div class="icon-container">🤒</div>
+                <div class="card-def">Feeling slightly ill or not in good spirits.</div>
+                <div class="card-example"><strong>Example:</strong> He stayed home today because he felt a bit under the weather.</div>
+            </div>
+
+            <div class="card yellow">
+                <div class="card-title">A clean bill of health <span class="speak-btn" onclick="speakWord('A clean bill of health')" title="Listen">🔊</span></div>
+                <div class="card-phonetic">/ə kliːn bɪl əv helθ/</div>
+                <div class="icon-container">👨‍⚕️</div>
+                <div class="card-def">A doctor's official statement that someone is healthy.</div>
+                <div class="card-example"><strong>Example:</strong> The physical checkup gave her a clean bill of health.</div>
+            </div>
+
+            <div class="card blue">
+                <div class="card-title">Prescription <span class="speak-btn" onclick="speakWord('Prescription')" title="Listen">🔊</span></div>
+                <div class="card-phonetic">/prɪˈskrɪp.ʃən/</div>
+                <div class="icon-container">📝</div>
+                <div class="card-def">A piece of paper with medical details for medicine.</div>
+                <div class="card-example"><strong>Example:</strong> The nurse gave him a prescription for eye drops.</div>
+            </div>
+
+            <div class="card pink">
+                <div class="card-title">Wound <span class="speak-btn" onclick="speakWord('Wound')" title="Listen">🔊</span></div>
+                <div class="card-phonetic">/wuːnd/</div>
+                <div class="icon-container">🩹</div>
+                <div class="card-def">An injury, especially one with damage to the skin.</div>
+                <div class="card-example"><strong>Example:</strong> The hero bandaged his sword wound quickly.</div>
+            </div>
+
+            <div class="card yellow">
+                <div class="card-title">Pass Out <span class="speak-btn" onclick="speakWord('Pass Out')" title="Listen">🔊</span></div>
+                <div class="card-phonetic">/pɑːs aʊt/</div>
+                <div class="icon-container">😵</div>
+                <div class="card-def">To become unconscious for a short time (faint).</div>
+                <div class="card-example"><strong>Example:</strong> The intense heat made the character pass out during training.</div>
+            </div>
+
+            <div class="card purple">
+                <div class="card-title">On the mend <span class="speak-btn" onclick="speakWord('On the mend')" title="Listen">🔊</span></div>
+                <div class="card-phonetic">/ɒn ðə mend/</div>
+                <div class="icon-container">🛌</div>
+                <div class="card-def">Getting better after an illness or injury.</div>
+                <div class="card-example"><strong>Example:</strong> His broken leg is finally on the mend.</div>
+            </div>
+
+            <div class="card purple">
+                <div class="card-title">Black and blue <span class="speak-btn" onclick="speakWord('Black and blue')" title="Listen">🔊</span></div>
+                <div class="card-phonetic">/blæk ənd bluː/</div>
+                <div class="icon-container">🤕</div>
+                <div class="card-def">Covered in bruises from being hit or falling.</div>
+                <div class="card-example"><strong>Example:</strong> After the robot battle, his arm was black and blue.</div>
+            </div>
+
+            <div class="card blue">
+                <div class="card-title">Come down with <span class="speak-btn" onclick="speakWord('Come down with')" title="Listen">🔊</span></div>
+                <div class="card-phonetic">/kʌm daʊn wɪð/</div>
+                <div class="icon-container">🤧</div>
+                <div class="card-def">To start to suffer from an illness.</div>
+                <div class="card-example"><strong>Example:</strong> I think I'm coming down with the flu.</div>
+            </div>
+
+            <div class="card pink">
+                <div class="card-title">Swollen <span class="speak-btn" onclick="speakWord('Swollen')" title="Listen">🔊</span></div>
+                <div class="card-phonetic">/ˈswəʊ.lən/</div>
+                <div class="icon-container">🎈</div>
+                <div class="card-def">Larger than usual due to an injury.</div>
+                <div class="card-example"><strong>Example:</strong> After twisting his ankle, it became very swollen.</div>
+            </div>
+
+            <div class="card yellow">
+                <div class="card-title">Check-up <span class="speak-btn" onclick="speakWord('Check-up')" title="Listen">🔊</span></div>
+                <div class="card-phonetic">/ˈtʃek.ʌp/</div>
+                <div class="icon-container">🩺</div>
+                <div class="card-def">A general medical examination.</div>
+                <div class="card-example"><strong>Example:</strong> I go to the dentist for a check-up every year.</div>
+            </div>
+
+            <div class="card purple">
+                <div class="card-title">Dizzy <span class="speak-btn" onclick="speakWord('Dizzy')" title="Listen">🔊</span></div>
+                <div class="card-phonetic">/ˈdɪz.i/</div>
+                <div class="icon-container">💫</div>
+                <div class="card-def">Feeling like everything is turning around.</div>
+                <div class="card-example"><strong>Example:</strong> Standing up too quickly made her feel dizzy.</div>
+            </div>
+
+            <div class="card blue">
+                <div class="card-title">Surgery <span class="speak-btn" onclick="speakWord('Surgery')" title="Listen">🔊</span></div>
+                <div class="card-phonetic">/ˈsɜː.dʒər.i/</div>
+                <div class="icon-container">🏥</div>
+                <div class="card-def">Medical treatment where a doctor cuts your body open.</div>
+                <div class="card-example"><strong>Example:</strong> He needs to have surgery to repair his broken knee.</div>
+            </div>
+
+            <div class="card pink">
+                <div class="card-title">Symptom <span class="speak-btn" onclick="speakWord('Symptom')" title="Listen">🔊</span></div>
+                <div class="card-phonetic">/ˈsɪmp.təm/</div>
+                <div class="icon-container">⚠️</div>
+                <div class="card-def">A physical feeling or problem that shows you are sick.</div>
+                <div class="card-example"><strong>Example:</strong> A bad cough is a common symptom of a cold.</div>
+            </div>
+
+            <div class="card yellow">
+                <div class="card-title">Infection <span class="speak-btn" onclick="speakWord('Infection')" title="Listen">🔊</span></div>
+                <div class="card-phonetic">/ɪnˈfek.ʃən/</div>
+                <div class="icon-container">🦠</div>
+                <div class="card-def">A disease in your body caused by bacteria or a virus.</div>
+                <div class="card-example"><strong>Example:</strong> You must clean the cut to prevent a serious infection.</div>
+            </div>
+
+            <div class="card purple">
+                <div class="card-title">Throw up <span class="speak-btn" onclick="speakWord('Throw up')" title="Listen">🔊</span></div>
+                <div class="card-phonetic">/θrəʊ ʌp/</div>
+                <div class="icon-container">🤢</div>
+                <div class="card-def">To vomit or empty the contents of your stomach.</div>
+                <div class="card-example"><strong>Example:</strong> Eating the old food made him throw up in the bathroom.</div>
+            </div>
+        </div>
+
+        <div class="quiz-container">
+            <div class="quiz-header">📝 Final Exam Questionnaire</div>
+            <form id="quizForm">
+                <div class="quiz-grid">
+                    
+                    <div class="question-box">
+                        <p>1. If you feel "under the weather", you feel...</p>
+                        <select id="q1">
+                            <option value="">- Select -</option>
+                            <option value="a">a) Slightly ill</option>
+                            <option value="b">b) Very energetic</option>
+                            <option value="c">c) Cold</option>
+                        </select>
+                    </div>
+                    <div class="question-box">
+                        <p>2. A piece of paper a doctor gives you for medicine is a...</p>
+                        <select id="q2">
+                            <option value="">- Select -</option>
+                            <option value="a">a) Receipt</option>
+                            <option value="b">b) Prescription</option>
+                            <option value="c">c) Bill</option>
+                        </select>
+                    </div>
+                    <div class="question-box">
+                        <p>3. To be "fit as a fiddle" means to be...</p>
+                        <select id="q3">
+                            <option value="">- Select -</option>
+                            <option value="a">a) Good at music</option>
+                            <option value="b">b) Perfectly healthy</option>
+                            <option value="c">c) Very sick</option>
+                        </select>
+                    </div>
+                    <div class="question-box">
+                        <p>4. The official statement that you are healthy is a clean bill of...</p>
+                        <select id="q4">
+                            <option value="">- Select -</option>
+                            <option value="a">a) Health</option>
+                            <option value="b">b) Wealth</option>
+                            <option value="c">c) Medicine</option>
+                        </select>
+                    </div>
+                    <div class="question-box">
+                        <p>5. An injury that breaks the skin is called a...</p>
+                        <select id="q5">
+                            <option value="">- Select -</option>
+                            <option value="a">a) Disease</option>
+                            <option value="b">b) Wound</option>
+                            <option value="c">c) Cure</option>
+                        </select>
+                    </div>
+                    <div class="question-box">
+                        <p>6. To "pass out" means to...</p>
+                        <select id="q6">
+                            <option value="">- Select -</option>
+                            <option value="a">a) Give things away</option>
+                            <option value="b">b) Faint / lose consciousness</option>
+                            <option value="c">c) Die</option>
+                        </select>
+                    </div>
+                    <div class="question-box">
+                        <p>7. If someone is covered in bruises, they are "black and..."</p>
+                        <select id="q7">
+                            <option value="">- Select -</option>
+                            <option value="a">a) Blue</option>
+                            <option value="b">b) Red</option>
+                            <option value="c">c) Yellow</option>
+                        </select>
+                    </div>
+                    <div class="question-box">
+                        <p>8. Someone recovering from an illness is "on the..."</p>
+                        <select id="q8">
+                            <option value="">- Select -</option>
+                            <option value="a">a) Fix</option>
+                            <option value="b">b) Heal</option>
+                            <option value="c">c) Mend</option>
+                        </select>
+                    </div>
+                    <div class="question-box">
+                        <p>9. A hard truth to accept is a "bitter _____ to swallow".</p>
+                        <select id="q9">
+                            <option value="">- Select -</option>
+                            <option value="a">a) Pill</option>
+                            <option value="b">b) Drink</option>
+                            <option value="c">c) Food</option>
+                        </select>
+                    </div>
+                    <div class="question-box">
+                        <p>10. When you completely get better from an illness, you...</p>
+                        <select id="q10">
+                            <option value="">- Select -</option>
+                            <option value="a">a) Recover</option>
+                            <option value="b">b) Return</option>
+                            <option value="c">c) Rescue</option>
+                        </select>
+                    </div>
+
+                    <div class="question-box">
+                        <p>11. Type the missing word: The doctor wrote a _________ for antibiotics.</p>
+                        <input type="text" id="q11" placeholder="Type answer here">
+                    </div>
+                    <div class="question-box">
+                        <p>12. Type the missing word: Because he didn't eat, he ______ out during PE class.</p>
+                        <input type="text" id="q12" placeholder="Type answer here">
+                    </div>
+                    <div class="question-box">
+                        <p>13. Type the missing word: After the fight, the anime hero had a deep sword ______.</p>
+                        <input type="text" id="q13" placeholder="Type answer here">
+                    </div>
+                    <div class="question-box">
+                        <p>14. Type the missing word: I'm feeling under the _______ today.</p>
+                        <input type="text" id="q14" placeholder="Type answer here">
+                    </div>
+                    <div class="question-box">
+                        <p>15. Type the missing word: My grandfather runs marathons; he's fit as a _______.</p>
+                        <input type="text" id="q15" placeholder="Type answer here">
+                    </div>
+                    <div class="question-box">
+                        <p>16. Transformation: He is recovering well. -> He is on the ______.</p>
+                        <input type="text" id="q16" placeholder="Type answer here">
+                    </div>
+                    <div class="question-box">
+                        <p>17. Transformation: He was covered in bruises. -> He was black and ______.</p>
+                        <input type="text" id="q17" placeholder="Type answer here">
+                    </div>
+                    <div class="question-box">
+                        <p>18. Transformation: The checkup showed no problems. -> He got a clean bill of ______.</p>
+                        <input type="text" id="q18" placeholder="Type answer here">
+                    </div>
+                    <div class="question-box">
+                        <p>19. Word Formation (ILL): His mysterious ________ lasted for a week.</p>
+                        <input type="text" id="q19" placeholder="Type answer here">
+                    </div>
+                    <div class="question-box">
+                        <p>20. Word Formation (RECOVER): She made a full ________ after the accident.</p>
+                        <input type="text" id="q20" placeholder="Type answer here">
+                    </div>
+
+                    <div class="question-box">
+                        <p>21. Unscramble: Type the correct word for "L W E S L O N" (enlarged due to injury).</p>
+                        <input type="text" id="q21" placeholder="Type answer here">
+                    </div>
+                    <div class="question-box">
+                        <p>22. Spot the Mistake: "I am coming up with a cold." Type the correct preposition to replace "up".</p>
+                        <input type="text" id="q22" placeholder="Type answer here">
+                    </div>
+                    <div class="question-box">
+                        <p>23. True or False: "Dizzy" means feeling like everything is spinning.</p>
+                        <select id="q23">
+                            <option value="">- Select -</option>
+                            <option value="true">True</option>
+                            <option value="false">False</option>
+                        </select>
+                    </div>
+                    <div class="question-box">
+                        <p>24. Definition Match: Type the word for a routine medical examination (include the hyphen).</p>
+                        <input type="text" id="q24" placeholder="Type answer here">
+                    </div>
+                    <div class="question-box">
+                        <p>25. Odd One Out: Which word is an item, not a symptom or injury? (wound / swollen / prescription / dizzy)</p>
+                        <input type="text" id="q25" placeholder="Type answer here">
+                    </div>
+
+                    <div class="question-box">
+                        <p>26. When a doctor cuts open your body to fix a problem, it is called...</p>
+                        <select id="q26">
+                            <option value="">- Select -</option>
+                            <option value="a">a) Surgery</option>
+                            <option value="b">b) Check-up</option>
+                            <option value="c">c) Prescription</option>
+                        </select>
+                    </div>
+                    <div class="question-box">
+                        <p>27. Type the missing word: A high fever is a bad ________ of the flu.</p>
+                        <input type="text" id="q27" placeholder="Type answer here">
+                    </div>
+                    <div class="question-box">
+                        <p>28. Type the missing word: If you eat that old meat, you might ________ up.</p>
+                        <input type="text" id="q28" placeholder="Type answer here">
+                    </div>
+                    <div class="question-box">
+                        <p>29. Word Formation (INFECT): Wash your hands so you don't get a bad ________.</p>
+                        <input type="text" id="q29" placeholder="Type answer here">
+                    </div>
+                    <div class="question-box">
+                        <p>30. True or False: "To throw up" means to catch a ball.</p>
+                        <select id="q30">
+                            <option value="">- Select -</option>
+                            <option value="true">True</option>
+                            <option value="false">False</option>
+                        </select>
+                    </div>
+
+                </div>
+                <button type="button" class="submit-btn" onclick="checkAnswers()">SUBMIT EXAM</button>
+                <div id="result" class="result"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // --- TEXT TO SPEECH FUNCTION ---
+        function speakWord(word) {
+            if ('speechSynthesis' in window) {
+                // Cancel any ongoing speech so it doesn't queue up multiple clicks
+                window.speechSynthesis.cancel();
+                
+                let utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = 'en-US'; // English pronunciation
+                utterance.rate = 0.9;     // Slightly slower for learners
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("Sorry, your browser doesn't support Text-to-Speech.");
+            }
+        }
+
+        const totalQuestions = 30; 
+        const grid = document.getElementById('flashcardGrid');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const quizForm = document.getElementById('quizForm');
+        let cardsVisible = true;
+
+        // Function to fully reset the quiz
+        function resetQuiz() {
+            quizForm.reset();
+            document.getElementById('result').innerHTML = '';
+            
+            // Reset question box colors back to default
+            for (let i = 1; i <= totalQuestions; i++) {
+                let el = document.getElementById('q' + i);
+                if (el) {
+                    let parentBox = el.parentElement;
+                    parentBox.style.borderLeft = "5px solid #3a7bd5"; // Default blue border
+                    parentBox.style.backgroundColor = "#f1f2f6"; // Default gray background
+                }
+            }
+        }
+
+        // Toggle button logic
+        toggleBtn.addEventListener('click', function() {
+            cardsVisible = !cardsVisible;
+            if (cardsVisible) {
+                grid.style.display = 'grid';
+                toggleBtn.innerHTML = '👁️ Hide Flashcards & Start Exam';
+            } else {
+                grid.style.display = 'none';
+                toggleBtn.innerHTML = '📖 Show Flashcards & Restart Exam';
+            }
+            // Always restart the exam when hitting the button
+            resetQuiz();
+        });
+
+        // Hide flashcards automatically when a student begins typing/answering the quiz
+        quizForm.addEventListener('input', function() {
+            if (cardsVisible) {
+                cardsVisible = false;
+                grid.style.display = 'none';
+                toggleBtn.innerHTML = '📖 Show Flashcards & Restart Exam';
+            }
+        });
+
+        // Grading Logic
+        function checkAnswers() {
+            let score = 0;
+
+            const answers = {
+                q1: "a", q2: "b", q3: "b", q4: "a", q5: "b",
+                q6: "b", q7: "a", q8: "c", q9: "a", q10: "a",
+                q11: "prescription", q12: "passed", q13: "wound", 
+                q14: "weather", q15: "fiddle", q16: "mend", 
+                q17: "blue", q18: "health", q19: "illness", q20: "recovery",
+                q21: "swollen", q22: "down", q23: "true", q24: "check-up", q25: "prescription",
+                q26: "a", q27: "symptom", q28: "throw", q29: "infection", q30: "false"
+            };
+
+            for (let i = 1; i <= totalQuestions; i++) {
+                let el = document.getElementById('q' + i);
+                if (el) {
+                    let userAnswer = el.value.trim().toLowerCase();
+                    let parentBox = el.parentElement;
+
+                    if (userAnswer === answers['q' + i]) {
+                        score++;
+                        parentBox.style.borderLeft = "5px solid #00b894"; // Green for correct
+                        parentBox.style.backgroundColor = "#e8f8f5";
+                    } else {
+                        parentBox.style.borderLeft = "5px solid #d63031"; // Red for incorrect
+                        parentBox.style.backgroundColor = "#fdeaea";
+                    }
+                }
+            }
+
+            let resultDiv = document.getElementById('result');
+            let percentage = Math.round((score / totalQuestions) * 100);
+            resultDiv.innerHTML = `You scored ${score} / ${totalQuestions} (${percentage}%)!`;
+        }
+    </script>
+</body>
+</html>
