@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phrasal Verbs B2 – Let's Go! 🚀</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --yellow: #FFE000;
+    --pink:   #FF3CAC;
+    --cyan:   #00F5FF;
+    --green:  #39FF14;
+    --orange: #FF6B35;
+    --purple: #BF5AF2;
+    --dark:   #0D0D1A;
+    --card:   #16162A;
+    --glass:  rgba(255,255,255,0.06);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--dark);
+    color: #fff;
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none; z-index:1000;
+  }
+
+  /* ── ANIMATED BG BLOBS ── */
+  .blobs { position:fixed; inset:0; overflow:hidden; pointer-events:none; }
+  .blob {
+    position:absolute; border-radius:50%; filter:blur(90px); opacity:.25;
+    animation: drift 12s ease-in-out infinite alternate;
+  }
+  .blob-1 { width:500px; height:500px; background:var(--pink);   top:-150px; left:-100px; animation-delay:0s; }
+  .blob-2 { width:400px; height:400px; background:var(--cyan);   bottom:-100px; right:-80px; animation-delay:-4s; }
+  .blob-3 { width:300px; height:300px; background:var(--purple); top:40%; left:60%; animation-delay:-7s; }
+  @keyframes drift { from { transform:translate(0,0) scale(1); } to { transform:translate(40px,30px) scale(1.12); } }
+
+  /* ── LAYOUT ── */
+  #app { position:relative; z-index:10; width:100%; height:100vh; display:flex; flex-direction:column; }
+
+  /* ── TOP BAR ── */
+  header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 28px;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+    background:rgba(13,13,26,.7); backdrop-filter:blur(12px);
+    flex-shrink:0;
+  }
+  .logo { font-family:'Bangers',cursive; font-size:1.6rem; letter-spacing:2px; color:var(--yellow); text-shadow:0 0 20px rgba(255,224,0,.5); }
+  .progress-wrap { display:flex; align-items:center; gap:12px; }
+  .progress-bar-bg { width:200px; height:8px; background:rgba(255,255,255,.12); border-radius:99px; overflow:hidden; }
+  .progress-bar-fill { height:100%; background:linear-gradient(90deg,var(--pink),var(--cyan)); border-radius:99px; transition:width .5s ease; }
+  .slide-counter { font-size:.85rem; font-weight:800; color:rgba(255,255,255,.5); }
+  .mode-badge {
+    font-size:.75rem; font-weight:800; letter-spacing:1px; padding:4px 14px;
+    border-radius:99px; text-transform:uppercase;
+  }
+  .mode-learn { background:rgba(0,245,255,.15); color:var(--cyan); border:1px solid rgba(0,245,255,.3); }
+  .mode-quiz  { background:rgba(255,60,172,.15); color:var(--pink); border:1px solid rgba(255,60,172,.3); }
+
+  /* ── SLIDE CONTAINER ── */
+  #slides-wrap { flex:1; overflow:hidden; position:relative; }
+  .slide {
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px;
+    opacity:0; transform:translateX(80px);
+    transition: opacity .45s ease, transform .45s ease;
+    pointer-events:none;
+  }
+  .slide.active { opacity:1; transform:translateX(0); pointer-events:all; }
+  .slide.exit    { opacity:0; transform:translateX(-80px); }
+
+  /* ── LEARN CARD ── */
+  .learn-card {
+    background:var(--card);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:28px;
+    padding:44px 60px;
+    max-width:980px; width:100%;
+    box-shadow:0 0 80px rgba(0,0,0,.4);
+    position:relative; overflow:hidden;
+  }
+  .learn-card::before {
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:4px;
+    background:linear-gradient(90deg, var(--card-accent-a), var(--card-accent-b));
+  }
+  .verb-number { font-size:.9rem; font-weight:800; letter-spacing:2px; text-transform:uppercase; opacity:.4; margin-bottom:6px; }
+  .verb-title {
+    font-family:'Bangers',cursive; font-size:4.6rem; letter-spacing:2px;
+    color:var(--card-accent-a); text-shadow:0 0 30px var(--card-accent-a-glow);
+    line-height:1; margin-bottom:20px;
+  }
+  .verb-def {
+    font-size:1.28rem; font-weight:700; line-height:1.55;
+    background:rgba(255,255,255,.06); border-radius:14px;
+    padding:16px 22px; margin-bottom:18px;
+    border-left:4px solid var(--card-accent-a);
+  }
+  .verb-example {
+    font-size:1.12rem; font-style:italic; color:rgba(255,255,255,.7);
+    margin-bottom:20px; padding-left:8px;
+  }
+  .verb-example span { color:var(--card-accent-b); font-style:normal; font-weight:800; }
+  .synonyms-label { font-size:.85rem; font-weight:800; letter-spacing:2px; text-transform:uppercase; opacity:.45; margin-bottom:10px; }
+  .synonyms { display:flex; flex-wrap:wrap; gap:8px; }
+  .syn-tag {
+    font-size:.95rem; font-weight:700;
+    padding:6px 16px; border-radius:99px;
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15);
+    color:rgba(255,255,255,.75);
+  }
+  .card-emoji { position:absolute; top:36px; right:44px; font-size:4rem; opacity:.35; }
+
+  /* ── QUIZ CARD ── */
+  .quiz-card {
+    background:var(--card); border:1px solid rgba(255,255,255,.1);
+    border-radius:28px; padding:44px 60px;
+    max-width:980px; width:100%;
+    box-shadow:0 0 80px rgba(0,0,0,.4);
+  }
+  .quiz-tag { display:inline-flex; align-items:center; gap:6px; font-size:.85rem; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:var(--pink); margin-bottom:16px; }
+  .quiz-question { font-size:1.3rem; font-weight:800; line-height:1.55; margin-bottom:8px; }
+  .quiz-context { font-size:1rem; color:rgba(255,255,255,.5); margin-bottom:26px; font-style:italic; }
+  .quiz-blank { color:var(--yellow); font-style:normal; font-weight:900; border-bottom:2px dashed var(--yellow); }
+
+  .options { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .opt-btn {
+    background:rgba(255,255,255,.05); border:2px solid rgba(255,255,255,.12);
+    border-radius:16px; padding:18px 22px;
+    font-family:'Nunito',sans-serif; font-size:1.05rem; font-weight:700;
+    color:#fff; cursor:pointer; text-align:left;
+    transition:all .2s ease;
+    position:relative; overflow:hidden;
+  }
+  .opt-btn:hover:not(:disabled) {
+    background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.3);
+    transform:translateY(-2px);
+  }
+  .opt-btn.correct { background:rgba(57,255,20,.15); border-color:var(--green); color:var(--green); }
+  .opt-btn.wrong   { background:rgba(255,60,172,.12); border-color:var(--pink);  color:var(--pink);  opacity:.7; }
+  .opt-btn:disabled { cursor:default; }
+  .opt-letter {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:28px; height:28px; border-radius:8px;
+    background:rgba(255,255,255,.1); font-size:.82rem; font-weight:900;
+    margin-right:12px; flex-shrink:0;
+  }
+  .opt-btn.correct .opt-letter { background:var(--green); color:#000; }
+  .opt-btn.wrong   .opt-letter { background:var(--pink);  color:#fff; }
+
+  .feedback {
+    margin-top:20px; padding:16px 22px; border-radius:14px;
+    font-weight:700; font-size:1.05rem;
+    display:none;
+  }
+  .feedback.show { display:block; }
+  .feedback.correct-fb { background:rgba(57,255,20,.1); color:var(--green); border:1px solid rgba(57,255,20,.3); }
+  .feedback.wrong-fb   { background:rgba(255,60,172,.1); color:#ff80d0;     border:1px solid rgba(255,60,172,.3); }
+
+  /* ── NAV ── */
+  footer {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 28px;
+    border-top:1px solid rgba(255,255,255,.07);
+    background:rgba(13,13,26,.7); backdrop-filter:blur(12px);
+    flex-shrink:0;
+  }
+  .nav-btn {
+    display:flex; align-items:center; gap:8px;
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15);
+    border-radius:14px; padding:10px 22px;
+    font-family:'Nunito',sans-serif; font-size:.9rem; font-weight:800;
+    color:#fff; cursor:pointer;
+    transition:all .2s ease;
+  }
+  .nav-btn:hover { background:rgba(255,255,255,.15); transform:scale(1.04); }
+  .nav-btn:disabled { opacity:.3; cursor:default; transform:none; }
+  .nav-btn.primary { background:linear-gradient(135deg,var(--pink),var(--purple)); border:none; }
+  .nav-btn.primary:hover { filter:brightness(1.1); transform:scale(1.04); }
+
+  .score-display { font-size:.9rem; font-weight:800; color:rgba(255,255,255,.45); }
+  .score-display span { color:var(--yellow); }
+
+  /* ── INTRO SLIDE ── */
+  .intro-card {
+    text-align:center; max-width:860px;
+  }
+  .intro-emoji { font-size:5.5rem; margin-bottom:16px; animation:bounce 2s ease-in-out infinite; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+  .intro-title { font-family:'Bangers',cursive; font-size:5.2rem; letter-spacing:3px; line-height:1;
+    background:linear-gradient(135deg,var(--yellow),var(--pink),var(--cyan));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:16px; }
+  .intro-sub { font-size:1.22rem; font-weight:700; color:rgba(255,255,255,.65); line-height:1.6; margin-bottom:32px; }
+  .intro-chips { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-bottom:38px; }
+  .chip {
+    font-size:.9rem; font-weight:800; padding:7px 18px; border-radius:99px;
+    border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.07);
+  }
+
+  /* ── END SLIDE ── */
+  .end-card { text-align:center; max-width:780px; }
+  .end-title { font-family:'Bangers',cursive; font-size:4.5rem; letter-spacing:3px;
+    background:linear-gradient(135deg,var(--green),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .end-score { font-size:5.5rem; font-weight:900; color:var(--yellow); margin:16px 0 4px; }
+  .end-label { font-size:1rem; font-weight:700; color:rgba(255,255,255,.45); margin-bottom:20px; }
+  .end-msg { font-size:1.2rem; font-weight:700; color:rgba(255,255,255,.7); margin-bottom:32px; }
+  .restart-btn {
+    background:linear-gradient(135deg,var(--pink),var(--purple));
+    border:none; border-radius:16px; padding:15px 44px;
+    font-family:'Nunito',sans-serif; font-size:1.1rem; font-weight:800;
+    color:#fff; cursor:pointer; transition:all .2s;
+  }
+  .restart-btn:hover { filter:brightness(1.1); transform:scale(1.05); }
+
+  /* ── SECTION TITLE SLIDE ── */
+  .section-card { text-align:center; max-width:780px; }
+  .section-icon { font-size:4.5rem; margin-bottom:16px; }
+  .section-title { font-family:'Bangers',cursive; font-size:4rem; letter-spacing:3px; margin-bottom:14px; }
+  .section-sub { font-size:1.12rem; font-weight:700; color:rgba(255,255,255,.55); }
+</style>
+</head>
+<body>
+
+<div class="blobs">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<div id="app">
+  <header>
+    <div class="logo">⚡ Saturday Classes - Freshmen</div>
+    <div class="progress-wrap">
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="slide-counter" id="slideCounter">1 / 43</div>
+    </div>
+    <span class="mode-badge mode-learn" id="modeBadge">LEARN</span>
+  </header>
+
+  <div id="slides-wrap"></div>
+
+  <footer>
+    <button class="nav-btn" id="btnPrev" onclick="navigate(-1)" disabled>← Back</button>
+    <div class="score-display">Quiz score: <span id="scoreVal">0</span> / 20</div>
+    <button class="nav-btn primary" id="btnNext" onclick="navigate(1)">Next →</button>
+  </footer>
+</div>
+
+<script>
+// ──────────────────────────────────────────────
+//  DATA
+// ──────────────────────────────────────────────
+const ACCENT_SETS = [
+  {a:'#FFE000', b:'#FF6B35', ag:'rgba(255,224,0,.35)'},
+  {a:'#FF3CAC', b:'#BF5AF2', ag:'rgba(255,60,172,.35)'},
+  {a:'#00F5FF', b:'#00A8CC', ag:'rgba(0,245,255,.35)'},
+  {a:'#39FF14', b:'#00F5FF', ag:'rgba(57,255,20,.35)'},
+  {a:'#FF6B35', b:'#FFE000', ag:'rgba(255,107,53,.35)'},
+  {a:'#BF5AF2', b:'#FF3CAC', ag:'rgba(191,90,242,.35)'},
+];
+
+const VERBS = [
+  { v:'keep up with', def:'To maintain the same pace or level as someone else — not fall behind!', ex:'I can\'t <span>keep up with</span> my older sister — she types so fast!', syns:['stay current','match the pace','stay up to date'], emoji:'🏃' },
+  { v:'hand in',      def:'To submit a piece of work to a teacher or authority.', ex:'Don\'t forget to <span>hand in</span> your homework before the bell!', syns:['submit','turn in','deliver','give to'], emoji:'📝' },
+  { v:'make fun of',  def:'To laugh at someone in an unkind way, mocking their mistakes or appearance.', ex:'Nobody should <span>make fun of</span> others — it\'s just mean.', syns:['mock','tease','ridicule','bully'], emoji:'😤' },
+  { v:'figure out',   def:'To understand or find the answer to something after thinking hard about it.', ex:'I finally <span>figured out</span> how to beat that level!', syns:['work out','understand','solve','crack'], emoji:'🧠' },
+  { v:'turn down',    def:'To reject or refuse an offer or request.', ex:'She <span>turned down</span> the invitation to the party.', syns:['reject','refuse','decline','say no to'], emoji:'🙅' },
+  { v:'hand back',    def:'To return something to its original owner.', ex:'The teacher <span>handed back</span> our tests with the grades.', syns:['return','give back','restore'], emoji:'🔄' },
+  { v:'look up',      def:'To search for information in a book, dictionary, or online.', ex:'If you don\'t know a word, just <span>look it up</span> on your phone!', syns:['search for','check','research'], emoji:'🔍' },
+  { v:'pick up',      def:'To collect or give someone a ride in your vehicle.', ex:'Mum said she\'d <span>pick us up</span> after football practice.', syns:['collect','fetch','get'], emoji:'🚗' },
+  { v:'turn off',     def:'To switch off a device, light, or appliance so it stops working.', ex:'Please <span>turn off</span> your phone before the exam!', syns:['switch off','power down','shut down'], emoji:'💡' },
+  { v:'hang out',     def:'To spend relaxed, casual time with friends or people you like.', ex:'We always <span>hang out</span> at the mall on Saturdays.', syns:['chill','spend time with','socialise'], emoji:'😎' },
+  { v:'hang up',      def:'To end a phone call, or to place clothing on a hook or hanger.', ex:'He <span>hung up</span> without saying goodbye — so rude!', syns:['end the call','disconnect','ring off'], emoji:'📞' },
+  { v:'fill up',      def:'To make something completely full, to its maximum capacity.', ex:'Can you <span>fill up</span> the tank? We have a long drive ahead.', syns:['fill completely','top up','pack'], emoji:'⛽' },
+  { v:'give up',      def:'To stop trying; to quit something because it feels too difficult.', ex:'Don\'t <span>give up</span> on learning guitar — you\'re getting better!', syns:['quit','stop trying','surrender','throw in the towel'], emoji:'🏳️' },
+  { v:'give back',    def:'To return something you borrowed from someone.', ex:'Can you <span>give back</span> my charger? I need it!', syns:['return','hand back','restore'], emoji:'↩️' },
+  { v:'give away',    def:'To give something to others for free, without expecting anything in return.', ex:'She <span>gave away</span> her old clothes to charity.', syns:['donate','hand out for free','distribute'], emoji:'🎁' },
+  { v:'point out',    def:'To draw attention to something or someone; to highlight.', ex:'The teacher <span>pointed out</span> the mistakes in my essay.', syns:['highlight','indicate','identify','draw attention to'], emoji:'👆' },
+  { v:'fall for',     def:'To be tricked or deceived into believing something that isn\'t true.', ex:'I totally <span>fell for</span> his April Fools prank!', syns:['be tricked by','be fooled by','be deceived by'], emoji:'🪤' },
+  { v:'go for',       def:'To choose something or decide in favour of an option.', ex:'I think I\'ll <span>go for</span> the burger — it looks amazing!', syns:['choose','pick','opt for','select'], emoji:'✅' },
+  { v:'put off',      def:'To postpone or delay something to a later time.', ex:'Stop <span>putting off</span> your homework — do it now!', syns:['postpone','delay','defer','push back'], emoji:'⏰' },
+  { v:'call off',     def:'To cancel something that was planned.', ex:'They <span>called off</span> the match because of the rain.', syns:['cancel','scrap','abort'], emoji:'❌' },
+];
+
+const QUIZ_Qs = [
+  { q:'You\'ve been studying for hours and your brain is completely fried. Your friend says, "Come on, just ___ — you can\'t learn everything in one night."', blank:'give up', choices:['give up','call off','hand in','turn down'], correct:0, fb:'Exactly! "Give up" means quit or stop trying — though hopefully you won\'t!' },
+  { q:'Your teacher sends you a message: "Please ___ your project by Friday or you\'ll get a zero."', blank:'hand in', choices:['hang out','hand in','pick up','look up'], correct:1, fb:'Right! "Hand in" = submit work to a teacher.' },
+  { q:'The football match tomorrow has been ___ because of bad weather.', blank:'called off', choices:['put off','given away','called off','turned down'], correct:2, fb:'Correct! "Call off" means to cancel something planned.' },
+  { q:'Your mum texts you: "I\'ll ___ you ___ after school at 4 pm. Wait by the gate!"', blank:'pick … up', choices:['turn off','hang up','pick … up','fill up'], correct:2, fb:'Yes! "Pick up" = collect someone in your car.' },
+  { q:'You don\'t know what "procrastinate" means. What should you do? You should ___ the word in a dictionary.', blank:'look up', choices:['figure out','look up','make fun of','point out'], correct:1, fb:'Spot on! "Look up" = search for a word or information.' },
+  { q:'Your phone is on during class and the teacher can see it. She says, "___ your phone right now!"', blank:'Turn off', choices:['Hang up','Turn off','Fill up','Give back'], correct:1, fb:'Correct! "Turn off" = switch off a device.' },
+  { q:'Your group of friends is really fast at solving maths problems. You\'re struggling to ___ ___ ___ them.', blank:'keep up with', choices:['hang out with','fall for','keep up with','go for'], correct:2, fb:'Great! "Keep up with" = maintain the same pace as others.' },
+  { q:'You finally solved the puzzle that had been driving you crazy for days. You texted your bestie: "I finally ___ ___ how to do it!!"', blank:'figured out', choices:['gave away','figured out','turned down','put off'], correct:1, fb:'Brilliant! "Figure out" = understand after thinking hard.' },
+  { q:'Your friend asked you to do something you didn\'t want to do, so you ___ ___ their request politely.', blank:'turned down', choices:['called off','turned down','hung up','gave up'], correct:1, fb:'Correct! "Turn down" = refuse or reject an offer.' },
+  { q:'You finished the film and want to sleep, so you ___ the Netflix and the lights.', blank:'turned off', choices:['handed in','turned off','filled up','hung out'], correct:1, fb:'Right! "Turn off" = switch something off.' },
+  { q:'Your tank is almost empty. Your dad says, "We need to stop and ___ ___ the car."', blank:'fill up', choices:['give away','fill up','hang up','point out'], correct:1, fb:'Yes! "Fill up" = fill to capacity — used for fuel, food, bottles...' },
+  { q:'Someone online said you could win a free iPhone if you click a link. You ___ ___ the scam and lost your password.', blank:'fell for', choices:['fell for','went for','gave away','called off'], correct:0, fb:'Oops! "Fall for" = be tricked into believing something false. Be careful online!' },
+  { q:'It\'s Saturday afternoon. You message your crew: "Hey, wanna ___ ___ at the park later?"', blank:'hang out', choices:['hand back','hang out','look up','put off'], correct:1, fb:'Perfect! "Hang out" = spend chill time with friends.' },
+  { q:'The teacher corrected all the tests and now she\'s ___ ___ the papers to everyone.', blank:'handing back', choices:['giving away','handing back','calling off','picking up'], correct:1, fb:'Exactly! "Hand back" = return work to students.' },
+  { q:'At the menu, your friend asks "Which burger do you want?" and you say, "I\'ll ___ ___ the veggie one, please!"', blank:'go for', choices:['put off','fall for','go for','give up'], correct:2, fb:'Nice choice! "Go for" = choose or decide on something.' },
+  { q:'Your little cousin keeps delaying his homework. His mum says, "Stop ___ ___ your studies!"', blank:'putting off', choices:['giving up','putting off','turning down','looking up'], correct:1, fb:'Correct! "Put off" = postpone, delay — classic procrastination!' },
+  { q:'Your teacher ___ ___ three spelling errors in your paragraph and circled them in red.', blank:'pointed out', choices:['figured out','hung up','pointed out','gave back'], correct:2, fb:'Right! "Point out" = draw attention to something specific.' },
+  { q:'After finishing the call with grandma, she said "Love you, bye!" and ___ ___.', blank:'hung up', choices:['gave away','hung up','kept up','made fun of'], correct:1, fb:'Sweet! "Hang up" = end a phone call.' },
+  { q:'She had too many old toys, so she decided to ___ ___ the ones she didn\'t use anymore to younger kids.', blank:'give away', choices:['give away','give back','give up','go for'], correct:0, fb:'Lovely! "Give away" = donate or share for free.' },
+  { q:'That book belongs to the library — you need to ___ it ___ before Thursday!', blank:'give back', choices:['point out','give back','hang out','fall for'], correct:1, fb:'Correct! "Give back" = return something to its owner.' },
+];
+
+// ──────────────────────────────────────────────
+//  STATE
+// ──────────────────────────────────────────────
+let currentSlide = 0;
+let score = 0;
+let answered = new Array(QUIZ_Qs.length).fill(null); // null | 'correct' | 'wrong'
+
+// ──────────────────────────────────────────────
+//  SLIDE DEFINITIONS
+// ──────────────────────────────────────────────
+// Slide order: intro(0) → 20 learn slides (1-20) → quiz-section (21) → 20 quiz slides (22-41) → end (42)
+const TOTAL = 43;
+
+function renderAll() {
+  const wrap = document.getElementById('slides-wrap');
+  wrap.innerHTML = '';
+
+  // 0 — Intro
+  wrap.appendChild(makeSlide(0, introHTML()));
+
+  // 1-20 — Learn
+  VERBS.forEach((v,i) => {
+    const ac = ACCENT_SETS[i % ACCENT_SETS.length];
+    wrap.appendChild(makeSlide(i+1, learnHTML(v, i, ac), ac));
+  });
+
+  // 21 — Quiz section header
+  wrap.appendChild(makeSlide(21, quizSectionHTML()));
+
+  // 22-41 — Quiz
+  QUIZ_Qs.forEach((q,i) => {
+    wrap.appendChild(makeSlide(22+i, quizHTML(q, i)));
+  });
+
+  // 42 — End
+  wrap.appendChild(makeSlide(42, endHTML()));
+
+  goTo(0, false);
+}
+
+function makeSlide(index, html, ac) {
+  const div = document.createElement('div');
+  div.className = 'slide';
+  div.dataset.index = index;
+  if (ac) {
+    div.style.setProperty('--card-accent-a', ac.a);
+    div.style.setProperty('--card-accent-b', ac.b);
+    div.style.setProperty('--card-accent-a-glow', ac.ag);
+  }
+  div.innerHTML = html;
+  return div;
+}
+
+function introHTML() {
+  return `<div class="learn-card intro-card" style="--card-accent-a:#FFE000;--card-accent-b:#FF3CAC">
+    <div class="intro-emoji">🚀</div>
+    <div class="intro-title">Phrasal Verbs<br>Let's Go!</div>
+    <div class="intro-sub">Master 20 essential English phrasal verbs — the kind native speakers use every single day. Learn them, then prove it! 💪</div>
+    <div class="intro-chips">
+      <span class="chip">📚 B2 Level</span>
+      <span class="chip">🎯 20 Verbs</span>
+      <span class="chip">🧩 20 Quiz Questions</span>
+      <span class="chip">🇬🇧 Real English</span>
+    </div>
+    <div style="font-size:.85rem;font-weight:700;color:rgba(255,255,255,.35);">Use the arrows to navigate →</div>
+  </div>`;
+}
+
+function learnHTML(v, i, ac) {
+  return `<div class="learn-card">
+    <div class="card-emoji">${v.emoji}</div>
+    <div class="verb-number">Verb ${i+1} of 20</div>
+    <div class="verb-title">${v.v}</div>
+    <div class="verb-def">📖 ${v.def}</div>
+    <div class="verb-example">💬 "${v.ex}"</div>
+    <div class="synonyms-label">Synonyms</div>
+    <div class="synonyms">${v.syns.map(s=>`<span class="syn-tag">${s}</span>`).join('')}</div>
+  </div>`;
+}
+
+function quizSectionHTML() {
+  return `<div class="learn-card section-card" style="--card-accent-a:#FF3CAC;--card-accent-b:#BF5AF2;--card-accent-a-glow:rgba(255,60,172,.35)">
+    <div class="section-icon">🧩</div>
+    <div class="section-title" style="color:#FF3CAC;">Time to Quiz!</div>
+    <div class="section-sub">You've seen all 20 phrasal verbs.<br>Now let's see if you really got them! 20 questions await. Good luck! 🍀</div>
+  </div>`;
+}
+
+function quizHTML(q, i) {
+  const letters = ['A','B','C','D'];
+  const answeredState = answered[i];
+  const opts = q.choices.map((c,ci) => {
+    let cls = '';
+    if (answeredState !== null) {
+      if (ci === q.correct) cls = 'correct';
+      else if (ci === answeredState && ci !== q.correct) cls = 'wrong';
+    }
+    return `<button class="opt-btn ${cls}" ${answeredState !== null ? 'disabled' : ''} onclick="answer(${i},${ci})">
+      <span class="opt-letter">${letters[ci]}</span>${c}
+    </button>`;
+  }).join('');
+
+  let fbCls = '', fbMsg = '';
+  if (answeredState !== null) {
+    if (answeredState === q.correct) { fbCls = 'correct-fb'; fbMsg = '✅ ' + q.fb; }
+    else { fbCls = 'wrong-fb'; fbMsg = `❌ Not quite! The answer is "<strong>${q.choices[q.correct]}</strong>". ${q.fb}`; }
+  }
+
+  return `<div class="quiz-card">
+    <div class="quiz-tag">🧩 Question ${i+1} of 20</div>
+    <div class="quiz-question">${q.q.replace(/_+/g, '<span class="quiz-blank">________</span>')}</div>
+    <div class="quiz-context">Choose the best phrasal verb to complete the sentence:</div>
+    <div class="options">${opts}</div>
+    <div class="feedback ${fbCls} ${answeredState !== null ? 'show' : ''}">${fbMsg}</div>
+  </div>`;
+}
+
+function endHTML() {
+  const pct = Math.round(score / QUIZ_Qs.length * 100);
+  let msg = pct >= 90 ? '🌟 Absolutely brilliant! You\'re a phrasal verb pro!' :
+            pct >= 70 ? '🎉 Great job! You\'ve got most of them down!' :
+            pct >= 50 ? '💪 Not bad! Review the ones you missed and try again.' :
+                        '😅 Keep practising! You\'ve got this — go review!';
+  return `<div class="learn-card end-card" style="--card-accent-a:#39FF14;--card-accent-b:#00F5FF;--card-accent-a-glow:rgba(57,255,20,.35)">
+    <div class="end-title">Results! 🎊</div>
+    <div class="end-score">${score} / 20</div>
+    <div class="end-label">CORRECT ANSWERS</div>
+    <div class="end-msg">${msg}</div>
+    <button class="restart-btn" onclick="restart()">🔄 Play Again</button>
+  </div>`;
+}
+
+// ──────────────────────────────────────────────
+//  NAVIGATION
+// ──────────────────────────────────────────────
+function goTo(index, animate) {
+  const slides = document.querySelectorAll('.slide');
+  slides.forEach(s => {
+    s.classList.remove('active','exit');
+    if (parseInt(s.dataset.index) === currentSlide && animate) s.classList.add('exit');
+  });
+
+  currentSlide = index;
+
+  requestAnimationFrame(() => {
+    slides.forEach(s => {
+      if (parseInt(s.dataset.index) === currentSlide) s.classList.add('active');
+    });
+  });
+
+  // Update progress
+  const pct = (currentSlide / (TOTAL-1)) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('slideCounter').textContent = (currentSlide+1) + ' / ' + TOTAL;
+
+  // Mode badge
+  const badge = document.getElementById('modeBadge');
+  if (currentSlide >= 22 && currentSlide <= 41) {
+    badge.textContent = 'QUIZ'; badge.className = 'mode-badge mode-quiz';
+  } else {
+    badge.textContent = 'LEARN'; badge.className = 'mode-badge mode-learn';
+  }
+
+  // Buttons
+  document.getElementById('btnPrev').disabled = currentSlide === 0;
+
+  const isQuiz = currentSlide >= 22 && currentSlide <= 41;
+  const qi = currentSlide - 22;
+  const needsAnswer = isQuiz && answered[qi] === null;
+
+  const btnNext = document.getElementById('btnNext');
+  if (currentSlide === TOTAL-1) {
+    btnNext.disabled = true;
+    btnNext.textContent = 'Done 🎉';
+  } else {
+    btnNext.disabled = false;
+    btnNext.textContent = 'Next →';
+  }
+
+  document.getElementById('scoreVal').textContent = score;
+}
+
+function navigate(dir) {
+  const next = currentSlide + dir;
+  if (next < 0 || next >= TOTAL) return;
+  goTo(next, true);
+}
+
+function answer(qIndex, choiceIndex) {
+  if (answered[qIndex] !== null) return;
+  answered[qIndex] = choiceIndex;
+  if (choiceIndex === QUIZ_Qs[qIndex].correct) score++;
+
+  // Re-render this quiz slide
+  const slide = document.querySelector(`.slide[data-index="${22+qIndex}"]`);
+  slide.innerHTML = quizHTML(QUIZ_Qs[qIndex], qIndex);
+
+  // Update end slide
+  const endSlide = document.querySelector(`.slide[data-index="42"]`);
+  endSlide.innerHTML = endHTML();
+
+  document.getElementById('scoreVal').textContent = score;
+}
+
+function restart() {
+  score = 0;
+  answered = new Array(QUIZ_Qs.length).fill(null);
+  renderAll();
+}
+
+// ── Keyboard nav ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   navigate(-1);
+});
+
+// ── Init ──
+renderAll();
+</script>
+</body>
+</html>
