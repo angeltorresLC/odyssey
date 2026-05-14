@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IELTS WRITING TASK</title>
+    <script src="questions.js"></script>
+    <style>
+        :root {
+            --neon-blue: #00f2ff;
+            --bg: linear-gradient(180deg, #001f3f 0%, #000b1a 100%);
+            --card: rgba(0, 31, 63, 0.85); 
+            --correct: #00d4ff; 
+            --incorrect: #ff8c00;
+            --ai-purple: #8a2be2;
+        }
+        body { 
+            background: var(--bg); background-attachment: fixed; color: white; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; 
+            user-select: none; overflow-x: hidden; min-height: 100vh; margin: 0; padding: 20px;
+        }
+        .bubble-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; }
+        .bubble { position: absolute; bottom: -100px; background: rgba(255, 255, 255, 0.2); box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5); border-radius: 50%; animation: rise linear infinite; }
+        @keyframes rise { 0% { bottom: -100px; opacity: 0; } 20% { opacity: 0.6; } 100% { bottom: 110vh; opacity: 0; } }
+        
+        #main-container { max-width: 800px; width: 95%; background: var(--card); border: 2px solid rgba(0, 242, 255, 0.3); border-radius: 25px; padding: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); backdrop-filter: blur(5px); }
+        h1 { text-align: center; color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue); font-size: 2.2rem; margin-bottom: 10px;}
+        
+        #timer-box { background: rgba(0, 242, 255, 0.2); border: 1px solid var(--neon-blue); padding: 10px 20px; border-radius: 50px; font-weight: bold; float: right; color: var(--neon-blue); }
+        .sonar-container { width: 100%; height: 12px; background: rgba(0, 242, 255, 0.1); border-radius: 10px; border: 1px solid rgba(0, 242, 255, 0.3); margin: 20px 0; overflow: hidden; position: relative; }
+        #sonar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #0072ff, #00f2ff); box-shadow: 0 0 15px #00f2ff; transition: width 0.5s; position: relative; }
+        
+        .q-card { background: rgba(255, 255, 255, 0.05); margin: 25px 0; padding: 20px; border-radius: 15px; border-left: 5px solid var(--neon-blue); }
+        input[type="text"], .underwater-select { width: 100%; max-width: 350px; background: rgba(0,0,0,0.4); color: white; border: 1px solid var(--neon-blue); padding: 12px; border-radius: 10px; outline: none; }
+        .mcq-option { display: block; margin: 8px 0; cursor: pointer; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; }
+        .btn-submit { width: 100%; padding: 18px; background: linear-gradient(45deg, #0072ff, #00c6ff); border: none; border-radius: 12px; color: white; font-size: 1.3rem; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px;}
+        
+        /* Start Screen Styles */
+        #start-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        #start-overlay h1 { font-size: 3rem; margin-bottom: 20px; }
+        #start-overlay p { font-size: 1.2rem; color: #aaa; margin-bottom: 40px; max-width: 600px; }
+        .btn-start { background: linear-gradient(45deg, #ff8c00, #ff0055); padding: 20px 50px; font-size: 1.5rem; border: none; border-radius: 50px; color: white; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px rgba(255, 140, 0, 0.5); transition: 0.3s; }
+        .btn-start:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(255, 140, 0, 0.8); }
+        
+        /* Lockdown Cheat Overlay */
+        #cheat-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.95); z-index: 10001; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        #cheat-overlay h1 { font-size: 3.5rem; margin-bottom: 10px; color: white; }
+        #cheat-overlay p { font-size: 1.5rem; color: white; margin-bottom: 30px; font-weight: bold; max-width: 700px; }
+        #unlock-password { background: rgba(0,0,0,0.6); color: white; border: 2px solid white; padding: 15px; border-radius: 10px; outline: none; margin-bottom: 10px; text-align: center; font-size: 1.2rem; width: 250px; }
+        #unlock-error { color: #ffcc00; font-weight: bold; display: none; margin-bottom: 20px; font-size: 1.2rem; }
+
+        /* NEW: Image Gallery Styles */
+        .gallery-container { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 15px; border: 1px solid var(--neon-blue); margin-bottom: 20px; width: 100%; box-sizing: border-box; }
+        .gallery-title { text-align: left; color: var(--neon-blue); margin-top: 0; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; }
+        .scroll-wrapper { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px; scrollbar-color: var(--neon-blue) rgba(0,0,0,0.5); scrollbar-width: thin; }
+        .scroll-wrapper::-webkit-scrollbar { height: 8px; }
+        .scroll-wrapper::-webkit-scrollbar-track { background: rgba(0,0,0,0.5); border-radius: 10px; }
+        .scroll-wrapper::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; }
+        .process-img { height: 350px; border-radius: 8px; border: 2px solid var(--neon-blue); object-fit: contain; background: white; transition: transform 0.3s; }
+        .process-img:hover { transform: scale(1.02); }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+<div id="start-overlay">
+    <h1>IELTS</h1>
+    <p>SECURITY PROTOCOL ACTIVE.<br>This task requires Fullscreen mode. Exiting fullscreen, switching tabs, or using copy/paste will immediately lock your screen.</p>
+    <button class="btn-start" onclick="startMission()">ENTER FULLSCREEN & START</button>
+</div>
+
+<div id="cheat-overlay">
+    <h1>⛔ SECURITY LOCKDOWN ⛔</h1>
+    <p>Rule violation detected (Exited Fullscreen or Switched Tabs).<br>Your test is paused. An instructor must enter the override code to unblock the mission.</p>
+    <input type="password" id="unlock-password" placeholder="Enter Override Code..." autocomplete="off">
+    <div id="unlock-error">⛔ ACCESS DENIED: INCORRECT CODE ⛔</div>
+    <button class="btn-start" style="background: linear-gradient(45deg, #222, #000);" onclick="unlockMission()">UNBLOCK MISSION</button>
+</div>
+
+<div class="bubble-wrap" id="bubble-bg"></div>
+
+<div id="main-container" style="display: none;"> 
+    <div id="timer-box">⏳ 25:00</div>
+    <h1>IELTS REPORTS: Writing</h1>
+    <div class="sonar-container"><div id="sonar-fill"></div></div>
+    <div class="gallery-container">
+        <h3 class="gallery-title">📊 Reference Diagrams (Scroll Left/Right)</h3>
+        <div class="scroll-wrapper">
+            <img class="process-img" src="img/carboncycle.png" alt="carboon Cycle Diagram">
+            <img class="process-img" src="img/honey.png" alt="digestion Process">
+            <img class="process-img" src="img/photosyntesis.png" alt="fotsynthesis process">
+            <img class="process-img" src="img/bamboo_process.png" alt="volcano Process">
+            <img class="process-img" src="img/watercycle.png" alt="water Process">
+            <img class="process-img" src="img/recycling_process.png" alt="water Process">
+        </div>
+    </div>
+    
+    <div id="quiz-flow"></div>
+
+    <div id="footer-input" style="text-align: center; margin-top: 30px;">
+        <input type="text" id="playerName" placeholder="Enter Name..." style="text-align: center; margin-bottom: 5px;">
+        <p id="name-reminder" style="color: #ff8c00; display: none; font-weight: bold;">⚠️ Name required!</p>
+        <button class="btn-submit" onclick="gradeQuiz()">SUBMIT ANSWER</button>
+    </div>
+
+    <div id="results-area" style="display: none; margin-top: 30px; text-align: center; border-top: 1px solid var(--neon-blue); padding-top: 20px;">
+        <h2 id="finalScore"></h2>
+        <div id="grammarReport"></div>
+    </div>
+</div>
+
+<script>
+    const GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbxO8wpQJ95RcjhxFHpUK3b-BSmSlEJqB5ueWhqMDMzTVUlblITPMoDAJsEx6KdLajM-/exec";
+     
+    // --- INSTRUCTOR OVERRIDE PASSWORD ---
+    const OVERRIDE_PASSWORD = "qwg"; 
+    // ------------------------------------
+
+    let activeQuestions = [];
+    let timeLeft = 1500; 
+    let timerInterval;
+    let quizSubmitted = false;
+    let finalWritingFeedback = {}; 
+    let isLockedDown = false; 
+    let alarmInterval; 
+
+    // Background Bubbles
+    const bg = document.getElementById('bubble-bg');
+    for(let i=0; i<12; i++) {
+        let b = document.createElement('div');
+        b.className = 'bubble';
+        b.style.left = Math.random() * 100 + "%";
+        b.style.width = b.style.height = (Math.random() * 60 + 10) + "px";
+        b.style.animationDuration = (Math.random() * 8 + 6) + "s";
+        bg.appendChild(b);
+    }
+
+    function startMission() {
+        let elem = document.documentElement;
+        if (elem.requestFullscreen) { elem.requestFullscreen(); } 
+        else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); } 
+        else if (elem.msRequestFullscreen) { elem.msRequestFullscreen(); }
+        
+        document.getElementById('start-overlay').style.display = 'none';
+        document.getElementById('main-container').style.display = 'block';
+        init(); 
+    }
+
+    function init() {
+        activeQuestions = [...questionBank];
+        const flow = document.getElementById('quiz-flow');
+        
+        activeQuestions.forEach((q, i) => {
+            let inputHtml = "";
+            if(q.type === "dropdown") {
+                inputHtml = `<select id="ans-${i}" class="underwater-select" onchange="updateSonar()"><option value="" disabled selected>Select...</option>${q.options.map(o => `<option value="${o}">${o}</option>`).join('')}</select>`;
+            } else if(q.type === "mcq") {
+                inputHtml = q.options.map(opt => `<label class="mcq-option"><input type="radio" name="q-${i}" value="${opt}" onclick="updateSonar()"> ${opt}</label>`).join('');
+            } else if(q.type === "essay") {
+                inputHtml = `
+                    <textarea id="ans-${i}" oninput="updateSonar()" placeholder="Write your report here..." rows="8" style="width:95%; background:rgba(0,0,0,0.4); color:white; border:1px solid var(--neon-blue); padding:12px; border-radius:10px; font-size:1rem; outline:none; resize:vertical; margin-bottom:10px;"></textarea>
+                    <button id="ai-btn-${i}" type="button" onclick="assessWithAI(${i})" style="width: 95%; padding: 10px; background: linear-gradient(45deg, #8a2be2, #4b0082); border: 1px solid var(--neon-blue); border-radius: 8px; color: white; cursor: pointer; font-weight: bold; margin-bottom: 10px;">🤖 ASSESS REPORT</button>
+                    <div id="ai-feedback-${i}" style="display:none; text-align:left; background: rgba(138, 43, 226, 0.2); padding: 15px; border-radius: 8px; border-left: 5px solid #8a2be2; margin-bottom: 15px; white-space: pre-wrap; font-family: monospace; font-size: 1.1rem; line-height: 1.4;"></div>`;
+            } else {
+                inputHtml = `<input type="text" id="ans-${i}" oninput="updateSonar()" autocomplete="off">`;
+            }
+            flow.innerHTML += `<div class="q-card" id="card-${i}"><p><strong>[${q.grammar}]</strong><br>${q.question}</p><div class="input-area">${inputHtml}</div></div>`;
+        });
+        startTimer();
+    }
+
+    function updateSonar() {
+        let answered = 0;
+        activeQuestions.forEach((q, i) => {
+            if (q.type === "mcq") { if (document.querySelector(`input[name="q-${i}"]:checked`)) answered++; } 
+            else { if (document.getElementById(`ans-${i}`).value.trim() !== "") answered++; }
+        });
+        document.getElementById('sonar-fill').style.width = ((answered / activeQuestions.length) * 100) + "%";
+    }
+
+    function assessWithAI(questionIndex) {
+        const textArea = document.getElementById(`ans-${questionIndex}`);
+        const aiButton = document.getElementById(`ai-btn-${questionIndex}`);
+        const feedbackDiv = document.getElementById(`ai-feedback-${questionIndex}`);
+        if (textArea.value.trim() === "") return alert("Please write your report first!");
+
+        aiButton.innerText = "🤖 ANALYZING REPORT...";
+        aiButton.style.background = "#ff8c00";
+        aiButton.disabled = true;
+
+        const formData = new URLSearchParams();
+        formData.append("action", "grade_article");
+        formData.append("article", textArea.value.trim());
+
+        fetch(GOOGLE_APP_URL, { method: 'POST', body: formData })
+        .then(response => response.text())
+        .then(feedbackText => {
+            finalWritingFeedback[questionIndex] = feedbackText; 
+            feedbackDiv.style.display = "block";
+            feedbackDiv.innerText = feedbackText; 
+            
+            aiButton.innerText = "✅ ASSESSMENT SAVED";
+            aiButton.style.background = "#28a745";
+            aiButton.style.cursor = "not-allowed";
+        }).catch(error => { 
+            alert("Connection Error."); 
+            aiButton.innerText = "🤖 RETRY ASSESSMENT";
+            aiButton.style.background = "#ff0000";
+            aiButton.disabled = false; 
+        });
+    }
+
+    function gradeQuiz() {
+        const nameInput = document.getElementById('playerName');
+        if (nameInput.value.trim() === "") return document.getElementById('name-reminder').style.display = "block";
+        if(quizSubmitted) return;
+        quizSubmitted = true;
+        clearInterval(timerInterval);
+
+        const submitBtn = document.querySelector('.btn-submit');
+        submitBtn.innerText = "UPLOADING TO DATABASE... 📡";
+        submitBtn.style.background = "#ff8c00";
+
+        let score = 0, errors = {}, articleContent = "", allWritingFeedback = ""; 
+
+        activeQuestions.forEach((q, i) => {
+            let isCorrect = false;
+            if (q.type === "essay") {
+                const input = document.getElementById(`ans-${i}`);
+                if(input.value.trim() !== "") articleContent += `[${q.grammar}]: ${input.value}\n\n`;
+                if(finalWritingFeedback[i]) allWritingFeedback += `[AI Report Feedback]:\n${finalWritingFeedback[i]}\n\n`;
+                isCorrect = true;
+            } else if (q.type === "mcq") {
+                const checked = document.querySelector(`input[name="q-${i}"]:checked`);
+                isCorrect = checked && checked.value.toLowerCase() === q.answer.toLowerCase();
+            } else {
+                const input = document.getElementById(`ans-${i}`);
+                isCorrect = input.value.trim().toLowerCase() === q.answer.toLowerCase();
+            }
+            if (isCorrect && q.type !== "essay") score++;
+            if (!isCorrect) errors[q.grammar] = (errors[q.grammar] || 0) + 1;
+        });
+
+        let errorString = Object.keys(errors).map(k => `${k}`).join(', ') || "None";
+        const formData = new URLSearchParams();
+        formData.append("action", "save_quiz");
+        formData.append("name", nameInput.value.trim());
+        formData.append("score", score);
+        formData.append("errors", errorString);
+        formData.append("article", articleContent);
+        formData.append("writingFeedback", allWritingFeedback); 
+
+        fetch(GOOGLE_APP_URL, { method: 'POST', body: formData }).then(() => {
+            document.getElementById('footer-input').style.display = 'none';
+            document.getElementById('results-area').style.display = 'block';
+            document.getElementById('finalScore').innerText = `${nameInput.value.trim()} - Upload Complete.`;
+        });
+    }
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            if (!isLockedDown) {
+                timeLeft--;
+                let m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+                document.getElementById('timer-box').innerText = `⏳ ${m}:${s < 10 ? '0' : ''}${s}`;
+                if(timeLeft <= 0) gradeQuiz();
+            }
+        }, 1000);
+    }
+
+    // --- ANTI-CHEAT PROTOCOLS & ALARM ---
+    
+    function playWarningBeep() {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(400, ctx.currentTime);
+            osc.frequency.linearRampToValueAtTime(800, ctx.currentTime + 0.3);
+            
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+            
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.5);
+        } catch(e) { }
+    }
+
+    function triggerCheatProtocol() {
+        if (!quizSubmitted && !isLockedDown) {
+            isLockedDown = true;
+            document.getElementById('cheat-overlay').style.display = 'flex';
+            document.getElementById('unlock-password').value = ''; 
+            document.getElementById('unlock-error').style.display = 'none';
+            
+            playWarningBeep();
+            alarmInterval = setInterval(() => {
+                if (isLockedDown) playWarningBeep();
+                else clearInterval(alarmInterval);
+            }, 9000);
+        }
+    }
+
+    function unlockMission() {
+        const inputVal = document.getElementById('unlock-password').value;
+        if (inputVal === OVERRIDE_PASSWORD) {
+            document.getElementById('cheat-overlay').style.display = 'none';
+            document.getElementById('unlock-error').style.display = 'none';
+            isLockedDown = false;
+            
+            if (alarmInterval) clearInterval(alarmInterval);
+            
+            let elem = document.documentElement;
+            if (elem.requestFullscreen) { elem.requestFullscreen(); } 
+            else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); } 
+            else if (elem.msRequestFullscreen) { elem.msRequestFullscreen(); }
+        } else {
+            document.getElementById('unlock-error').style.display = 'block';
+        }
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement && document.getElementById('start-overlay').style.display === 'none') {
+            triggerCheatProtocol();
+        }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && document.getElementById('start-overlay').style.display === 'none') { 
+            triggerCheatProtocol(); 
+        }
+    });
+
+    document.addEventListener('copy', (e) => e.preventDefault());
+    document.addEventListener('cut', (e) => e.preventDefault());
+    document.addEventListener('paste', (e) => e.preventDefault());
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'F12' || 
+           (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
+           (e.ctrlKey && e.key === 'U')) {
+            e.preventDefault();
+        }
+    });
+
+</script>
+</body>
+</html>
