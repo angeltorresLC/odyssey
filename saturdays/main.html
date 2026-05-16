@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Adventure Portal</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #87CEEB, #E0F6FF);
+            font-family: 'Nunito', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden; 
+            overflow-y: auto;
+        }
+
+        /* Animated Floating Background Bubbles */
+        .bg-bubbles {
+            position: fixed; 
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .bg-bubbles div {
+            position: absolute;
+            bottom: -50px;
+            background-color: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            animation: floatUp 10s infinite ease-in;
+        }
+        .bg-bubbles div:nth-child(1) { width: 40px; height: 40px; left: 15%; animation-duration: 8s; }
+        .bg-bubbles div:nth-child(2) { width: 80px; height: 80px; left: 35%; animation-duration: 12s; animation-delay: 2s; }
+        .bg-bubbles div:nth-child(3) { width: 50px; height: 50px; left: 65%; animation-duration: 10s; animation-delay: 4s; }
+        .bg-bubbles div:nth-child(4) { width: 100px; height: 100px; left: 85%; animation-duration: 14s; animation-delay: 1s; }
+        .bg-bubbles div:nth-child(5) { width: 30px; height: 30px; left: 50%; animation-duration: 7s; animation-delay: 3s; }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-120vh) scale(1.5); opacity: 0; }
+        }
+
+        header {
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-family: 'Fredoka One', cursive;
+            font-size: 3.2em;
+            color: #fff;
+            -webkit-text-stroke: 2px #3498db;
+            text-shadow: 4px 4px 0px #3498db;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        /* Date Section Styling */
+        .date-section {
+            width: 90%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 20px;
+            border-radius: 40px;
+            margin-bottom: 30px;
+            border: 4px dashed #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1;
+        }
+
+        h2.date-header {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2em;
+            color: #2980b9;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 0px #fff;
+        }
+
+        .link-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            width: 100%;
+        }
+
+        /* Bubbly Link Buttons */
+        .bubble-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            border: 4px solid #fff;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1), inset 0 -3px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .bubble-link:hover {
+            transform: scale(1.03) translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+        .icon {
+            font-size: 2.2em;
+            margin-right: 15px;
+            filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1));
+        }
+
+        .link-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.4em;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        /* Vibrant Gradients for Levels */
+        .movers { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
+        .flyers { background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%); }
+        .freshmen { background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); }
+
+    </style>
+</head>
+<body>
+
+    <div class="bg-bubbles">
+        <div></div><div></div><div></div><div></div><div></div>
+    </div>
+
+    <header>
+        <h1>Learning Adventure Portal</h1>
+    </header>
+
+    <div class="date-section">
+        <h2 class="date-header">May 9th</h2>
+        <div class="link-grid">
+            <a href="may9_movers.html" class="bubble-link movers">
+                <span class="icon">👩🏽‍🔬</span>
+                <h3 class="link-title">Movers (A1)</h3>
+            </a>
+            <a href="may9_flyers.html" class="bubble-link flyers">
+                <span class="icon">😷</span>
+                <h3 class="link-title">Flyers (A2)</h3>
+            </a>
+            <a href="may9_freshmen.html" class="bubble-link freshmen">
+                <span class="icon">⚕️</span>
+                <h3 class="link-title">Freshmen (B1-B2)</h3>
+            </a>
+        </div>
+    </div>
+
+    <div class="date-section">
+        <h2 class="date-header">May 16th</h2>
+        <div class="link-grid">
+            <a href="may16_movers.html" class="bubble-link movers">
+                <span class="icon">🚵</span>
+                <h3 class="link-title">Movers (A1)</h3>
+            </a>
+            <a href="may16_flyers.html" class="bubble-link flyers">
+                <span class="icon">🍎</span>
+                <h3 class="link-title">Flyers (A2)</h3>
+            </a>
+            <a href="may16_freshmen.html" class="bubble-link freshmen">
+                <span class="icon">🧬</span>
+                <h3 class="link-title">Freshmen (B1-B2)</h3>
+            </a>
+        </div>
+    </div>
+
+    <div class="date-section">
+        <h2 class="date-header">May 23rd</h2>
+        <div class="link-grid">
+            <a href="may23_movers.html" class="bubble-link movers">
+                <span class="icon">🚀</span>
+                <h3 class="link-title">Movers (A1)</h3>
+            </a>
+            <a href="may23_flyers.html" class="bubble-link flyers">
+                <span class="icon">🌙</span>
+                <h3 class="link-title">Flyers (A2)</h3>
+            </a>
+            <a href="may23_freshmen.html" class="bubble-link freshmen">
+                <span class="icon">🛰️</span>
+                <h3 class="link-title">Freshmen (B1-B2)</h3>
+            </a>
+        </div>
+    </div>
+
+    <div class="date-section">
+        <h2 class="date-header">May 30th</h2>
+        <div class="link-grid">
+            <a href="may30_movers.html" class="bubble-link movers">
+                <span class="icon">⚽</span>
+                <h3 class="link-title">Movers (A1)</h3>
+            </a>
+            <a href="may30_flyers.html" class="bubble-link flyers">
+                <span class="icon">🎮</span>
+                <h3 class="link-title">Flyers (A2)</h3>
+            </a>
+            <a href="may30_freshmen.html" class="bubble-link freshmen">
+                <span class="icon">🎨</span>
+                <h3 class="link-title">Freshmen (B1-B2)</h3>
+            </a>
+        </div>
+    </div>
+
+    <div class="date-section">
+        <h2 class="date-header">June 6th</h2>
+        <div class="link-grid">
+            <a href="june6_movers.html" class="bubble-link movers">
+                <span class="icon">🦁</span>
+                <h3 class="link-title">Movers (A1)</h3>
+            </a>
+            <a href="june6_flyers.html" class="bubble-link flyers">
+                <span class="icon">🦓</span>
+                <h3 class="link-title">Flyers (A2)</h3>
+            </a>
+            <a href="june6_freshmen.html" class="bubble-link freshmen">
+                <span class="icon">🐘</span>
+                <h3 class="link-title">Freshmen (B1-B2)</h3>
+            </a>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 50px;"></div>
+
+</body>
+</html>

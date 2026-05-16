@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Friends: Kawaii Tech Quest</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap');
+
+        :root {
+            --kawaii-pink: #FF85A2;
+            --kawaii-cyan: #70D6FF;
+            --kawaii-yellow: #FFD670;
+            --kawaii-green: #99FFAC;
+            --kawaii-white: rgba(255, 255, 255, 0.9);
+            --bubble-color: rgba(255, 255, 255, 0.4);
+            --text-dark: #4A4E69;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #FFC8DD 0%, #BDE0FE 100%);
+            color: var(--text-dark); overflow-x: hidden; min-height: 100vh;
+        }
+
+        /* --- ANIME BUBBLE BACKGROUND --- */
+        .bg-bubbles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        .bg-bubbles div { position: absolute; bottom: -100px; background-color: var(--bubble-color); border-radius: 50%; animation: floatUp 12s infinite ease-in; }
+        .b1 { width: 90px; height: 90px; left: 5%; animation-duration: 7s; }
+        .b2 { width: 130px; height: 130px; left: 25%; animation-duration: 10s; animation-delay: 1s; }
+        .b3 { width: 70px; height: 70px; left: 60%; animation-duration: 9s; }
+        .b4 { width: 160px; height: 160px; left: 85%; animation-duration: 13s; animation-delay: 2s; }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-120vh) scale(1.4); opacity: 0; } }
+
+        /* --- MODALS & HUD --- */
+        .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(10px); }
+        .quest-modal { background: white; width: 90%; max-width: 450px; padding: 40px; border-radius: 45px; border: 8px solid var(--kawaii-pink); text-align: center; }
+
+        .hud { display: flex; justify-content: space-between; width: 95%; max-width: 1000px; margin: 20px auto; align-items: center; }
+        .shelf { background: var(--kawaii-white); padding: 12px 25px; border-radius: 50px; border: 4px solid var(--kawaii-cyan); display: flex; gap: 15px; }
+        .perk { font-size: 1.8em; opacity: 0.2; filter: grayscale(1); transition: 0.5s; }
+        .perk.unlocked { opacity: 1; filter: grayscale(0); transform: scale(1.2); }
+
+        .diorama { width: 90%; max-width: 800px; height: 100px; margin: 0 auto; background: rgba(255,255,255,0.5); border-radius: 40px; border: 4px dashed white; display: flex; justify-content: space-around; align-items: center; position: relative; }
+        #agent-pin { position: absolute; font-size: 2.5em; top: -35px; transition: 0.8s; z-index: 50; }
+        .waypoint { font-size: 2em; opacity: 0.3; }
+        .waypoint.active { opacity: 1; transform: scale(1.3); }
+
+        /* --- UI ELEMENTS --- */
+        .container { width: 90%; max-width: 800px; margin: 0 auto; text-align: center; }
+        .quest-card { background: var(--kawaii-white); padding: 30px; border-radius: 40px; border: 5px solid var(--kawaii-cyan); margin-bottom: 25px; position: relative; }
+        
+        .ios-btn { font-family: 'Fredoka One', cursive; padding: 15px 30px; border-radius: 25px; cursor: pointer; border: none; transition: 0.2s; font-size: 1.1em; text-transform: uppercase; margin: 5px; }
+        .btn-pink { background: var(--kawaii-pink); color: #fff; box-shadow: 0 6px 0 #E63946; }
+        .btn-cyan { background: var(--kawaii-cyan); color: #fff; box-shadow: 0 6px 0 #0096C7; }
+        .btn-green { background: var(--kawaii-green); color: #4A4E69; box-shadow: 0 6px 0 #52B788; }
+        .ios-btn:active { transform: translateY(4px); box-shadow: none; }
+
+        .ios-input { width: 100%; padding: 18px; border-radius: 30px; border: 4px solid var(--kawaii-cyan); background: #fff; color: var(--text-dark); font-family: 'Nunito', sans-serif; font-size: 1.4em; text-align: center; margin: 15px 0; outline: none; }
+
+        /* --- FLASHCARD FIXED POSITION FIX --- */
+        .fc-container { height: 350px; display: flex; justify-content: center; align-items: center; margin: 20px 0; position: relative; }
+        .fc-scene { perspective: 1000px; width: 320px; height: 320px; }
+        .fc-inner { width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; position: relative; cursor: pointer; }
+        .fc-inner.flipped { transform: rotateY(180deg); }
+        .fc-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; background: white; border: 6px solid var(--kawaii-pink); border-radius: 35px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .fc-back { transform: rotateY(180deg); border-color: var(--kawaii-yellow); }
+
+        /* --- MATCHING --- */
+        .match-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px 0; }
+        .match-tile { height: 90px; background: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.9em; font-weight: 800; cursor: pointer; border: 4px solid var(--kawaii-cyan); transition: 0.3s; padding: 5px; text-align: center; }
+        .match-tile.flipped { background: var(--kawaii-yellow); color: white; border-color: white; transform: scale(1.05); }
+        .match-tile.matched { background: var(--kawaii-green); color: white; opacity: 0; pointer-events: none; }
+
+        /* --- CROSSWORD --- */
+        .cw-row { display: flex; justify-content: center; margin-bottom: 6px; }
+        .cw-cell { width: 40px; height: 40px; border: 2px solid #ddd; margin: 0 2px; border-radius: 12px; text-align: center; font-family: 'Fredoka One'; font-size: 1.4em; background: white; display: flex; justify-content: center; align-items: center; }
+        .cw-cell.target { border: 4px solid var(--kawaii-pink); color: var(--kawaii-pink); }
+        .cw-cell.empty { background: transparent; border: none; }
+        .cw-cell.hint-char { color: #ccc; font-weight: normal; }
+
+        /* --- WORD SEARCH --- */
+        .ws-grid { display: grid; grid-template-columns: repeat(10, 35px); gap: 5px; justify-content: center; }
+        .ws-cell { width: 35px; height: 35px; background: white; border: 1px solid #eee; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; cursor: pointer; }
+        .ws-cell.found { background: var(--kawaii-green); color: white; }
+
+        .hidden { display: none !important; }
+        .shake { animation: shake 0.4s both; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+    </style>
+</head>
+<body>
+
+    <div class="bg-bubbles"><div class="b1"></div><div class="b2"></div><div class="b3"></div><div class="b4"></div></div>
+
+    <div id="authModal" class="modal-bg">
+        <div class="quest-modal">
+            <h1 style="font-family:'Fredoka One'; color: var(--kawaii-pink); margin-bottom: 10px;">HELLO FRIEND!</h1>
+            <p style="font-size: 1.3em; line-height: 1.4; color: #666;">
+                1. Look at the words.<br>
+                2. Match the pairs.<br>
+                3. Solve the puzzles.<br>
+                4. Win the Golden Crown! 👑✨
+            </p>
+            <button class="ios-btn btn-cyan" style="width:100%; padding:20px; font-size: 1.2em;" onclick="initSystem()">LET'S PLAY!</button>
+        </div>
+    </div>
+
+    <header id="mainHeader" class="hidden" style="text-align:center; padding: 25px;">
+        <h1 style="font-family:'Fredoka One'; font-size:2.8em; color: white; text-shadow: 3px 3px var(--kawaii-pink);">Anime Tech Quest</h1>
+        <button class="ios-btn btn-pink" onclick="document.getElementById('authModal').style.display='flex'">Show Rules</button>
+    </header>
+
+    <div id="phase1" class="container hidden">
+        <h3 style="color:white; text-shadow: 2px 2px rgba(0,0,0,0.1);">Mission 1: Word Gallery</h3>
+        <div class="fc-container">
+            <div class="fc-scene">
+                <div class="fc-inner" id="fc-inner" onclick="flipFC()">
+                    <div class="fc-face">
+                        <div id="fc-emoji" style="font-size:6em; margin-bottom:10px;">💻</div>
+                        <h2 id="fc-term" style="font-family:'Fredoka One'; color:var(--kawaii-pink); font-size: 2.5em; margin:0;">Computer</h2>
+                        <button class="ios-btn btn-cyan" style="margin-top:20px;" onclick="speakText(database[currentFC].w, event)">🔊 Listen</button>
+                    </div>
+                    <div class="fc-face fc-back">
+                        <div style="color:var(--kawaii-cyan); font-weight:900;">WHAT IS IT?</div>
+                        <p id="fc-def" style="font-size:1.3em; margin: 15px 0;">You can work and play on this.</p>
+                        <div style="color:var(--kawaii-pink); font-weight:900;">EXAMPLE</div>
+                        <p id="fc-ex" style="font-style:italic;">"I use my computer at school."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="display:flex; justify-content:center; gap:15px;">
+            <button class="ios-btn btn-pink" onclick="prevFC()">◀</button>
+            <button class="ios-btn btn-cyan" onclick="flipFC()">FLIP</button>
+            <button class="ios-btn btn-pink" onclick="nextFC()">▶</button>
+        </div>
+        <p id="fc-count" style="font-weight:bold; color:white; margin-top: 15px;">1 / 25</p>
+        <button class="ios-btn btn-green" style="margin-top:20px; width:100%; max-width:400px;" onclick="startPhase2()">Next Mission! ➡</button>
+    </div>
+
+    <div id="phase2" class="container hidden">
+        <h3 style="color:white;">Mission 2: Cute Pairs</h3>
+        <div class="match-grid" id="matchGrid"></div>
+        <button class="ios-btn btn-green hidden" id="btnToP3" onclick="startPhase3()">Next Mission! ➡</button>
+    </div>
+
+    <div id="phase3" class="container hidden">
+        <h3 style="color:white;">Mission 3: Spelling Time</h3>
+        <div id="hangHint" style="background:white; padding:15px; border-radius:25px; margin-bottom:15px; font-weight:bold; border: 4px solid var(--kawaii-yellow);"></div>
+        <div class="word-display" id="hangWord" style="font-size:3em; letter-spacing:15px; margin:25px 0; font-family: 'Fredoka One'; color: white;">_ _ _</div>
+        <div id="keyboard" style="display:flex; flex-wrap:wrap; justify-content:center; gap:8px;"></div>
+        <button class="ios-btn btn-green hidden" id="btnToP4" onclick="startPhase4()">Next Mission! ➡</button>
+    </div>
+
+    <div id="phase4" class="container hidden">
+        <h3 style="color:white;">Mission 4: Word Puzzle</h3>
+        <div id="cw-container" style="background:white; padding:25px; border-radius:40px; border: 6px solid var(--kawaii-cyan); margin-bottom:20px;"></div>
+        <div style="background:white; padding:20px; border-radius:35px;">
+            <p id="cw-clue" style="font-weight: 800; font-size: 1.3em;">Clue loading...</p>
+            <input type="text" id="cw-input" class="ios-input" placeholder="Type here...">
+            <button class="ios-btn btn-green" onclick="submitCW()">Check!</button>
+        </div>
+        <button class="ios-btn btn-pink hidden" id="btnToP5" style="margin-top:20px;" onclick="startPhase5()">Next Mission! ➡</button>
+    </div>
+
+    <div id="phase5" class="container hidden">
+        <h3 style="color:white;">Mission 5: Find the Words</h3>
+        <div style="display:flex; justify-content:center; gap:25px; flex-wrap:wrap;">
+            <div id="ws-grid" class="ws-grid" style="background:white; padding:15px; border-radius:30px; border: 5px solid var(--kawaii-pink);"></div>
+            <div id="ws-clues" style="background:white; padding:25px; border-radius:30px; text-align:left; border: 5px solid var(--kawaii-cyan);">
+                <b style="color:var(--kawaii-pink);">Look for:</b><br><br>
+                1. MOUSE<br>2. GAME<br>3. PHONE<br>4. TV<br>5. PHOTO
+            </div>
+        </div>
+        <button class="ios-btn btn-green hidden" id="btnToP6" style="margin-top:20px;" onclick="startPhase6()">FINAL QUEST! ⭐</button>
+    </div>
+
+    <div id="phase6" class="container hidden">
+        <div class="hud">
+            <div class="shelf">
+                <span class="perk" id="perk1">🍦</span><span class="perk" id="perk2">🎈</span><span class="perk" id="perk3">🎀</span><span class="perk" id="perk4">🍭</span><span class="perk" id="perk5">👑</span>
+            </div>
+            <div style="background:white; padding:12px 25px; border-radius:50px; font-weight:900;">STARS: <span id="stars" style="color:var(--kawaii-pink);">0</span></div>
+        </div>
+        <div class="diorama">
+            <div id="agent-pin" style="left:8%;">🦄</div>
+            <div class="waypoint active">🏡</div><div class="waypoint" id="wp2">🎪</div><div class="waypoint" id="wp3">🎡</div><div class="waypoint" id="wp4">🎢</div><div class="waypoint" id="wp5">🏰</div>
+        </div>
+
+        <div class="quest-card" id="gameCard">
+            <div style="display:flex; justify-content:space-around; margin-bottom:20px;">
+                <div style="color:var(--kawaii-pink); font-weight:900; font-size: 1.5em;">TIME: <span id="timerDisplay">30</span>s</div>
+                <div style="color:var(--kawaii-cyan); font-weight:900; font-size: 1.5em;">COMBO: <span id="comboDisplay">x1</span></div>
+            </div>
+            <p id="storyText" style="font-size:1.5em; font-weight:800;"></p>
+            <div id="missionImg" style="width:100%; height:200px; background-size:cover; background-position:center; border-radius:30px; margin:20px 0; border: 5px solid var(--kawaii-pink);"></div>
+            <input type="text" id="userInput" class="ios-input" placeholder="What is it?">
+            <button class="ios-btn btn-cyan" style="width: 100%;" onclick="verifySector()">YES!</button>
+            <div id="feedback" style="margin-top:15px; font-weight:900; font-size: 1.2em;"></div>
+        </div>
+    </div>
+
+    <script>
+        // GLOBAL PRONUNCIATION
+        function speakText(txt, event) {
+            if(event) event.stopPropagation();
+            window.speechSynthesis.cancel();
+            let m = new SpeechSynthesisUtterance(txt);
+            m.lang = 'en-US';
+            window.speechSynthesis.speak(m);
+        }
+
+        // A1 MOVERS DATABASE (25 Simplified Terms)
+        const database = [
+            {w: "Computer", s: "PC", d: "You can work and play on this.", e: "I have a new computer.", i: "💻", img: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500"},
+            {w: "Mouse", s: "Clicker", d: "You click on the screen with this.", e: "Click the photo with the mouse.", i: "🖱️", img: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=500"},
+            {w: "Keyboard", s: "Typing keys", d: "You type letters with this.", e: "Type your name on the keyboard.", i: "⌨️", img: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=500"},
+            {w: "Screen", s: "Monitor", d: "The glass part you look at.", e: "The screen is very bright.", i: "📺", img: "https://images.unsplash.com/photo-1547108738-03a442275668?w=500"},
+            {w: "Phone", s: "Mobile", d: "You call your friends with this.", e: "Talk to your mom on the phone.", i: "📱", img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500"},
+            {w: "Camera", s: "Photo maker", d: "You take photos with this.", e: "Smile for the camera!", i: "📷", img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500"},
+            {w: "Photo", s: "Picture", d: "A picture made by a camera.", e: "Look at this nice photo.", i: "🖼️", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=500"},
+            {w: "Video", s: "Movie", d: "A moving picture with sound.", e: "I am watching a funny video.", i: "🎥", img: "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=500"},
+            {w: "Game", s: "Fun play", d: "Something fun to play on a computer.", e: "Let's play a video game!", i: "🎮", img: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500"},
+            {w: "Internet", s: "Web", d: "It connects all computers together.", e: "I use the internet to see videos.", i: "🌐", img: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=500"},
+            {w: "Website", s: "Online page", d: "A page on the internet.", e: "Visit this fun website.", i: "🖥️", img: "https://images.unsplash.com/photo-1547658719-da2b51169166?w=500"},
+            {w: "Email", s: "Web letter", d: "A letter you send online.", e: "Send an email to your teacher.", i: "📧", img: "https://images.unsplash.com/photo-1596526122103-85c6cb7ce1e7?w=500"},
+            {w: "Message", s: "Text", d: "A short note on a smartphone.", e: "Send a message to your friend.", i: "💬", img: "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=500"},
+            {w: "Robot", s: "Machine person", d: "A machine that can talk.", e: "The robot is cleaning the house.", i: "🤖", img: "https://images.unsplash.com/photo-1589254065878-42c9da997008?w=500"},
+            {w: "Tablet", s: "Pad", d: "A flat computer you hold.", e: "I play on my tablet at home.", i: "📟", img: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=500"},
+            {w: "Laptop", s: "Small PC", d: "A computer you can carry.", e: "My mom has a silver laptop.", i: "💻", img: "https://images.unsplash.com/photo-1517336712462-83975851d87d?w=500"},
+            {w: "Battery", s: "Power", d: "It gives power to your mobile.", e: "My battery is at 10 percent.", i: "🔋", img: "https://images.unsplash.com/photo-1619641782821-75177212263f?w=500"},
+            {w: "App", s: "Program", d: "A small tool on your phone.", e: "Open the music app.", i: "📲", img: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=500"},
+            {w: "Button", s: "Clicker", d: "You press this to start a tool.", e: "Press the green button.", i: "🔘", img: "https://images.unsplash.com/photo-1591123720164-de1348028a82?w=500"},
+            {w: "Radio", s: "Music box", d: "You listen to songs on this.", e: "Turn on the radio.", i: "📻", img: "https://images.unsplash.com/photo-1593115057322-e94b77572f20?w=500"},
+            {w: "Music", s: "Songs", d: "Sounds that are nice to hear.", e: "I love listening to music.", i: "🎵", img: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500"},
+            {w: "Headphones", s: "Ear speakers", d: "You wear these on your ears.", e: "Put on your headphones.", i: "🎧", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500"},
+            {w: "Watch", s: "Clock", d: "It tells the time on your wrist.", e: "Look at my digital watch.", i: "⌚", img: "https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?w=500"},
+            {w: "TV", s: "Television", d: "You watch shows on this big screen.", e: "We watch TV after school.", i: "📺", img: "https://images.unsplash.com/photo-1593359674812-6b7f1f81df33?w=500"},
+            {w: "Help", s: "Assist", d: "You ask for this if you are stuck.", e: "Can you help me with the computer?", i: "🆘", img: "https://images.unsplash.com/photo-1469571483357-598e0445eba1?w=500"}
+        ];
+
+        // CROSSWORD DATA (10 Words)
+        const cwData = [
+            {w: "DOWNLOAD", t: 0, c: "Get a file from the web."}, 
+            {w: "INTERNET", t: 0, c: "The online world."}, 
+            {w: "GAME", t: 0, c: "Something fun to play."}, 
+            {w: "IPHONE", t: 0, c: "A popular smartphone."}, 
+            {w: "TABLET", t: 0, c: "A flat hand computer."}, 
+            {w: "APP", t: 0, c: "A program on your phone."}, 
+            {w: "LAPTOP", t: 0, c: "A portable computer."}, 
+            {w: "FACEBOOK", t: 0, c: "A place for friends online."}, 
+            {w: "UPDATE", t: 0, c: "Make your app better."}, 
+            {w: "NETWORK", t: 0, c: "It connects your gadgets."} 
+        ];
+
+        let currentFC = 0, qStep = 0, stars = 0, combo = 1, timeLeft = 30, timerInt, shuffledGame = [];
+
+        function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+        function initSystem() {
+            document.getElementById('authModal').style.display = 'none';
+            document.getElementById('mainHeader').classList.remove('hidden');
+            document.getElementById('phase1').classList.remove('hidden');
+            updateFC();
+        }
+
+        // PHASE 1: FLASHCARDS
+        function updateFC() {
+            const data = database[currentFC];
+            document.getElementById('fc-emoji').innerText = data.i;
+            document.getElementById('fc-term').innerText = data.w;
+            document.getElementById('fc-def').innerText = data.d;
+            document.getElementById('fc-ex').innerText = `"${data.e}"`;
+            document.getElementById('fc-count').innerText = `${currentFC + 1} / ${database.length}`;
+            document.getElementById('fc-inner').classList.remove('flipped');
+        }
+        function flipFC() { document.getElementById('fc-inner').classList.toggle('flipped'); }
+        function nextFC() { currentFC = (currentFC + 1) % database.length; updateFC(); }
+        function prevFC() { currentFC = (currentFC - 1 + database.length) % database.length; updateFC(); }
+
+        // PHASE 2: MATCHING
+        let firstMatch = null, matchCount = 0;
+        function startPhase2() {
+            document.getElementById('phase1').classList.add('hidden');
+            document.getElementById('phase2').classList.remove('hidden');
+            const grid = document.getElementById('matchGrid');
+            let pairs = [];
+            database.slice(0, 8).forEach(v => { pairs.push({t: v.w, p: v.w}, {t: v.s, p: v.w}); });
+            shuffle(pairs).forEach(p => {
+                const div = document.createElement('div');
+                div.className = "match-tile"; div.innerText = p.t;
+                div.onclick = () => {
+                    if (div.classList.contains('flipped') || div.classList.contains('matched')) return;
+                    div.classList.add('flipped');
+                    if (!firstMatch) firstMatch = {el: div, p: p.p};
+                    else {
+                        if (firstMatch.p === p.p) {
+                            setTimeout(() => { 
+                                div.classList.add('matched'); firstMatch.el.classList.add('matched'); 
+                                matchCount++; speakText(firstMatch.p); firstMatch = null; 
+                                if(matchCount === 8) document.getElementById('btnToP3').classList.remove('hidden'); 
+                            }, 400);
+                        } else {
+                            setTimeout(() => { div.classList.remove('flipped'); firstMatch.el.classList.remove('flipped'); firstMatch = null; }, 600);
+                        }
+                    }
+                };
+                grid.appendChild(div);
+            });
+        }
+
+        // PHASE 3: HANGMAN (With Hints)
+        let hangW = "", guessed = [], misses = 0;
+        function startPhase3() {
+            document.getElementById('phase2').classList.add('hidden');
+            document.getElementById('phase3').classList.remove('hidden');
+            const targetObj = database[Math.floor(Math.random() * database.length)];
+            hangW = targetObj.w.toUpperCase();
+            document.getElementById('hangHint').innerText = "CLUE: " + targetObj.d;
+            renderHang();
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(l => {
+                const b = document.createElement('button'); b.className = "ios-btn btn-cyan"; b.innerText = l;
+                b.onclick = () => {
+                    b.disabled = true; b.style.opacity = "0.5";
+                    if (hangW.includes(l)) { guessed.push(l); renderHang(); }
+                    else { misses++; if (misses >= 6) location.reload(); }
+                };
+                document.getElementById('keyboard').appendChild(b);
+            });
+        }
+        function renderHang() {
+            const disp = hangW.split("").map(l => guessed.includes(l) ? l : "_").join(" ");
+            document.getElementById('hangWord').innerText = disp;
+            if (!disp.includes("_")) { document.getElementById('btnToP4').classList.remove('hidden'); speakText(hangW); }
+        }
+
+        // PHASE 4: CROSSWORD (With Hints)
+        let cwStep = 0;
+        function startPhase4() {
+            document.getElementById('phase3').classList.add('hidden');
+            document.getElementById('phase4').classList.remove('hidden');
+            renderCW();
+        }
+        function renderCW() {
+            const container = document.getElementById('cw-container');
+            container.innerHTML = "";
+            cwData.forEach((row, rIdx) => {
+                const div = document.createElement('div'); div.className = "cw-row";
+                let possibleIndices = [];
+                for(let i=0; i<row.w.length; i++) { if (i !== row.t) possibleIndices.push(i); }
+                let hintIndices = shuffle(possibleIndices).slice(0, 2);
+                row.w.split("").forEach((char, cIdx) => {
+                    const cell = document.createElement('div'); cell.className = "cw-cell";
+                    if (cIdx === row.t) cell.classList.add('target');
+                    cell.id = `cw-cell-${rIdx}-${cIdx}`;
+                    if (hintIndices.includes(cIdx)) { cell.innerText = char; cell.classList.add('hint-char'); }
+                    div.appendChild(cell);
+                });
+                container.appendChild(div);
+            });
+            updateCWInput();
+        }
+        function updateCWInput() {
+            if(cwStep >= 10) {
+                document.getElementById('cw-clue').innerText = "PUZZLE CODE: DIGITAL FUN!";
+                document.getElementById('cw-input').classList.add('hidden');
+                document.getElementById('btnToP5').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('cw-clue').innerText = cwData[cwStep].c;
+            document.getElementById('cw-input').value = "";
+            document.getElementById('cw-input').focus();
+        }
+        function submitCW() {
+            const val = document.getElementById('cw-input').value.trim().toUpperCase();
+            if(val === cwData[cwStep].w) {
+                val.split("").forEach((char, cIdx) => { 
+                    let c = document.getElementById(`cw-cell-${cwStep}-${cIdx}`);
+                    c.innerText = char; c.classList.remove('hint-char'); 
+                });
+                speakText(cwData[cwStep].w); cwStep++; updateCWInput();
+            }
+        }
+
+        // PHASE 5: WORD SEARCH
+        function startPhase5() {
+            document.getElementById('phase4').classList.add('hidden');
+            document.getElementById('phase5').classList.remove('hidden');
+            const grid = document.getElementById('ws-grid');
+            const layout = ["MOUSEXXXXX", "XXXXXXXXXX", "GAMEXXXXXX", "XXXXXXXXXX", "PHONEXXXXX"];
+            layout.forEach((row, r) => {
+                row.split("").forEach((char, c) => {
+                    const cell = document.createElement('div'); cell.className = "ws-cell"; cell.innerText = char;
+                    cell.onclick = () => { cell.classList.add('found'); document.getElementById('btnToP6').classList.remove('hidden'); };
+                    grid.appendChild(cell);
+                });
+            });
+        }
+
+        // PHASE 6: FINAL GAME
+        function startPhase6() {
+            document.getElementById('phase5').classList.add('hidden');
+            document.getElementById('phase6').classList.remove('hidden');
+            shuffledGame = shuffle([...database]);
+            loadSector();
+        }
+        function loadSector() {
+            if(qStep >= database.length) { document.getElementById('storyText').innerText = "TECH STAR! ⭐"; return; }
+            const data = shuffledGame[qStep];
+            document.getElementById('storyText').innerText = "Look! " + data.d;
+            document.getElementById('missionImg').style.backgroundImage = `url('${data.img}')`;
+            document.getElementById('userInput').value = "";
+            timeLeft = 30; clearInterval(timerInt);
+            timerInt = setInterval(() => {
+                timeLeft--; document.getElementById('timerDisplay').innerText = timeLeft;
+                if(timeLeft <= 0) triggerFail("TIME UP!");
+            }, 1000);
+        }
+        function verifySector() {
+            const val = document.getElementById('userInput').value.trim().toLowerCase();
+            if (val === shuffledGame[qStep].w.toLowerCase()) {
+                clearInterval(timerInt); speakText(val);
+                stars += (10 * combo); combo++;
+                document.getElementById('stars').innerText = stars;
+                qStep++; document.getElementById('agent-pin').style.left = `${8 + (qStep * 3.5)}%`;
+                if (qStep % 5 === 0) {
+                    const id = qStep / 5;
+                    document.getElementById('perk'+id).classList.add('unlocked');
+                    document.getElementById('wp'+(id+1)).classList.add('active');
+                }
+                setTimeout(loadSector, 1000);
+            } else { triggerFail("TRY AGAIN!"); }
+        }
+        function triggerFail(msg) {
+            document.getElementById('gameCard').classList.add('shake');
+            setTimeout(() => document.getElementById('gameCard').classList.remove('shake'), 400);
+        }
+
+        // ANTI-CHEAT
+        document.addEventListener("visibilitychange", () => { if(document.hidden) location.reload(); });
+    </script>
+</body>
+</html>

@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iDecipher: Grand Master OS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&family=Orbitron:wght@500;700;900&display=swap');
+
+        :root {
+            --ios-blue: #007AFF;
+            --ios-gray: #1C1C1E;
+            --ios-glass: rgba(255, 255, 255, 0.1);
+            --ios-text: #F2F2F7;
+            --ios-green: #34C759;
+            --ios-red: #FF3B30;
+            --ios-gold: #FFD60A;
+            --neon-glow: 0 0 15px rgba(0, 122, 255, 0.8);
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: radial-gradient(circle at center, #1C1C1E 0%, #000000 100%);
+            color: var(--ios-text); overflow-x: hidden; min-height: 100vh;
+        }
+
+        /* --- ANIME-TECH BUBBLES --- */
+        .bg-blobs { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        .bg-blobs div { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.15; animation: drift 20s infinite alternate ease-in-out; }
+        .blob-1 { width: 500px; height: 500px; background: var(--ios-blue); top: -10%; left: -5%; }
+        .blob-2 { width: 400px; height: 400px; background: #5856D6; bottom: -5%; right: -5%; animation-delay: -5s; }
+        .blob-3 { width: 300px; height: 300px; background: var(--ios-gold); top: 40%; left: 30%; animation-delay: -2s; opacity: 0.1; }
+        @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(60px, 110px) scale(1.1); } }
+
+        /* --- MODALS --- */
+        .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(20px); }
+        .ios-modal { background: rgba(28, 28, 30, 0.9); width: 90%; max-width: 500px; padding: 40px; border-radius: 35px; border: 1px solid rgba(255,255,255,0.2); text-align: center; box-shadow: var(--neon-glow); }
+
+        /* --- HUD & DIORAMA --- */
+        .hud { display: flex; justify-content: space-between; width: 95%; max-width: 1100px; margin: 20px auto; align-items: center; }
+        .shelf { background: var(--ios-glass); padding: 10px 25px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); display: flex; gap: 15px; backdrop-filter: blur(15px); }
+        .perk { font-size: 1.5em; opacity: 0.2; filter: grayscale(1); transition: 0.5s; }
+        .perk.unlocked { opacity: 1; filter: grayscale(0) drop-shadow(0 0 12px var(--ios-gold)); transform: scale(1.2); }
+
+        .diorama { width: 90%; max-width: 850px; height: 120px; margin: 0 auto; background: var(--ios-glass); border-radius: 30px; transform: rotateX(25deg); border: 1px solid rgba(255,255,255,0.15); display: flex; justify-content: space-around; align-items: center; position: relative; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+        #agent-pin { position: absolute; font-size: 2.2em; top: -30px; transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 50; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); }
+        .waypoint { font-size: 1.6em; opacity: 0.3; transition: 0.3s; }
+        .waypoint.active { opacity: 1; filter: drop-shadow(0 0 15px var(--ios-blue)); transform: scale(1.2); }
+
+        /* --- UI COMPONENTS --- */
+        .container { width: 90%; max-width: 900px; margin: 0 auto; text-align: center; }
+        .ios-card { background: var(--ios-glass); padding: 30px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); margin-bottom: 25px; position: relative; overflow: hidden; }
+        
+        .ios-btn { font-family: -apple-system, sans-serif; padding: 14px 28px; border-radius: 12px; cursor: pointer; border: none; font-weight: 700; transition: 0.2s; font-size: 0.9em; text-transform: uppercase; margin: 5px; letter-spacing: 1px; }
+        .btn-blue { background: var(--ios-blue); color: #fff; box-shadow: 0 4px 15px rgba(0,122,255,0.4); }
+        .btn-green { background: var(--ios-green); color: #fff; box-shadow: 0 4px 15px rgba(52,199,89,0.4); }
+        .btn-red { background: var(--ios-red); color: #fff; box-shadow: 0 4px 15px rgba(255,59,48,0.4); }
+        .btn-secondary { background: #3A3A3C; color: #fff; }
+        .ios-btn:active { transform: scale(0.92); }
+
+        .ios-input { width: 100%; padding: 18px; border-radius: 18px; border: 2px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: var(--ios-gold); font-family: 'Orbitron', sans-serif; font-size: 1.2em; text-align: center; margin: 15px 0; outline: none; transition: 0.3s; }
+        .ios-input:focus { border-color: var(--ios-blue); box-shadow: var(--neon-glow); }
+
+        .speak-icon { cursor: pointer; transition: 0.2s; font-size: 0.8em; margin-left: 8px; }
+        .speak-icon:hover { transform: scale(1.2); filter: drop-shadow(0 0 5px var(--ios-blue)); }
+
+        /* --- GAME MECHANICS UI --- */
+        /* Flashcards */
+        .fc-scene { perspective: 1000px; height: 350px; margin: 20px auto; width: 100%; max-width: 400px; }
+        .fc-inner { width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; position: relative; }
+        .fc-inner.flipped { transform: rotateY(180deg); }
+        .fc-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; background: rgba(28,28,30,0.8); border: 1px solid var(--ios-blue); border-radius: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .fc-back { transform: rotateY(180deg); border-color: var(--ios-green); }
+
+        /* Matching Grid */
+        .match-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px 0; }
+        .match-tile { height: 90px; background: rgba(255,255,255,0.05); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 0.9em; font-weight: 700; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); transition: 0.3s; }
+        .match-tile.flipped { background: var(--ios-blue); border-color: #fff; transform: scale(1.05); }
+        .match-tile.matched { background: var(--ios-green); opacity: 0; pointer-events: none; }
+
+        /* Hangman */
+        .integrity-bar { width: 100%; height: 10px; background: #333; border-radius: 10px; margin: 20px 0; overflow: hidden; border: 1px solid rgba(255,255,255,0.2); }
+        .integrity-fill { height: 100%; background: var(--ios-green); width: 100%; transition: 0.3s; }
+        .word-display { font-family: 'Orbitron', sans-serif; font-size: 2.5em; letter-spacing: 10px; margin: 20px 0; color: var(--ios-blue); text-shadow: var(--neon-glow); }
+
+        /* Crossword */
+        .cw-row { display: flex; justify-content: center; margin-bottom: 5px; }
+        .cw-cell { width: 35px; height: 35px; border: 1px solid rgba(255,255,255,0.3); margin: 0 2px; border-radius: 5px; text-align: center; font-family: 'Orbitron'; font-size: 1.2em; font-weight: bold; background: rgba(0,0,0,0.5); color: #fff; display: flex; justify-content: center; align-items: center; text-transform: uppercase; transition: 0.3s; }
+        .cw-cell.target { background: rgba(0, 122, 255, 0.4); border-color: var(--ios-blue); box-shadow: 0 0 10px var(--ios-blue); color: var(--ios-gold); }
+        .cw-cell.empty { background: transparent; border: none; }
+        .cw-cell.hint-char { color: rgba(255, 255, 255, 0.3) !important; font-weight: normal; }
+        .cw-input-area { display: flex; gap: 10px; justify-content: center; align-items: center; margin-top: 20px; }
+
+        /* Word Search */
+        .ws-grid { display: grid; grid-template-columns: repeat(12, 30px); gap: 4px; justify-content: center; }
+        .ws-cell { width: 30px; height: 30px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: 'Orbitron'; font-weight: bold; cursor: pointer; user-select: none; transition: 0.2s; }
+        .ws-cell:hover { background: rgba(0, 122, 255, 0.3); }
+        .ws-cell.selected { background: var(--ios-gold); color: #000; box-shadow: 0 0 10px var(--ios-gold); }
+        .ws-cell.found { background: var(--ios-green); color: #000; border-color: #fff; box-shadow: 0 0 10px var(--ios-green); }
+        .ws-clue-item { margin-bottom: 8px; opacity: 0.6; transition: 0.3s; }
+        .ws-clue-item.found { opacity: 1; color: var(--ios-green); text-decoration: line-through; }
+
+        /* Main Game Elements */
+        .game-stats { display: flex; justify-content: space-around; background: rgba(0,0,0,0.5); padding: 15px; border-radius: 20px; border: 1px solid var(--ios-blue); margin-bottom: 20px; }
+        .timer-text { font-family: 'Orbitron'; font-size: 1.5em; color: var(--ios-red); font-weight: bold; }
+        .combo-text { font-family: 'Fredoka One'; font-size: 1.5em; color: var(--ios-gold); }
+        
+        .mission-img { width: 100%; max-width: 450px; height: 220px; border-radius: 20px; margin: 15px auto; background-size: cover; background-position: center; border: 2px solid var(--ios-blue); position: relative; overflow: hidden; transition: filter 0.5s; filter: sepia(100%) hue-rotate(180deg) blur(2px); }
+        .mission-img.decrypted { filter: sepia(0%) hue-rotate(0deg) blur(0px); border-color: var(--ios-green); }
+        
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; border-color: var(--ios-red) !important; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="bg-blobs"><div class="blob-1"></div><div class="blob-2"></div><div class="blob-3"></div></div>
+
+    <div id="authModal" class="modal-bg">
+        <div class="ios-modal">
+            <h1 style="font-family:'Fredoka One'; margin-top:0;">SYSTEM OVERRIDE</h1>
+            <p style="color: #AEAEB2; line-height: 1.6; font-size: 1.1em;">
+                Agent, the Central Core is failing. You must pass 6 rigorous cognitive security phases to unlock the terminal.<br><br>
+                <b>Memory. Synonyms. Spelling. Crossword. Data Search. Decryption.</b><br> Time is running out.
+            </p>
+            <button class="ios-btn btn-blue" style="width:100%; padding:20px; margin-top:10px; font-size:1.1em;" onclick="initSystem()">INITIALIZE PROTOCOL</button>
+        </div>
+    </div>
+
+    <header id="mainHeader" class="hidden" style="text-align:center; padding: 25px;">
+        <h1 style="font-family:'Fredoka One'; font-size:2.8em;">iDecipher Core</h1>
+        <button class="ios-btn btn-red" onclick="location.reload()">Emergency Reboot</button>
+    </header>
+
+    <div id="phase1" class="container hidden">
+        <h3 style="color:var(--ios-gold);">Phase 1: Cognitive Recall</h3>
+        <div class="fc-scene">
+            <div class="fc-inner" id="fc-inner">
+                <div class="fc-face">
+                    <div id="fc-emoji" style="font-size:4em; margin-bottom:10px;">🤖</div>
+                    <h2 style="font-family:'Fredoka One'; color:var(--ios-blue); font-size: 2em; margin:0;">
+                        <span id="fc-term">Deepfake</span>
+                    </h2>
+                    <button class="ios-btn btn-blue" style="margin-top:20px;" onclick="speakText(database[currentFC].w, event)">🔊 Pronounce</button>
+                </div>
+                <div class="fc-face fc-back">
+                    <div style="color:var(--ios-blue); font-weight:800; font-size: 0.9em;">DEFINITION</div>
+                    <p id="fc-def" style="font-size:1.1em; margin: 10px 0;">AI-generated media replacing likeness.</p>
+                    <div style="color:var(--ios-green); font-weight:800; margin-top:15px; font-size: 0.9em;">CONTEXT</div>
+                    <p id="fc-ex" style="font-style:italic; color:#ccc; margin: 10px 0;">"The deepfake video was used to lie."</p>
+                </div>
+            </div>
+        </div>
+        <div style="display:flex; justify-content:center; align-items:center; gap:15px;">
+            <button class="ios-btn btn-secondary" onclick="prevFC()">Prev</button>
+            <button class="ios-btn btn-blue" onclick="flipFC()">FLIP CARD</button>
+            <button class="ios-btn btn-secondary" onclick="nextFC()">Next</button>
+        </div>
+        <p id="fc-count" style="font-weight:bold; color:#AEAEB2;">1 / 25</p>
+        <button class="ios-btn btn-green" style="margin-top:20px; width:100%; max-width:400px;" onclick="startPhase2()">Sync Synonyms (Phase 2)</button>
+    </div>
+
+    <div id="phase2" class="container hidden">
+        <h3 style="color:var(--ios-blue);">Phase 2: Synonym Synchronization</h3>
+        <p style="color:#AEAEB2;">Match the technical term with its exact synonym to bypass the firewall.</p>
+        <div class="match-grid" id="matchGrid"></div>
+        <button class="ios-btn btn-green hidden" id="btnToP3" style="width:100%; max-width:400px; margin-top:20px;" onclick="startPhase3()">Launch Spelling Auth (Phase 3)</button>
+    </div>
+
+    <div id="phase3" class="container hidden">
+        <h3 style="color:var(--ios-red);">Phase 3: Tactical Spelling</h3>
+        <p style="color:#AEAEB2;">Decrypt the word before System Integrity reaches 0%.</p>
+        <div class="integrity-bar"><div id="integrityFill" class="integrity-fill"></div></div>
+        <div class="word-display" id="hangWord">_ _ _ _</div>
+        <div id="hangHint" style="color:var(--ios-gold); margin-bottom: 20px; font-weight: bold; text-shadow: 0 0 5px rgba(255, 214, 10, 0.5);"></div>
+        <div id="keyboard" style="display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-bottom: 20px;"></div>
+        <button class="ios-btn btn-green hidden" id="btnToP4" style="width:100%; max-width:400px;" onclick="startPhase4()">Access Crossword Node (Phase 4)</button>
+    </div>
+
+    <div id="phase4" class="container hidden">
+        <h3 style="color:var(--ios-gold);">Phase 4: The Neural Crossword</h3>
+        <p style="color:#AEAEB2;">Solve the 10 nodes to reveal the Master Code.</p>
+        
+        <div id="cw-container" style="background:rgba(0,0,0,0.4); padding:20px; border-radius:20px; border:1px solid var(--ios-blue); margin-bottom:20px;">
+            </div>
+
+        <div class="cw-input-area">
+            <div style="text-align:left;">
+                <div style="color:var(--ios-blue); font-weight:bold;">Current Node: <span id="cw-node-num">1</span>/10</div>
+                <div id="cw-clue" style="font-size:1.1em; margin-bottom:10px;">Clue goes here.</div>
+                <input type="text" id="cw-input" class="ios-input" style="margin:0; width: 250px;" placeholder="Type answer...">
+            </div>
+            <button class="ios-btn btn-green" onclick="submitCW()">Inject Code</button>
+        </div>
+        <button class="ios-btn btn-secondary hidden" id="btnGlossary" style="margin-top:20px;" onclick="showGlossary()">View Technical Glossary</button>
+        <button class="ios-btn btn-green hidden" id="btnToP5" style="width:100%; max-width:400px; margin-top:20px;" onclick="startPhase5()">Launch Data Search (Phase 5)</button>
+    </div>
+
+    <div id="phase5" class="container hidden">
+        <h3 style="color:var(--ios-green);">Phase 5: Data Extraction (Word Search)</h3>
+        <p style="color:#AEAEB2;">Locate the 6 hidden anomalies. Click the <b>first</b> and <b>last</b> letter of each target word.</p>
+        
+        <div style="display:flex; justify-content:center; gap:30px; flex-wrap:wrap; margin-bottom:15px; align-items: center;">
+            <div id="ws-clues" style="text-align:left; color:var(--ios-gold); font-size:0.95em; background:rgba(0,0,0,0.5); padding:20px; border-radius:20px; border:1px solid var(--ios-blue); min-width: 250px;">
+                </div>
+            <div id="ws-grid" class="ws-grid" style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 20px; border: 1px solid var(--ios-green);">
+                </div>
+        </div>
+        <button class="ios-btn btn-red hidden" id="btnToP6" style="width:100%; max-width:400px;" onclick="startPhase6()">Enter Final Terminal (Phase 6)</button>
+    </div>
+
+    <div id="glossaryModal" class="modal-bg hidden">
+        <div class="ios-modal" style="max-height: 80vh; overflow-y: auto;">
+            <h2 style="color:var(--ios-blue);">Analytical Synthesis</h2>
+            <div id="glossaryList" style="text-align:left; color:#fff;"></div>
+            <button class="ios-btn btn-red" style="width:100%; margin-top:20px;" onclick="document.getElementById('glossaryModal').classList.add('hidden')">Close Glossary</button>
+        </div>
+    </div>
+
+    <div id="phase6" class="container hidden">
+        <div class="hud">
+            <div class="shelf">
+                <span class="perk" id="perk1">💎</span><span class="perk" id="perk2">🧠</span><span class="perk" id="perk3">🛡️</span><span class="perk" id="perk4">⚡</span><span class="perk" id="perk5">🏆</span>
+            </div>
+            <div style="background:var(--ios-glass); padding:10px 20px; border-radius:50px; font-weight:700;">STARS: <span id="stars" style="color:var(--ios-gold);">0</span></div>
+        </div>
+        <div class="map-section"><div class="diorama">
+            <div id="agent-pin" style="left:8%;">📍</div>
+            <div class="waypoint active">🏡</div><div class="waypoint" id="wp2">🚵</div><div class="waypoint" id="wp3">🚀</div><div class="waypoint" id="wp4">🏙️</div><div class="waypoint" id="wp5">🏰</div>
+        </div></div>
+
+        <div class="ios-card" id="gameCard">
+            <div class="game-stats">
+                <div>TIME: <span class="timer-text" id="timerDisplay">30</span>s</div>
+                <div>COMBO: <span class="combo-text" id="comboDisplay">x1</span></div>
+            </div>
+            <h3 style="color:var(--ios-blue); margin-top:0;">Sector Log: <span id="secNum">1</span></h3>
+            <div id="missionImg" class="mission-img"></div>
+            <p id="storyText" style="font-size:1.2em; font-weight:700; line-height:1.4;"></p>
+            <input type="text" id="userInput" class="ios-input" placeholder="Authenticate Key..." autocomplete="off">
+            <div style="display:flex; justify-content:center; gap:10px;">
+                <button class="ios-btn btn-green" onclick="verifySector()">Override</button>
+            </div>
+            <div id="feedback" style="margin-top:15px; font-weight:900; font-size:1.2em;"></div>
+        </div>
+    </div>
+
+    <script>
+        // GLOBAL PRONUNCIATION ENGINE
+        function speakText(txt, event) {
+            if(event) event.stopPropagation();
+            window.speechSynthesis.cancel();
+            let m = new SpeechSynthesisUtterance(txt);
+            m.lang = 'en-US';
+            window.speechSynthesis.speak(m);
+        }
+
+        // MASTER DATABASE (25 Terms with Context Examples)
+        const database = [
+            {w: "Ransomware", s: "Digital extortion", d: "Malware that locks files until payment is made.", e: "The hospital was paralyzed by a ransomware attack.", i: "🔐", img: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500"},
+            {w: "Deepfake", s: "Fake media", d: "AI-generated media replacing likeness.", e: "A deepfake video of the CEO was released.", i: "🎭", img: "https://images.unsplash.com/photo-1633412802994-5c058f151b66?w=500"},
+            {w: "Outage", s: "Power cut", d: "A period when network supply is down.", e: "The storm caused a massive network outage.", i: "🔌", img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=500"},
+            {w: "Viral", s: "Internet sensation", d: "Information that spreads very rapidly online.", e: "The funny cat video went viral in hours.", i: "📈", img: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500"},
+            {w: "Malware", s: "Bad software", d: "Software designed to disrupt or damage systems.", e: "Avoid downloading malware from untrusted sites.", i: "🐛", img: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=500"},
+            {w: "Lag", s: "Response delay", d: "A delay between user action and system response.", e: "The game was unplayable due to server lag.", i: "⏳", img: "https://images.unsplash.com/photo-1506765515384-028b60a970df?w=500"},
+            {w: "Phishing", s: "Identity scam", d: "Fraudulent emails used to steal data.", e: "He lost his password in a phishing scam.", i: "🎣", img: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=500"},
+            {w: "Bandwidth", s: "Mental capacity", d: "The energy or capacity needed to handle a task.", e: "We don't have the bandwidth for this project.", i: "📊", img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500"},
+            {w: "Automation", s: "Machine work", d: "Technology performing tasks without human help.", e: "Factory automation is replacing manual labor.", i: "🤖", img: "https://images.unsplash.com/photo-1546776310-eef45dd6d63c?w=500"},
+            {w: "Encryption", s: "Data coding", d: "Process of converting info into a secret code.", e: "End-to-end encryption keeps messages secure.", i: "🔏", img: "https://images.unsplash.com/photo-1510511459019-5d0502b40b15?w=500"},
+            {w: "Hardware", s: "Physical tech", d: "The physical components of a computer.", e: "The computer's hardware needs an upgrade.", i: "🖥️", img: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=500"},
+            {w: "Firewall", s: "Digital shield", d: "A network security system monitoring traffic.", e: "The firewall blocked the unauthorized access.", i: "🧱", img: "https://images.unsplash.com/photo-1563089145-599997674dc9?w=500"},
+            {w: "Hallucination", s: "AI mistake", d: "When AI confidently provides incorrect data.", e: "The AI had a hallucination and invented facts.", i: "🌀", img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500"},
+            {w: "Cloud", s: "Remote server", d: "Remote servers hosted on the internet to store data.", e: "All our files are backed up in the cloud.", i: "☁️", img: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=500"},
+            {w: "Gadget", s: "Smart device", d: "A small mechanical or electronic device.", e: "He loves buying the latest electronic gadget.", i: "📱", img: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=500"},
+            {w: "Glitch", s: "System bug", d: "A minor, temporary technical fault.", e: "A software glitch caused the app to crash.", i: "👾", img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=500"},
+            {w: "Upgrade", s: "Enhancement", d: "Improving software/hardware to a higher standard.", e: "I need to upgrade my phone to the latest OS.", i: "🆙", img: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=500"},
+            {w: "Technophobe", s: "Tech hater", d: "A person who fears or dislikes technology.", e: "My grandfather is a technophobe who hates PCs.", i: "🚫", img: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=500"},
+            {w: "Data breach", s: "Info leak", d: "Unauthorized access to private information.", e: "Millions of emails were leaked in the data breach.", i: "🔓", img: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=500"},
+            {w: "Cyberbullying", s: "Online abuse", d: "The use of electronic communication to bully.", e: "Schools are trying to stop online cyberbullying.", i: "📱", img: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500"},
+            {w: "Biometrics", s: "Body scan", d: "Using physical characteristics for ID.", e: "The phone uses biometrics like fingerprint scanning.", i: "👁️", img: "https://images.unsplash.com/photo-1510511459019-5d0502b40b15?w=500"},
+            {w: "Spyware", s: "Tracker code", d: "Software that secretly records activity.", e: "Spyware was secretly tracking her browsing history.", i: "🕵️", img: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=500"},
+            {w: "Server", s: "Data host", d: "A central computer storing network data.", e: "The website crashed when the main server failed.", i: "🗄️", img: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500"},
+            {w: "Algorithm", s: "Logic rules", d: "A set of rules followed by an AI.", e: "The social media algorithm suggests new videos.", i: "🔢", img: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=500"},
+            {w: "Debugging", s: "Fixing code", d: "The process of removing errors from software.", e: "The programmer spent hours debugging the code.", i: "🛠️", img: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=500"}
+        ];
+
+        // CROSSWORD ACROSTIC DATA: "DATA BREACH" (10 Words)
+        const cwData = [
+            {w: "DEEPFAKE", t: 0, c: "AI replacing someone's face."}, // D
+            {w: "ALGORITHM", t: 0, c: "A set of rules followed by an AI."}, // A
+            {w: "TECHNOPHOBE", t: 0, c: "A person who fears technology."}, // T
+            {w: "AUTOMATION", t: 0, c: "Robots performing human tasks."}, // A
+            {w: "BANDWIDTH", t: 0, c: "Mental capacity or network speed."}, // B
+            {w: "RANSOMWARE", t: 0, c: "Malware demanding payment."}, // R
+            {w: "ENCRYPTION", t: 0, c: "Converting data into secret code."}, // E
+            {w: "MALWARE", t: 1, c: "Bad software causing damage."}, // A
+            {w: "CLOUD", t: 0, c: "Remote internet servers."}, // C
+            {w: "HARDWARE", t: 0, c: "Physical components of a PC."}  // H
+        ];
+
+        let currentFC = 0, qStep = 0, stars = 0, combo = 1, timeLeft = 30, timerInt, shuffledGame = [];
+        const maxOffset = 1;
+
+        function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+        function initSystem() {
+            document.getElementById('authModal').style.display = 'none';
+            document.getElementById('mainHeader').classList.remove('hidden');
+            document.getElementById('phase1').classList.remove('hidden');
+            updateFC();
+            buildGlossary();
+        }
+
+        // --- PHASE 1: FLASHCARDS ---
+        function updateFC() {
+            const data = database[currentFC];
+            document.getElementById('fc-emoji').innerText = data.i;
+            document.getElementById('fc-term').innerText = data.w;
+            document.getElementById('fc-def').innerText = data.d;
+            document.getElementById('fc-ex').innerText = `"${data.e}"`;
+            document.getElementById('fc-count').innerText = `${currentFC + 1} / ${database.length}`;
+            document.getElementById('fc-inner').classList.remove('flipped');
+        }
+        function flipFC() { document.getElementById('fc-inner').classList.toggle('flipped'); }
+        function nextFC() { currentFC = (currentFC + 1) % database.length; updateFC(); }
+        function prevFC() { currentFC = (currentFC - 1 + database.length) % database.length; updateFC(); }
+
+        // --- PHASE 2: MATCHING ---
+        let firstMatch = null, matchCount = 0;
+        function startPhase2() {
+            document.getElementById('phase1').classList.add('hidden');
+            document.getElementById('phase2').classList.remove('hidden');
+            const grid = document.getElementById('matchGrid');
+            let pairs = [];
+            database.slice(0, 8).forEach(v => { pairs.push({t: v.w, p: v.w}, {t: v.s, p: v.w}); });
+            shuffle(pairs).forEach(p => {
+                const div = document.createElement('div');
+                div.className = "match-tile"; div.innerText = p.t;
+                div.onclick = () => {
+                    if (div.classList.contains('flipped') || div.classList.contains('matched')) return;
+                    div.classList.add('flipped');
+                    if (!firstMatch) firstMatch = {el: div, p: p.p};
+                    else {
+                        if (firstMatch.p === p.p) {
+                            setTimeout(() => { 
+                                div.classList.add('matched'); firstMatch.el.classList.add('matched'); 
+                                matchCount++; 
+                                speakText(firstMatch.p); 
+                                firstMatch = null; 
+                                if(matchCount === 8) document.getElementById('btnToP3').classList.remove('hidden'); 
+                            }, 400);
+                        } else {
+                            setTimeout(() => { div.classList.remove('flipped'); firstMatch.el.classList.remove('flipped'); firstMatch = null; }, 600);
+                        }
+                    }
+                };
+                grid.appendChild(div);
+            });
+        }
+
+        // --- PHASE 3: HANGMAN ---
+        let hangW = "", guessed = [], misses = 0;
+        function startPhase3() {
+            document.getElementById('phase2').classList.add('hidden');
+            document.getElementById('phase3').classList.remove('hidden');
+            const targetObj = database[Math.floor(Math.random() * database.length)];
+            hangW = targetObj.w.toUpperCase();
+            document.getElementById('hangHint').innerText = "CLUE: " + targetObj.d;
+            renderHang();
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(l => {
+                const b = document.createElement('button'); b.className = "ios-btn btn-secondary"; b.innerText = l;
+                b.onclick = () => {
+                    b.disabled = true; b.style.opacity = "0.5";
+                    if (hangW.includes(l)) { guessed.push(l); renderHang(); }
+                    else {
+                        misses++; document.getElementById('integrityFill').style.width = (100 - (misses * 20)) + "%";
+                        document.getElementById('integrityFill').style.background = (misses > 3) ? "var(--ios-red)" : "var(--ios-gold)";
+                        if (misses >= 5) { alert("SYSTEM COMPROMISED. REBOOTING."); location.reload(); }
+                    }
+                };
+                document.getElementById('keyboard').appendChild(b);
+            });
+        }
+        function renderHang() {
+            const disp = hangW.split("").map(l => guessed.includes(l) ? l : "_").join(" ");
+            document.getElementById('hangWord').innerText = disp;
+            if (!disp.includes("_")) {
+                document.getElementById('btnToP4').classList.remove('hidden');
+                speakText(hangW);
+            }
+        }
+
+        // --- PHASE 4: ACROSTIC CROSSWORD WITH HINTS (10 WORDS) ---
+        let cwStep = 0;
+        function startPhase4() {
+            document.getElementById('phase3').classList.add('hidden');
+            document.getElementById('phase4').classList.remove('hidden');
+            renderCW();
+        }
+        function renderCW() {
+            const container = document.getElementById('cw-container');
+            container.innerHTML = "";
+            cwData.forEach((row, rIdx) => {
+                const div = document.createElement('div'); div.className = "cw-row";
+                const leftPad = maxOffset - row.t;
+                for(let i=0; i<leftPad; i++) {
+                    const cell = document.createElement('div'); cell.className = "cw-cell empty"; div.appendChild(cell);
+                }
+                
+                let possibleIndices = [];
+                for(let i=0; i<row.w.length; i++) { if (i !== row.t) possibleIndices.push(i); }
+                let hintIndices = shuffle(possibleIndices).slice(0, 2);
+
+                row.w.split("").forEach((char, cIdx) => {
+                    const cell = document.createElement('div'); cell.className = "cw-cell";
+                    if (cIdx === row.t) cell.classList.add('target');
+                    cell.id = `cw-cell-${rIdx}-${cIdx}`;
+                    
+                    if (hintIndices.includes(cIdx)) {
+                        cell.innerText = char;
+                        cell.classList.add('hint-char');
+                    }
+                    
+                    div.appendChild(cell);
+                });
+                container.appendChild(div);
+            });
+            updateCWInput();
+        }
+        function updateCWInput() {
+            if(cwStep >= 10) {
+                document.getElementById('cw-clue').innerText = "MASTER CODE DECRYPTED: DATA BREACH";
+                document.getElementById('cw-input').classList.add('hidden');
+                document.querySelector('.cw-input-area button').classList.add('hidden');
+                document.getElementById('btnGlossary').classList.remove('hidden');
+                document.getElementById('btnToP5').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('cw-node-num').innerText = cwStep + 1;
+            document.getElementById('cw-clue').innerText = cwData[cwStep].c;
+            document.getElementById('cw-input').value = "";
+            document.getElementById('cw-input').focus();
+        }
+        function submitCW() {
+            const val = document.getElementById('cw-input').value.trim().toUpperCase();
+            if(val === cwData[cwStep].w) {
+                val.split("").forEach((char, cIdx) => { 
+                    let c = document.getElementById(`cw-cell-${cwStep}-${cIdx}`);
+                    c.innerText = char; 
+                    c.classList.remove('hint-char'); 
+                });
+                speakText(cwData[cwStep].w);
+                cwStep++; updateCWInput();
+            } else {
+                document.getElementById('cw-input').value = "";
+                document.getElementById('cw-input').placeholder = "ERROR. TRY AGAIN.";
+            }
+        }
+        document.getElementById("cw-input").addEventListener("keypress", (e) => { if (e.key === "Enter") submitCW(); });
+
+        // GLOSSARY
+        function buildGlossary() {
+            const list = document.getElementById('glossaryList');
+            database.forEach(v => {
+                list.innerHTML += `<div style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.1);">
+                    <b style="color:var(--ios-gold); font-size:1.2em;">${v.w} <span class="speak-icon" onclick="speakText('${v.w}', event)">🔊</span></b><br>
+                    ${v.d} <br> <i style="color:#AEAEB2;">Synonym: ${v.s}</i><br>
+                    <span style="color:var(--ios-green); font-size:0.9em;">Example: "${v.e}"</span>
+                </div>`;
+            });
+        }
+        function showGlossary() { document.getElementById('glossaryModal').classList.remove('hidden'); }
+
+        // --- PHASE 5: WORD SEARCH ---
+        const wsTargetWords = [
+            { w: "DEEPFAKE", r1: 0, c1: 2, r2: 0, c2: 9, s: "Fake media" },
+            { w: "RANSOMWARE", r1: 1, c1: 0, r2: 10, c2: 0, s: "Digital extortion" },
+            { w: "MALWARE", r1: 2, c1: 2, r2: 2, c2: 8, s: "Bad software" },
+            { w: "GLITCH", r1: 2, c1: 10, r2: 7, c2: 10, s: "System bug" },
+            { w: "OUTAGE", r1: 8, c1: 4, r2: 8, c2: 9, s: "Power cut" },
+            { w: "VIRAL", r1: 4, c1: 11, r2: 8, c2: 11, s: "Internet sensation" }
+        ];
+
+        const wsLayout = [
+            "V X D E E P F A K E P Q",
+            "R T U W C V B N M K L O",
+            "A Y M A L W A R E X G P",
+            "N S D F G H J K L Z L X",
+            "S C V B N M Q W E R I V",
+            "O A S D F G H J K L T I",
+            "M Z X C V B N M Q W C R",
+            "W E R T Y U I O P A H A",
+            "A S D F O U T A G E S L",
+            "R Z X C V B N M Q W E R",
+            "E T Y U I O P A S D F G",
+            "M N B V C X Z L K J H G"
+        ];
+
+        let wsSelected = null, wsFoundCount = 0;
+
+        function startPhase5() {
+            document.getElementById('phase4').classList.add('hidden');
+            document.getElementById('phase5').classList.remove('hidden');
+            renderWS();
+        }
+
+        function renderWS() {
+            const grid = document.getElementById('ws-grid');
+            grid.innerHTML = "";
+            wsLayout.forEach((rowStr, r) => {
+                const letters = rowStr.split(" ");
+                letters.forEach((char, c) => {
+                    const cell = document.createElement('div');
+                    cell.className = "ws-cell";
+                    cell.innerText = char;
+                    cell.id = `ws-${r}-${c}`;
+                    cell.onclick = () => handleWSClick(r, c);
+                    grid.appendChild(cell);
+                });
+            });
+
+            const clues = document.getElementById('ws-clues');
+            clues.innerHTML = "<b style='color:white; font-size: 1.2em;'>Target Synonyms:</b><br><br>";
+            wsTargetWords.forEach((tw, i) => {
+                clues.innerHTML += `<div id="ws-clue-${i}" class="ws-clue-item">➔ ${tw.s} (${tw.w.length} letters)</div>`;
+            });
+        }
+
+        function handleWSClick(r, c) {
+            const cell = document.getElementById(`ws-${r}-${c}`);
+            if(cell.classList.contains('found')) return;
+
+            if(!wsSelected) {
+                wsSelected = {r, c, el: cell};
+                cell.classList.add('selected');
+            } else {
+                const r1 = wsSelected.r, c1 = wsSelected.c;
+                const r2 = r, c2 = c;
+                wsSelected.el.classList.remove('selected');
+                wsSelected = null;
+
+                let matchedWordIndex = -1;
+                wsTargetWords.forEach((tw, idx) => {
+                    if ((r1 === tw.r1 && c1 === tw.c1 && r2 === tw.r2 && c2 === tw.c2) ||
+                        (r1 === tw.r2 && c1 === tw.c2 && r2 === tw.r1 && c2 === tw.c1)) {
+                        matchedWordIndex = idx;
+                    }
+                });
+
+                if (matchedWordIndex !== -1) {
+                    const tw = wsTargetWords[matchedWordIndex];
+                    const clueEl = document.getElementById(`ws-clue-${matchedWordIndex}`);
+                    if(!clueEl.classList.contains('found')) {
+                        clueEl.classList.add('found');
+                        highlightWord(tw);
+                        speakText(tw.w);
+                        wsFoundCount++;
+                        if(wsFoundCount === wsTargetWords.length) {
+                            document.getElementById('btnToP6').classList.remove('hidden');
+                        }
+                    }
+                }
+            }
+        }
+
+        function highlightWord(tw) {
+            const rMin = Math.min(tw.r1, tw.r2), rMax = Math.max(tw.r1, tw.r2);
+            const cMin = Math.min(tw.c1, tw.c2), cMax = Math.max(tw.c1, tw.c2);
+
+            if(rMin === rMax) { 
+                for(let c=cMin; c<=cMax; c++) { document.getElementById(`ws-${rMin}-${c}`).classList.add('found'); }
+            } else if (cMin === cMax) { 
+                for(let r=rMin; r<=rMax; r++) { document.getElementById(`ws-${r}-${cMin}`).classList.add('found'); }
+            }
+        }
+
+        // --- PHASE 6: THE NEURAL BREACH (MAIN GAME) ---
+        function startPhase6() {
+            document.getElementById('phase5').classList.add('hidden');
+            document.getElementById('phase6').classList.remove('hidden');
+            shuffledGame = shuffle([...database]);
+            loadSector();
+        }
+        function loadSector() {
+            if(qStep >= database.length) { document.getElementById('storyText').innerText = "GLOBAL NETWORK SECURED."; document.getElementById('userInput').classList.add('hidden'); clearInterval(timerInt); return; }
+            const data = shuffledGame[qStep];
+            document.getElementById('secNum').innerText = qStep + 1;
+            document.getElementById('storyText').innerText = "Anomaly Detected: " + data.d;
+            document.getElementById('missionImg').style.backgroundImage = `url('${data.img}')`;
+            document.getElementById('missionImg').classList.remove('decrypted');
+            document.getElementById('userInput').value = "";
+            document.getElementById('feedback').innerText = "";
+            document.getElementById('gameCard').classList.remove('shake');
+            document.getElementById('userInput').focus();
+            
+            timeLeft = 30; combo = 1;
+            document.getElementById('comboDisplay').innerText = `x${combo}`;
+            clearInterval(timerInt);
+            timerInt = setInterval(() => {
+                timeLeft--; document.getElementById('timerDisplay').innerText = timeLeft;
+                if(timeLeft <= 0) {
+                    clearInterval(timerInt);
+                    triggerFail("TIMEOUT");
+                }
+            }, 1000);
+        }
+
+        function verifySector() {
+            const val = document.getElementById('userInput').value.trim().toLowerCase();
+            const correct = shuffledGame[qStep].w.toLowerCase();
+            if (val === correct) {
+                clearInterval(timerInt);
+                document.getElementById('missionImg').classList.add('decrypted');
+                speakText(correct);
+                stars += (10 * combo); combo++;
+                document.getElementById('stars').innerText = stars;
+                document.getElementById('comboDisplay').innerText = `x${combo}`;
+                qStep++;
+                document.getElementById('agent-pin').style.left = `${8 + (qStep * 3.5)}%`;
+                
+                if (qStep % 5 === 0) {
+                    const id = qStep / 5;
+                    if(document.getElementById('perk'+id)) document.getElementById('perk'+id).classList.add('unlocked');
+                    if(document.getElementById('wp'+(id+1))) document.getElementById('wp'+(id+1)).classList.add('active');
+                }
+                document.getElementById('feedback').innerText = "NODE OVERRIDDEN";
+                document.getElementById('feedback').style.color = "var(--ios-green)";
+                setTimeout(loadSector, 1500);
+            } else {
+                triggerFail("SYNTAX ERROR");
+            }
+        }
+
+        function triggerFail(msg) {
+            combo = 1; document.getElementById('comboDisplay').innerText = `x${combo}`;
+            document.getElementById('feedback').innerText = msg;
+            document.getElementById('feedback').style.color = "var(--ios-red)";
+            document.getElementById('gameCard').classList.add('shake');
+            document.getElementById('userInput').value = "";
+            setTimeout(() => document.getElementById('gameCard').classList.remove('shake'), 500);
+        }
+
+        document.getElementById("userInput").addEventListener("keypress", (e) => { if (e.key === "Enter" && !document.getElementById('phase6').classList.contains('hidden')) verifySector(); });
+        document.addEventListener("visibilitychange", () => { if(document.hidden) location.reload(); });
+    </script>
+</body>
+</html>

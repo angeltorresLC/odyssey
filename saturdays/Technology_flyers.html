@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Quest: Digital Discovery</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&family=Orbitron:wght@500;700;900&display=swap');
+
+        :root {
+            --tech-green: #2ECC71;
+            --tech-blue: #3498DB;
+            --tech-gold: #F1C40F;
+            --tech-pink: #FF4757;
+            --bubble-glass: rgba(255, 255, 255, 0.3);
+            --text-main: #2C3E50;
+            --card-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #74EBD5 0%, #9FACE6 100%);
+            color: var(--text-main); overflow-x: hidden; min-height: 100vh;
+        }
+
+        /* --- VIBRANT BUBBLE BACKGROUND --- */
+        .bg-bubbles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        .bg-bubbles div { position: absolute; bottom: -100px; background-color: var(--bubble-glass); border-radius: 50%; animation: floatUp 15s infinite ease-in; }
+        .b1 { width: 80px; height: 80px; left: 10%; animation-duration: 8s; }
+        .b2 { width: 120px; height: 120px; left: 30%; animation-duration: 12s; animation-delay: 2s; }
+        .b3 { width: 60px; height: 60px; left: 55%; animation-duration: 10s; }
+        .b4 { width: 150px; height: 150px; left: 80%; animation-duration: 14s; }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-120vh) scale(1.3); opacity: 0; } }
+
+        /* --- MODALS & HUD --- */
+        .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.8); display: flex; justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(8px); }
+        .quest-modal { background: white; width: 90%; max-width: 500px; padding: 40px; border-radius: 40px; border: 10px solid var(--tech-gold); text-align: center; box-shadow: 0 20px 0 rgba(0,0,0,0.1); }
+
+        .hud { display: flex; justify-content: space-between; width: 95%; max-width: 1000px; margin: 20px auto; align-items: center; }
+        .shelf { background: var(--card-bg); padding: 12px 25px; border-radius: 50px; border: 4px solid var(--tech-blue); display: flex; gap: 15px; }
+        .perk { font-size: 1.8em; opacity: 0.2; filter: grayscale(1); transition: 0.5s; }
+        .perk.unlocked { opacity: 1; filter: grayscale(0); transform: scale(1.2); }
+
+        .diorama { width: 90%; max-width: 850px; height: 100px; margin: 0 auto; background: rgba(255,255,255,0.4); border-radius: 30px; border: 3px dashed white; display: flex; justify-content: space-around; align-items: center; position: relative; }
+        #agent-pin { position: absolute; font-size: 2.5em; top: -35px; transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 50; }
+        .waypoint { font-size: 1.8em; opacity: 0.3; transition: 0.3s; }
+        .waypoint.active { opacity: 1; transform: scale(1.3); filter: drop-shadow(0 0 10px white); }
+
+        /* --- UI ELEMENTS --- */
+        .container { width: 90%; max-width: 850px; margin: 0 auto; text-align: center; }
+        .quest-card { background: var(--card-bg); padding: 30px; border-radius: 35px; border: 5px solid var(--tech-blue); margin-bottom: 25px; position: relative; box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        
+        .ios-btn { font-family: 'Fredoka One', cursive; padding: 15px 30px; border-radius: 20px; cursor: pointer; border: none; transition: 0.2s; font-size: 1em; text-transform: uppercase; margin: 5px; }
+        .btn-green { background: var(--tech-green); color: #fff; box-shadow: 0 6px 0 #27AE60; }
+        .btn-blue { background: var(--tech-blue); color: #fff; box-shadow: 0 6px 0 #2980B9; }
+        .btn-pink { background: var(--tech-pink); color: #fff; box-shadow: 0 6px 0 #C0392B; }
+        .ios-btn:active { transform: translateY(4px); box-shadow: none; }
+
+        .ios-input { width: 100%; padding: 18px; border-radius: 25px; border: 4px solid var(--tech-green); background: #fff; color: var(--text-main); font-family: 'Nunito', sans-serif; font-size: 1.3em; text-align: center; margin: 15px 0; outline: none; }
+
+        /* --- PHASE SPECIFICS --- */
+        .fc-scene { perspective: 1000px; height: 320px; margin: 20px auto; width: 100%; max-width: 380px; }
+        .fc-inner { width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; position: relative; cursor: pointer; }
+        .fc-inner.flipped { transform: rotateY(180deg); }
+        .fc-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; background: white; border: 6px solid var(--tech-blue); border-radius: 30px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 25px; box-sizing: border-box; }
+        .fc-back { transform: rotateY(180deg); border-color: var(--tech-gold); }
+
+        .match-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px 0; }
+        .match-tile { height: 90px; background: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.9em; font-weight: 800; cursor: pointer; border: 4px solid var(--tech-blue); transition: 0.3s; padding: 5px; text-align: center; }
+        .match-tile.flipped { background: var(--tech-gold); color: white; border-color: white; transform: scale(1.05); }
+        .match-tile.matched { background: var(--tech-green); color: white; opacity: 0; pointer-events: none; }
+
+        .cw-row { display: flex; justify-content: center; margin-bottom: 6px; }
+        .cw-cell { width: 40px; height: 40px; border: 2px solid #ddd; margin: 0 2px; border-radius: 10px; text-align: center; font-family: 'Fredoka One'; font-size: 1.4em; background: white; display: flex; justify-content: center; align-items: center; text-transform: uppercase; }
+        .cw-cell.target { border: 4px solid var(--tech-pink); color: var(--tech-pink); }
+        .cw-cell.empty { background: transparent; border: none; }
+        .cw-cell.hint-char { color: #ccc; font-weight: normal; }
+
+        .ws-grid { display: grid; grid-template-columns: repeat(10, 35px); gap: 5px; justify-content: center; background: white; padding: 15px; border-radius: 25px; border: 5px solid var(--tech-green); }
+        .ws-cell { width: 35px; height: 35px; background: #f8f9fa; border: 1px solid #eee; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; cursor: pointer; user-select: none; }
+        .ws-cell.found { background: var(--tech-green); color: white; border-color: white; }
+
+        .hidden { display: none !important; }
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
+    </style>
+</head>
+<body>
+
+    <div class="bg-bubbles">
+        <div class="b1"></div><div class="b2"></div><div class="b3"></div><div class="b4"></div>
+    </div>
+
+    <div id="authModal" class="modal-bg">
+        <div class="quest-modal">
+            <h1 style="font-family:'Fredoka One'; color: var(--tech-blue); margin-bottom: 10px;">TECH DISCOVERY</h1>
+            <p style="font-size: 1.3em; line-height: 1.4;">Welcome, Explorer! Technology is all around us. Complete 6 Missions to unlock the Digital Prize!</p>
+            <button class="ios-btn btn-green" style="width:100%; padding:20px; font-size: 1.2em;" onclick="initSystem()">START QUEST</button>
+        </div>
+    </div>
+
+    <header id="mainHeader" class="hidden" style="text-align:center; padding: 25px;">
+        <h1 style="font-family:'Fredoka One'; font-size:2.8em; color: white; text-shadow: 3px 3px var(--tech-blue);">Tech discovery portal</h1>
+    </header>
+
+    <div id="phase1" class="container hidden">
+        <h3 style="color:white; text-shadow: 1px 1px var(--text-main);">Mission 1: Tech Memory</h3>
+        <div class="fc-scene">
+            <div class="fc-inner" id="fc-inner" onclick="flipFC()">
+                <div class="fc-face">
+                    <div id="fc-emoji" style="font-size:5em; margin-bottom:10px;">🤖</div>
+                    <h2 id="fc-term" style="font-family:'Fredoka One'; color:var(--tech-blue); font-size: 2.2em; margin:0;">Robot</h2>
+                    <button class="ios-btn btn-blue" style="margin-top:20px;" onclick="speakText(database[currentFC].w, event)">🔊 Listen</button>
+                </div>
+                <div class="fc-face fc-back">
+                    <div style="color:var(--tech-green); font-weight:900; letter-spacing: 1px;">DEFINITION</div>
+                    <p id="fc-def" style="font-size:1.2em; margin: 10px 0;">A machine that can work by itself.</p>
+                    <div style="color:var(--tech-pink); font-weight:900; margin-top:15px;">EXAMPLE</div>
+                    <p id="fc-ex" style="font-style:italic; color:#555;">"The robot is cleaning the floor."</p>
+                </div>
+            </div>
+        </div>
+        <div style="display:flex; justify-content:center; gap:15px;">
+            <button class="ios-btn btn-pink" onclick="prevFC()">Prev</button>
+            <button class="ios-btn btn-blue" onclick="flipFC()">Flip</button>
+            <button class="ios-btn btn-pink" onclick="nextFC()">Next</button>
+        </div>
+        <p id="fc-count" style="font-weight:bold; color:white; margin-top: 15px;">1 / 25</p>
+        <button class="ios-btn btn-green" style="margin-top:20px; width:100%; max-width:400px;" onclick="startPhase2()">Go to Mission 2</button>
+    </div>
+
+    <div id="phase2" class="container hidden">
+        <h3 style="color:white;">Mission 2: Tech Synonyms</h3>
+        <div class="match-grid" id="matchGrid"></div>
+        <button class="ios-btn btn-green hidden" id="btnToP3" onclick="startPhase3()">Go to Mission 3</button>
+    </div>
+
+    <div id="phase3" class="container hidden">
+        <h3 style="color:white;">Mission 3: Spelling Code</h3>
+        <div id="hangHint" style="background:white; padding:15px; border-radius:20px; margin-bottom:15px; font-weight:bold; border: 3px solid var(--tech-gold);"></div>
+        <div class="word-display" id="hangWord" style="font-size:3em; letter-spacing:12px; margin:25px 0; font-family: 'Orbitron'; color: white;">_ _ _</div>
+        <div id="keyboard" style="display:flex; flex-wrap:wrap; justify-content:center; gap:8px;"></div>
+        <button class="ios-btn btn-green hidden" id="btnToP4" onclick="startPhase4()">Go to Mission 4</button>
+    </div>
+
+    <div id="phase4" class="container hidden">
+        <h3 style="color:white;">Mission 4: Digital Crossword</h3>
+        <div id="cw-container" style="background:white; padding:25px; border-radius:30px; border: 5px solid var(--tech-blue); margin-bottom:20px;"></div>
+        <div style="background:white; padding:20px; border-radius:30px; border: 5px solid var(--tech-green);">
+            <p id="cw-clue" style="font-weight: 800; font-size: 1.2em;">Clue loading...</p>
+            <input type="text" id="cw-input" class="ios-input" placeholder="Type answer here...">
+            <button class="ios-btn btn-green" onclick="submitCW()">Enter Word</button>
+        </div>
+        <button class="ios-btn btn-pink hidden" id="btnToP5" style="margin-top:20px;" onclick="startPhase5()">Go to Mission 5</button>
+    </div>
+
+    <div id="phase5" class="container hidden">
+        <h3 style="color:white;">Mission 5: Data Extraction</h3>
+        <div style="display:flex; justify-content:center; gap:25px; flex-wrap:wrap;">
+            <div id="ws-grid" class="ws-grid"></div>
+            <div id="ws-clues" style="background:white; padding:25px; border-radius:30px; text-align:left; border: 5px solid var(--tech-blue); min-width: 220px;">
+                <b style="color:var(--tech-blue);">Find these 6 words:</b><br><br>
+                1. ROBOT<br>2. PHONE<br>3. MOUSE<br>4. TABLET<br>5. SCREEN<br>6. APP
+            </div>
+        </div>
+        <button class="ios-btn btn-green hidden" id="btnToP6" style="margin-top:20px;" onclick="startPhase6()">FINAL MISSION</button>
+    </div>
+
+    <div id="phase6" class="container hidden">
+        <div class="hud">
+            <div class="shelf">
+                <span class="perk" id="perk1">📱</span><span class="perk" id="perk2">💻</span><span class="perk" id="perk3">📡</span><span class="perk" id="perk4">🔋</span><span class="perk" id="perk5">🏆</span>
+            </div>
+            <div style="background:white; padding:12px 25px; border-radius:50px; font-weight:900;">STARS: <span id="stars" style="color:var(--tech-pink);">0</span></div>
+        </div>
+        <div class="diorama">
+            <div id="agent-pin" style="left:8%;">🚀</div>
+            <div class="waypoint active">🏠</div><div class="waypoint" id="wp2">🕹️</div><div class="waypoint" id="wp3">🛰️</div><div class="waypoint" id="wp4">🏗️</div><div class="waypoint" id="wp5">🏰</div>
+        </div>
+
+        <div class="quest-card" id="gameCard">
+            <div style="display:flex; justify-content:space-around; margin-bottom:20px;">
+                <div style="color:var(--tech-pink); font-weight:900; font-size: 1.4em;">TIME: <span id="timerDisplay">30</span>s</div>
+                <div style="color:var(--tech-blue); font-weight:900; font-size: 1.4em;">COMBO: <span id="comboDisplay">x1</span></div>
+            </div>
+            <p id="storyText" style="font-size:1.4em; font-weight:800; line-height:1.4;"></p>
+            <div id="missionImg" style="width:100%; height:220px; background-size:cover; background-position:center; border-radius:25px; margin:20px 0; border: 4px solid var(--tech-blue);"></div>
+            <input type="text" id="userInput" class="ios-input" placeholder="Type the key word!">
+            <button class="ios-btn btn-green" style="width: 100%; font-size: 1.2em;" onclick="verifySector()">IDENTIFY</button>
+            <div id="feedback" style="margin-top:15px; font-weight:900; font-size: 1.2em;"></div>
+        </div>
+    </div>
+
+    <script>
+        // GLOBAL PRONUNCIATION ENGINE
+        function speakText(txt, event) {
+            if(event) event.stopPropagation();
+            window.speechSynthesis.cancel();
+            let m = new SpeechSynthesisUtterance(txt);
+            m.lang = 'en-US';
+            window.speechSynthesis.speak(m);
+        }
+
+        // A2 FLYERS TECH DATABASE (25 Terms)
+        const database = [
+            {w: "Tablet", s: "Pad computer", d: "A flat computer you hold in your hands.", e: "I play games on my tablet.", i: "📟", img: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=500"},
+            {w: "Laptop", s: "Portable PC", d: "A computer you can close and carry.", e: "My dad works on his laptop.", i: "💻", img: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500"},
+            {w: "Robot", s: "Machine person", d: "A machine that can work by itself.", e: "The robot can walk and talk.", i: "🤖", img: "https://images.unsplash.com/photo-1589254065878-42c9da997008?w=500"},
+            {w: "Smartphone", s: "Mobile phone", d: "A phone that can go on the internet.", e: "I use a smartphone to call my dad.", i: "📱", img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500"},
+            {w: "Camera", s: "Photo taker", d: "You use this to take pictures.", e: "Smile for the camera!", i: "📷", img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500"},
+            {w: "Internet", s: "World Wide Web", d: "A giant network that connects computers.", e: "I use the internet to watch videos.", i: "🌐", img: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=500"},
+            {w: "Website", s: "Online page", d: "A place on the internet with information.", e: "This is a fun website for kids.", i: "🖥️", img: "https://images.unsplash.com/photo-1547658719-da2b51169166?w=500"},
+            {w: "Download", s: "Save from web", d: "To get a file from the internet to your PC.", e: "Download the game to play it.", i: "📥", img: "https://images.unsplash.com/photo-1614064641938-3bbee52942c7?w=500"},
+            {w: "Battery", s: "Power cell", d: "This gives energy to your gadgets.", e: "My phone battery is low.", i: "🔋", img: "https://images.unsplash.com/photo-1619641782821-75177212263f?w=500"},
+            {w: "Keyboard", s: "Typing board", d: "You use this to type letters and numbers.", e: "Type your name on the keyboard.", i: "⌨️", img: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=500"},
+            {w: "Mouse", s: "Click tool", d: "You move this to click on things.", e: "Click the red button with the mouse.", i: "🖱️", img: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=500"},
+            {w: "Printer", s: "Paper machine", d: "A machine that puts pictures on paper.", e: "The printer is making a photo.", i: "🖨️", img: "https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?w=500"},
+            {w: "Message", s: "Text note", d: "A short note you send to a friend.", e: "Send me a message when you arrive.", i: "✉️", img: "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=500"},
+            {w: "App", s: "Program", d: "A game or tool on your phone.", e: "This app helps me learn English.", i: "📲", img: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=500"},
+            {w: "Screen", s: "Display monitor", d: "The part of the tech you look at.", e: "Don't sit too close to the screen.", i: "📺", img: "https://images.unsplash.com/photo-1547108738-03a442275668?w=500"},
+            {w: "Password", s: "Secret word", d: "A secret word to open your device.", e: "Keep your password secret!", i: "🔑", img: "https://images.unsplash.com/photo-1633265486064-086b219458ec?w=500"},
+            {w: "Drone", s: "Flying camera", d: "A small machine that flies in the sky.", e: "The drone is taking a video of the park.", i: "🚁", img: "https://images.unsplash.com/photo-1508614589041-895b88991e3e?w=500"},
+            {w: "Video call", s: "Face talk", d: "Talking to someone while seeing their face.", e: "I had a video call with grandma.", i: "🎥", img: "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=500"},
+            {w: "Charger", s: "Power cable", d: "You use this to give energy to a battery.", e: "Where is my phone charger?", i: "🔌", img: "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=500"},
+            {w: "Speaker", s: "Sound box", d: "This makes the music loud.", e: "Turn up the volume on the speaker!", i: "🔊", img: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=500"},
+            {w: "Headphones", s: "Ear speakers", d: "You wear these to hear music alone.", e: "Put on your headphones to listen.", i: "🎧", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500"},
+            {w: "Wi-Fi", s: "Wireless web", d: "Wireless internet in your house.", e: "What is the Wi-Fi password?", i: "📶", img: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=500"},
+            {w: "Online", s: "On the web", d: "When you are connected to the internet.", e: "I am playing a game online with my friend.", i: "🟢", img: "https://images.unsplash.com/photo-1432888622747-4eb9a8f2c20e?w=500"},
+            {w: "Digital", s: "Electronic", d: "Something that uses a computer or technology.", e: "My digital watch tells the time.", i: "🔢", img: "https://images.unsplash.com/photo-1550741111-3d6d17e6c9d3?w=500"},
+            {w: "Game", s: "Fun play", d: "Something fun you play on a device.", e: "Let's play a video game!", i: "🎮", img: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500"}
+        ];
+
+        // CROSSWORD DATA: "TECH GADGET" (10 Words)
+        const cwData = [
+            {w: "TABLET", t: 0, c: "A flat computer you hold."}, // T
+            {w: "EMAIL", t: 0, c: "A letter on the internet."}, // E
+            {w: "CAMERA", t: 0, c: "Use this to take photos."}, // C
+            {w: "HEADPHONES", t: 0, c: "Wear these to hear music."}, // H
+            {w: "GAME", t: 0, c: "Something fun to play."}, // G
+            {w: "APP", t: 0, c: "A tool on your smartphone."}, // A
+            {w: "DOWNLOAD", t: 0, c: "Get a file from the web."}, // D
+            {w: "GLITCH", t: 0, c: "A small mistake in a game."}, // G
+            {w: "ELECTRIC", t: 0, c: "Uses power from a battery."}, // E
+            {w: "TEXT", t: 0, c: "A short message you type."}  // T
+        ];
+
+        let currentFC = 0, qStep = 0, stars = 0, combo = 1, timeLeft = 30, timerInt, shuffledGame = [];
+        const maxOffset = 1;
+
+        function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+        function initSystem() {
+            document.getElementById('authModal').style.display = 'none';
+            document.getElementById('mainHeader').classList.remove('hidden');
+            document.getElementById('phase1').classList.remove('hidden');
+            updateFC();
+        }
+
+        // --- PHASE 1: FLASHCARDS ---
+        function updateFC() {
+            const data = database[currentFC];
+            document.getElementById('fc-emoji').innerText = data.i;
+            document.getElementById('fc-term').innerText = data.w;
+            document.getElementById('fc-def').innerText = data.d;
+            document.getElementById('fc-ex').innerText = `"${data.e}"`;
+            document.getElementById('fc-count').innerText = `${currentFC + 1} / ${database.length}`;
+            document.getElementById('fc-inner').classList.remove('flipped');
+        }
+        function flipFC() { document.getElementById('fc-inner').classList.toggle('flipped'); }
+        function nextFC() { currentFC = (currentFC + 1) % database.length; updateFC(); }
+        function prevFC() { currentFC = (currentFC - 1 + database.length) % database.length; updateFC(); }
+
+        // --- PHASE 2: MATCHING ---
+        let firstMatch = null, matchCount = 0;
+        function startPhase2() {
+            document.getElementById('phase1').classList.add('hidden');
+            document.getElementById('phase2').classList.remove('hidden');
+            const grid = document.getElementById('matchGrid');
+            let pairs = [];
+            database.slice(0, 8).forEach(v => { pairs.push({t: v.w, p: v.w}, {t: v.s, p: v.w}); });
+            shuffle(pairs).forEach(p => {
+                const div = document.createElement('div');
+                div.className = "match-tile"; div.innerText = p.t;
+                div.onclick = () => {
+                    if (div.classList.contains('flipped') || div.classList.contains('matched')) return;
+                    div.classList.add('flipped');
+                    if (!firstMatch) firstMatch = {el: div, p: p.p};
+                    else {
+                        if (firstMatch.p === p.p) {
+                            setTimeout(() => { 
+                                div.classList.add('matched'); firstMatch.el.classList.add('matched'); 
+                                matchCount++; speakText(firstMatch.p); firstMatch = null; 
+                                if(matchCount === 8) document.getElementById('btnToP3').classList.remove('hidden'); 
+                            }, 400);
+                        } else {
+                            setTimeout(() => { div.classList.remove('flipped'); firstMatch.el.classList.remove('flipped'); firstMatch = null; }, 600);
+                        }
+                    }
+                };
+                grid.appendChild(div);
+            });
+        }
+
+        // --- PHASE 3: HANGMAN ---
+        let hangW = "", guessed = [], misses = 0;
+        function startPhase3() {
+            document.getElementById('phase2').classList.add('hidden');
+            document.getElementById('phase3').classList.remove('hidden');
+            const targetObj = database[Math.floor(Math.random() * database.length)];
+            hangW = targetObj.w.toUpperCase();
+            document.getElementById('hangHint').innerText = "CLUE: " + targetObj.d;
+            renderHang();
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(l => {
+                const b = document.createElement('button'); b.className = "ios-btn btn-blue"; b.innerText = l;
+                b.onclick = () => {
+                    b.disabled = true; b.style.opacity = "0.5";
+                    if (hangW.includes(l)) { guessed.push(l); renderHang(); }
+                    else { misses++; if (misses >= 6) location.reload(); }
+                };
+                document.getElementById('keyboard').appendChild(b);
+            });
+        }
+        function renderHang() {
+            const disp = hangW.split("").map(l => guessed.includes(l) ? l : "_").join(" ");
+            document.getElementById('hangWord').innerText = disp;
+            if (!disp.includes("_")) { document.getElementById('btnToP4').classList.remove('hidden'); speakText(hangW); }
+        }
+
+        // --- PHASE 4: CROSSWORD ---
+        let cwStep = 0;
+        function startPhase4() {
+            document.getElementById('phase3').classList.add('hidden');
+            document.getElementById('phase4').classList.remove('hidden');
+            renderCW();
+        }
+        function renderCW() {
+            const container = document.getElementById('cw-container');
+            container.innerHTML = "";
+            cwData.forEach((row, rIdx) => {
+                const div = document.createElement('div'); div.className = "cw-row";
+                const leftPad = maxOffset - row.t;
+                for(let i=0; i<leftPad; i++) {
+                    const cell = document.createElement('div'); cell.className = "cw-cell empty"; div.appendChild(cell);
+                }
+                
+                let possibleIndices = [];
+                for(let i=0; i<row.w.length; i++) { if (i !== row.t) possibleIndices.push(i); }
+                let hintIndices = shuffle(possibleIndices).slice(0, 2);
+
+                row.w.split("").forEach((char, cIdx) => {
+                    const cell = document.createElement('div'); cell.className = "cw-cell";
+                    if (cIdx === row.t) cell.classList.add('target');
+                    cell.id = `cw-cell-${rIdx}-${cIdx}`;
+                    if (hintIndices.includes(cIdx)) { cell.innerText = char; cell.classList.add('hint-char'); }
+                    div.appendChild(cell);
+                });
+                container.appendChild(div);
+            });
+            updateCWInput();
+        }
+        function updateCWInput() {
+            if(cwStep >= 10) {
+                document.getElementById('cw-clue').innerText = "TECH CODE DECRYPTED: TECH GADGET!";
+                document.getElementById('cw-input').classList.add('hidden');
+                document.getElementById('btnToP5').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('cw-clue').innerText = cwData[cwStep].c;
+            document.getElementById('cw-input').value = "";
+            document.getElementById('cw-input').focus();
+        }
+        function submitCW() {
+            const val = document.getElementById('cw-input').value.trim().toUpperCase();
+            if(val === cwData[cwStep].w) {
+                val.split("").forEach((char, cIdx) => { 
+                    let c = document.getElementById(`cw-cell-${cwStep}-${cIdx}`);
+                    c.innerText = char; c.classList.remove('hint-char'); 
+                });
+                speakText(cwData[cwStep].w); cwStep++; updateCWInput();
+            }
+        }
+
+        // --- PHASE 5: WORD SEARCH ---
+        function startPhase5() {
+            document.getElementById('phase4').classList.add('hidden');
+            document.getElementById('phase5').classList.remove('hidden');
+            const grid = document.getElementById('ws-grid');
+            const wsWords = ["ROBOT", "PHONE", "MOUSE", "TABLET", "SCREEN", "APP"];
+            const layout = [
+                "ROBOTXXXXX", "XXXXXXXXXX", "PHONEXXXXX", "XXXXXXXXXX", "MOUSEXXXXX", 
+                "XXXXXXXXXX", "TABLETXXXX", "XXXXXXXXXX", "SCREENXXXX", "APPXXXXXXX"
+            ];
+            layout.forEach((row, r) => {
+                row.split("").forEach((char, c) => {
+                    const cell = document.createElement('div'); cell.className = "ws-cell"; cell.innerText = char;
+                    cell.onclick = () => { cell.classList.add('found'); document.getElementById('btnToP6').classList.remove('hidden'); };
+                    grid.appendChild(cell);
+                });
+            });
+        }
+
+        // --- PHASE 6: FINAL GAME ---
+        function startPhase6() {
+            document.getElementById('phase5').classList.add('hidden');
+            document.getElementById('phase6').classList.remove('hidden');
+            shuffledGame = shuffle([...database]);
+            loadSector();
+        }
+        function loadSector() {
+            if(qStep >= database.length) { document.getElementById('storyText').innerText = "TECH QUEST COMPLETED!"; return; }
+            const data = shuffledGame[qStep];
+            document.getElementById('storyText').innerText = "Mission: Identify this " + data.d;
+            document.getElementById('missionImg').style.backgroundImage = `url('${data.img}')`;
+            document.getElementById('userInput').value = "";
+            document.getElementById('feedback').innerText = "";
+            timeLeft = 30; clearInterval(timerInt);
+            timerInt = setInterval(() => {
+                timeLeft--; document.getElementById('timerDisplay').innerText = timeLeft;
+                if(timeLeft <= 0) triggerFail("TIME UP!");
+            }, 1000);
+        }
+        function verifySector() {
+            const val = document.getElementById('userInput').value.trim().toLowerCase();
+            if (val === shuffledGame[qStep].w.toLowerCase()) {
+                clearInterval(timerInt); speakText(val);
+                stars += (10 * combo); combo++;
+                document.getElementById('stars').innerText = stars;
+                qStep++; document.getElementById('agent-pin').style.left = `${8 + (qStep * 3.5)}%`;
+                if (qStep % 5 === 0) {
+                    const id = qStep / 5;
+                    document.getElementById('perk'+id).classList.add('unlocked');
+                    document.getElementById('wp'+(id+1)).classList.add('active');
+                }
+                document.getElementById('feedback').innerText = "NODE UNLOCKED!";
+                document.getElementById('feedback').style.color = "var(--tech-green)";
+                setTimeout(loadSector, 1000);
+            } else { triggerFail("TRY AGAIN!"); }
+        }
+        function triggerFail(msg) {
+            document.getElementById('gameCard').classList.add('shake');
+            document.getElementById('feedback').innerText = msg;
+            document.getElementById('feedback').style.color = "var(--tech-pink)";
+            setTimeout(() => document.getElementById('gameCard').classList.remove('shake'), 400);
+        }
+
+        document.addEventListener("visibilitychange", () => { if(document.hidden) location.reload(); });
+    </script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Great Quest: A1+ Master Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+
+        :root {
+            --forest-green: #2ecc71;
+            --sky-blue: #3498db;
+            --sun-yellow: #f1c40f;
+            --berry-pink: #e91e63;
+            --magic-purple: #9b59b6;
+            --white: #ffffff;
+            --text-dark: #2c3e50;
+        }
+
+        body {
+            margin: 0; padding: 20px;
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; color: var(--text-dark);
+        }
+
+        /* --- REALISTIC PROGRESS MAP --- */
+        #world-map {
+            width: 100%; max-width: 850px;
+            background: #27ae60;
+            height: 150px; border-radius: 30px;
+            margin-bottom: 25px; border: 6px solid #145a32;
+            position: relative; display: flex; align-items: center;
+            justify-content: space-around;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2), inset 0 0 50px rgba(0,0,0,0.1);
+        }
+
+        .map-region { display: flex; flex-direction: column; align-items: center; z-index: 2; }
+        .region-icon { font-size: 2.2em; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3)); }
+        .region-label { font-size: 0.65em; font-weight: 900; color: white; text-transform: uppercase; margin-top: 5px; background: rgba(0,0,0,0.4); padding: 3px 10px; border-radius: 12px; }
+
+        #agent-pin {
+            position: absolute; font-size: 2.5em; top: 15px;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 10; filter: drop-shadow(0 5px 8px rgba(0,0,0,0.4));
+        }
+
+        /* --- HUD --- */
+        .hud { width: 95%; max-width: 800px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .stat-badge { background: var(--sun-yellow); padding: 10px 20px; border-radius: 50px; font-weight: 900; box-shadow: 0 5px 0 #d4ac0d; }
+        
+        .help-btn { 
+            background: var(--sky-blue); color: white; border: none; 
+            padding: 10px 20px; border-radius: 50px; font-weight: 900; 
+            cursor: pointer; box-shadow: 0 5px 0 #2980b9; transition: 0.2s;
+        }
+        .help-btn:hover { transform: translateY(-3px); background: #5dade2; }
+
+        /* --- GAME CONTAINER --- */
+        #game-container {
+            background: white; width: 95%; max-width: 800px;
+            padding: 35px; border-radius: 40px;
+            box-shadow: 0 20px 0px rgba(0,0,0,0.1);
+            text-align: center; border: 6px solid var(--forest-green);
+        }
+
+        .scene-emoji { font-size: 90px; margin: 15px 0; display: block; animation: float 3s infinite ease-in-out; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+
+        .story-bubble { 
+            font-size: 1.3em; line-height: 1.6; margin-bottom: 25px; 
+            font-weight: 700; background: #f0f7ff; 
+            padding: 25px; border-radius: 25px; border: 3px solid #d0e7ff;
+        }
+
+        .challenge-card { background: #fffcf0; padding: 25px; border-radius: 25px; border: 4px solid var(--sun-yellow); margin-bottom: 25px; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        button:not(.help-btn):not(.modal-close) { font-family: 'Nunito', sans-serif; font-size: 1.1em; font-weight: 800; padding: 18px; border: none; border-radius: 20px; cursor: pointer; transition: 0.2s; }
+        .opt-btn { background: var(--sky-blue); color: white; box-shadow: 0 6px 0 #2980b9; }
+        .choice-btn { background: var(--magic-purple); color: white; box-shadow: 0 6px 0 #8e44ad; }
+        
+        .hidden { display: none; }
+        .feedback { font-weight: 900; margin-top: 15px; font-size: 1.2em; height: 30px; }
+
+        /* --- MODAL RULES --- */
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); display: none; 
+            justify-content: center; align-items: center; z-index: 1000; 
+        }
+        .modal-content { 
+            background: white; width: 85%; max-width: 500px; padding: 30px; 
+            border-radius: 30px; border: 8px solid var(--sun-yellow); text-align: left;
+        }
+        .modal-close { 
+            background: var(--berry-pink); color: white; border: none; 
+            padding: 15px; border-radius: 15px; width: 100%; font-weight: 900; 
+            cursor: pointer; margin-top: 20px; box-shadow: 0 5px 0 #c2185b;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="rules-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 style="text-align:center; color:var(--forest-green); font-size: 2em; margin-top:0;">📜 Agent Manual</h2>
+            <p><b>1. Read:</b> Look at the picture and read the story bubble.</p>
+            <p><b>2. Unlock:</b> You must answer the English question correctly to open the path.</p>
+            <p><b>3. Choose:</b> Once unlocked, pick a direction to travel across the map.</p>
+            <p><b>4. Goal:</b> Reach the Castle at the end to win your Master Certificate!</p>
+            <hr>
+            <p style="font-size: 0.9em; color: #7f8c8d;"><i>Tip: Click the 🔊 to hear the story. Questions are random every time!</i></p>
+            <button class="modal-close" onclick="toggleRules()">I'M READY!</button>
+        </div>
+    </div>
+
+    <div id="world-map">
+        <div id="agent-pin" style="left: 6%;">📍</div>
+        <div class="map-region"><div class="region-icon">🏡</div><div class="region-name">Home</div></div>
+        <div class="map-region"><div class="region-icon">🚵</div><div class="region-name">Trail</div></div>
+        <div class="map-region"><div class="region-icon">🚀</div><div class="region-name">Space</div></div>
+        <div class="map-region"><div class="region-icon">🌊</div><div class="region-name">River</div></div>
+        <div class="map-region"><div class="region-icon">🏙️</div><div class="region-name">City</div></div>
+        <div class="map-region"><div class="region-icon">🏰</div><div class="region-name">End</div></div>
+    </div>
+
+    <div id="game-container">
+        <div class="hud">
+            <button class="help-btn" onclick="toggleRules()">❓ How to Play</button>
+            <div class="stat-badge">⭐ Stars: <span id="stars">0</span></div>
+            <div class="stat-badge">Quest: <span id="q-count">1</span></div>
+        </div>
+
+        <div id="game-screen">
+            <span class="scene-emoji" id="emoji">🏡</span>
+            <div class="story-bubble" id="story-text">Loading adventure...</div>
+            
+            <div id="challenge-area" class="challenge-card">
+                <p id="question" style="font-weight: 900; margin-bottom: 20px; font-size: 1.2em;"></p>
+                <div class="btn-grid" id="options"></div>
+                <div id="feedback" class="feedback"></div>
+            </div>
+
+            <div id="choice-area" class="hidden">
+                <div class="btn-grid" id="choices"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let stars = 0;
+        let questCounter = 1;
+        let usedQuestions = [];
+
+        // --- CORRECTED A1+ RANDOM QUESTION POOL ---
+        const questionPool = [
+            {q: "I ___ got a blue mountain bike.", opts: ["have", "has", "am"], a: 0},
+            {q: "There ___ a rocket on the launchpad.", opts: ["is", "are", "am"], a: 0},
+            {q: "Look! The astronauts ___ jumping.", opts: ["is", "are", "am"], a: 1},
+            {q: "The cat is sleeping ___ the chair.", opts: ["under", "between", "on"], a: 0},
+            {q: "One mouse, two ___.", opts: ["mouses", "mice", "mices"], a: 1},
+            {q: "A rocket is ___ than a plane.", opts: ["fast", "faster", "fastest"], a: 1},
+            {q: "She ___ to the Moon every year.", opts: ["go", "goes", "going"], a: 1},
+            {q: "Can you fly? No, I ___.", opts: ["can", "can't", "don't"], a: 1},
+            {q: "This is ___ favorite map.", opts: ["my", "me", "I"], a: 0},
+            {q: "I am ___ a book about NASA now.", opts: ["read", "reading", "reads"], a: 1},
+            {q: "NASA ___ many smart robots.", opts: ["has", "have", "is"], a: 0},
+            {q: "The mountain is very ___.", opts: ["high", "tallest", "higher"], a: 0},
+            {q: "I wake up ___ 7 o'clock.", opts: ["in", "at", "on"], a: 1},
+            {q: "They ___ happy today.", opts: ["is", "are", "am"], a: 1},
+            {q: "The sun is ___ than the Moon.", opts: ["hotter", "hot", "hottest"], a: 0},
+            {q: "He ___ speak three languages.", opts: ["can", "is", "has"], a: 0},
+            {q: "I eat ___ apple every day.", opts: ["a", "an", "the"], a: 1},
+            {q: "The ball is ___ the two boxes.", opts: ["on", "between", "under"], a: 1},
+            {q: "We ___ got a new car.", opts: ["has", "have", "are"], a: 1},
+            {q: "How ___ you? I am fine.", opts: ["are", "is", "am"], a: 0}
+        ];
+
+        // --- BRANCHING NARRATIVE (ALL PATHS WORK) ---
+        const world = {
+            start: {
+                emoji: "🏡", text: "You are at home. You want a big adventure! Will you go to the mountains or fly to Space?",
+                mapPos: "6%", paths: [{l: "Alpine Trail", n: "trail"}, {l: "Space Center", n: "nasa"}]
+            },
+            trail: {
+                emoji: "🚵", text: "You are on your mountain bike. The trail is between high trees. Where next?",
+                mapPos: "22%", paths: [{l: "Deep Forest", n: "forest"}, {l: "The River", n: "river"}]
+            },
+            nasa: {
+                emoji: "🚀", text: "NASA is busy. A rocket is ready. Do you want to join the mission?",
+                mapPos: "38%", paths: [{l: "Fly to the Moon", n: "moon"}, {l: "Fix the Robot", n: "robot"}]
+            },
+            forest: {
+                emoji: "🌲", text: "The forest is dark. You see a bear sleeping. Walk past it to the Peak?",
+                mapPos: "25%", paths: [{l: "Mountain Peak", n: "peak"}, {l: "Go to River", n: "river"}]
+            },
+            river: {
+                emoji: "🌊", text: "The water is cold and blue. You see a small boat. Go to the City?",
+                mapPos: "55%", paths: [{l: "Go to City", n: "city"}, {l: "Go back Home", n: "start"}]
+            },
+            moon: {
+                emoji: "🌕", text: "The Moon is quiet. You are wearing a white space suit. Explore craters?",
+                mapPos: "42%", paths: [{l: "Go to City", n: "city"}, {l: "Return to Earth", n: "start"}]
+            },
+            robot: {
+                emoji: "🤖", text: "The robot has got three arms. It is very fast! Where to now?",
+                mapPos: "42%", paths: [{l: "Space Station", n: "nasa"}, {l: "Go to City", n: "city"}]
+            },
+            peak: {
+                emoji: "❄️", text: "Brrr! It is snowing at the peak. You can see the whole world.",
+                mapPos: "28%", paths: [{l: "Sky City", n: "city"}, {l: "The Castle", n: "castle"}]
+            },
+            city: {
+                emoji: "🏙️", text: "The City has tall buildings. Will you visit the Library or the Castle?",
+                mapPos: "75%", paths: [{l: "The Library", n: "library"}, {l: "The Castle", n: "castle"}]
+            },
+            library: {
+                emoji: "📚", text: "The Library is quiet. Pick a story or go to the Castle?",
+                mapPos: "75%", paths: [{l: "The Castle", n: "castle"}, {l: "Go back Home", n: "start"}]
+            },
+            castle: {
+                emoji: "🏰", text: "You made it! The King and Queen say: 'You are an English Hero!'",
+                mapPos: "92%", paths: [{l: "New Adventure", n: "start"}]
+            }
+        };
+
+        function toggleRules() {
+            const m = document.getElementById('rules-modal');
+            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const m = new SpeechSynthesisUtterance(text);
+            m.lang = 'en-US';
+            window.speechSynthesis.speak(m);
+        }
+
+        function loadNode(nodeID) {
+            const node = world[nodeID];
+            document.getElementById('agent-pin').style.left = node.mapPos;
+            document.getElementById('emoji').innerText = node.emoji;
+            document.getElementById('story-text').innerHTML = node.text + ` <span style="cursor:pointer" onclick="speak('${node.text}')">🔊</span>`;
+            document.getElementById('q-count').innerText = questCounter;
+            
+            document.getElementById('challenge-area').classList.remove('hidden');
+            document.getElementById('choice-area').classList.add('hidden');
+            document.getElementById('feedback').innerText = "";
+
+            const q = questionPool[Math.floor(Math.random() * questionPool.length)];
+            document.getElementById('question').innerText = q.q;
+
+            const optGrid = document.getElementById('options');
+            optGrid.innerHTML = "";
+            q.opts.forEach((opt, idx) => {
+                const b = document.createElement('button');
+                b.className = "opt-btn";
+                b.innerText = opt;
+                b.onclick = () => {
+                    if (idx === q.a) {
+                        stars++; questCounter++;
+                        document.getElementById('stars').innerText = stars;
+                        document.getElementById('feedback').innerText = "✅ Correct! Path Unlocked.";
+                        document.getElementById('feedback').style.color = "var(--forest-green)";
+                        showChoices(node.paths);
+                    } else {
+                        document.getElementById('feedback').innerText = "❌ Oops! Try again.";
+                        document.getElementById('feedback').style.color = "var(--berry-pink)";
+                    }
+                };
+                optGrid.appendChild(b);
+            });
+        }
+
+        function showChoices(paths) {
+            document.getElementById('challenge-area').classList.add('hidden');
+            const area = document.getElementById('choice-area');
+            const grid = document.getElementById('choices');
+            area.classList.remove('hidden');
+            grid.innerHTML = "";
+            paths.forEach(p => {
+                const b = document.createElement('button');
+                b.className = "choice-btn";
+                b.innerText = p.l;
+                b.onclick = () => loadNode(p.n);
+                grid.appendChild(b);
+            });
+        }
+
+        loadNode('start');
+    </script>
+</body>
+</html>
