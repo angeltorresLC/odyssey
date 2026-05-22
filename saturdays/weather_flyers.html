@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A2 Storm Chasers: Race to the Radar</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@700;800;900&display=swap');
+
+        :root {
+            --sky-blue: #0284c7;
+            --cloud-white: #ffffff;
+            --text-dark: #0f172a;
+            --sun-yellow: #facc15;
+            --storm-gray: #475569;
+            --grass-green: #10b981;
+            --alert-red: #ef4444;
+            --border-dark: #1e293b;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: #f1f5f9;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-image: 
+                linear-gradient(180deg, rgba(2, 132, 199, 0.7) 0%, rgba(15, 23, 42, 0.8) 100%), 
+                url('https://images.unsplash.com/photo-1516912481808-3406841bd33c?q=80&w=2000&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 40px;
+            border-radius: 24px;
+            border: 3px solid var(--sky-blue);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        h1 {
+            font-family: 'Nunito', sans-serif;
+            color: var(--sky-blue);
+            text-shadow: 0 3px 0 #bae6fd;
+            margin: 0;
+            font-size: 2.6rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            color: var(--storm-gray);
+            margin: 5px 0 0 0;
+            font-size: 1.1rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-weight: 800;
+        }
+
+        /* --- GLOSSARY SECTION --- */
+        #glossary-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 35px;
+            border-radius: 28px;
+            border: 4px solid var(--border-dark);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            margin-top: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .glossary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+
+        .vocab-card {
+            background: #f8fafc;
+            border: 2px solid #cbd5e1;
+            border-radius: 16px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .vocab-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--sky-blue);
+            background: #f0f9ff;
+        }
+        .vocab-word { font-size: 1.3rem; font-weight: 700; color: #0284c7; display: flex; align-items: center; gap: 8px; }
+        .vocab-def { font-size: 0.95rem; color: #334155; line-height: 1.4; }
+        .vocab-ex { font-size: 0.85rem; color: #64748b; font-style: italic; margin-top: 5px;}
+
+        /* --- SETUP SECTION --- */
+        #setup-container {
+            display: none;
+            background: var(--cloud-white);
+            padding: 35px;
+            border-radius: 28px;
+            border: 4px solid var(--border-dark);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .input-group { margin: 18px 0; text-align: left; }
+        label { display: block; font-weight: 700; margin-bottom: 6px; color: var(--border-dark); }
+        input[type="text"], select {
+            width: 100%; padding: 14px; border-radius: 14px; border: 2px solid #cbd5e1;
+            font-size: 1rem; font-family: 'Fredoka', sans-serif; box-sizing: border-box; outline: none; background: #f8fafc;
+        }
+
+        .btn {
+            background: var(--sun-yellow); color: #4a3b00; border: 3px solid var(--border-dark);
+            padding: 14px 32px; font-weight: 700; font-size: 1.25rem; border-radius: 20px;
+            cursor: pointer; text-transform: uppercase; transition: all 0.15s ease;
+            box-shadow: 0 6px 0px var(--border-dark);
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 0px var(--border-dark); }
+        .btn:active { transform: translateY(4px); box-shadow: 0 2px 0px var(--border-dark); }
+        .btn-primary { background: var(--sky-blue); color: #ffffff; width: 100%; font-size: 1.4rem; padding: 18px; }
+
+        /* --- GAME BOARD --- */
+        #game-container {
+            display: none; width: 100%; max-width: 1450px;
+            grid-template-columns: 2.3fr 1fr; gap: 25px; margin-top: 10px;
+        }
+
+        #board-wrapper {
+            background: rgba(15, 23, 42, 0.85); border: 4px solid #475569;
+            border-radius: 36px; padding: 25px; box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+            backdrop-filter: blur(15px);
+        }
+
+        #board-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 14px; }
+
+        .cell {
+            border: 2px solid rgba(255,255,255,0.2); border-radius: 16px; height: 135px; position: relative;
+            display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+            padding: 7px; box-sizing: border-box; overflow: hidden; background-color: #1e293b;
+            box-shadow: inset 0 -5px 0 rgba(0,0,0,0.2);
+        }
+
+        .sky-row-5 { background: #334155; } .sky-row-4 { background: #1e293b; }
+        .sky-row-3 { background: #0f172a; } .sky-row-2 { background: #0284c7; }
+        .sky-row-1 { background: #0369a1; } .sky-row-0 { background: #075985; }
+
+        .cell-num {
+            font-size: 0.85rem; font-weight: 800; color: #ffffff; align-self: flex-start;
+            background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 8px;
+            position: relative; z-index: 2; box-shadow: 0 2px 0 rgba(0,0,0,0.4);
+        }
+
+        .cell-type {
+            font-size: 0.75rem; font-weight: 800; text-transform: uppercase; text-align: center;
+            line-height: 1.2; color: #ffffff; position: relative; z-index: 2; text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .cell-start { background: var(--grass-green) !important; border-color: #059669 !important; }
+        .cell-finish { background: var(--sun-yellow) !important; border-color: #ca8a04 !important; }
+        .cell-boost { background: #0284c7 !important; border-color: #38bdf8 !important; }
+        .cell-hazard { background: var(--alert-red) !important; border-color: #b91c1c !important; }
+
+        .dir-arrow { font-size: 0.9rem; font-weight: 900; color: rgba(255,255,255,0.3); position: relative; z-index: 2; align-self: flex-end; }
+        .dir-arrow.turn-up { color: #facc15; font-size: 1rem; }
+        .cell-icon { font-size: 1.8rem; line-height: 1; position: relative; z-index: 2; filter: drop-shadow(0 4px 2px rgba(0,0,0,0.4)); }
+
+        .token-holder { display: flex; gap: 4px; justify-content: center; align-items: center; width: 100%; min-height: 52px; position: relative; z-index: 2; }
+        .player-token { font-size: 3.5rem; animation: float 2.5s ease-in-out infinite alternate; filter: drop-shadow(0 6px 4px rgba(0,0,0,0.5)); user-select: none; }
+
+        #controls-panel { display: flex; flex-direction: column; gap: 20px; }
+        .card { background: var(--cloud-white); border: 4px solid var(--border-dark); border-radius: 28px; padding: 24px; box-shadow: 0 15px 30px rgba(0,0,0,0.3); }
+        .active-player-banner { font-size: 1.45rem; font-weight: 700; margin-bottom: 18px; padding: 14px; border-radius: 16px; border: 3px solid var(--border-dark); text-align: center;}
+        
+        .scene { width: 90px; height: 90px; perspective: 300px; margin: 20px auto 15px auto; }
+        .cube { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 1s cubic-bezier(0.2, 0.8, 0.3, 1); }
+        @keyframes cubeTumble { 0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); } 100% { transform: rotateX(720deg) rotateY(1440deg) rotateZ(360deg); } }
+        .tumbling { animation: cubeTumble 1s linear infinite; }
+
+        .cube-face {
+            position: absolute; width: 90px; height: 90px; background: #ffffff; border: 3px solid var(--border-dark);
+            border-radius: 18px; display: flex; justify-content: center; align-items: center; font-size: 2.6rem;
+            font-weight: 700; color: var(--text-dark); box-shadow: inset 0 -4px 0 rgba(0,0,0,0.1); box-sizing: border-box;
+        }
+        .face-1 { transform: rotateY(0deg) translateZ(45px); color: #ef4444;} .face-6 { transform: rotateY(180deg) translateZ(45px); color: #3b82f6;}
+        .face-2 { transform: rotateY(90deg) translateZ(45px); color: #10b981;} .face-5 { transform: rotateY(-90deg) translateZ(45px); color: #a855f7;}
+        .face-3 { transform: rotateX(90deg) translateZ(45px); color: #f97316;} .face-4 { transform: rotateX(-90deg) translateZ(45px); color: #eab308;}
+
+        .roll-badge { background: #f1f5f9; color: #475569; padding: 8px 16px; border-radius: 12px; font-size: 0.95rem; font-weight: 800; letter-spacing: 1px; display: inline-block; margin-bottom: 15px; border: 2px solid #cbd5e1; }
+
+        /* --- MODALS --- */
+        #question-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
+        .modal-task-box { background: #ffffff; border: 6px solid var(--sky-blue); border-radius: 36px; padding: 40px; max-width: 680px; width: 90%; box-shadow: 0 25px 50px rgba(0,0,0,0.8); text-align: center; animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes modalPop { 0% { transform: scale(0.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        #task-question { font-size: 1.5rem; line-height: 1.6; margin-bottom: 25px; font-weight: 700; color: #1e293b; background: #f0f9ff; padding: 22px; border-radius: 22px; border: 2px solid #bae6fd; }
+        .options-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px; }
+        .option-btn { background: #ffffff; border: 2px solid #cbd5e1; padding: 16px 22px; border-radius: 16px; cursor: pointer; font-family: 'Fredoka', sans-serif; font-size: 1.2rem; font-weight: 700; text-align: left; transition: all 0.15s ease; color: var(--text-dark); box-shadow: 0 4px 0px #cbd5e1; }
+        .option-btn:hover { border-color: var(--sky-blue); background: #f0f9ff; transform: translateX(5px); box-shadow: 0 4px 0px var(--sky-blue); }
+        #text-input-area { display: none; margin-bottom: 15px; }
+        #blank-input { width: 100%; padding: 16px; border-radius: 16px; border: 3px solid #cbd5e1; font-size: 1.25rem; font-family: 'Fredoka', sans-serif; outline: none; box-sizing: border-box; text-align: center; }
+
+        #log-card { max-height: 140px; overflow-y: auto; font-size: 0.95rem; background: #f8fafc; border-radius: 14px; padding: 12px; border: 2px solid #e2e8f0; text-align: left;}
+        .log-entry { padding: 6px 0; border-bottom: 1px dashed #e2e8f0; font-weight: 600; color: #334155;}
+        
+        .author-sig { font-size: 0.85rem; color: #94a3b8; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; margin-bottom: 12px;}
+
+        @keyframes float { 0% { transform: translateY(0px); } 100% { transform: translateY(-7px); } }
+
+        #popup-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 99999; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
+        .popup-content { background: white; padding: 35px; border-radius: 32px; border: 4px solid var(--border-dark); text-align: center; max-width: 480px; width: 90%; box-shadow: 0 30px 60px rgba(0,0,0,0.6); }
+        #popup-title { font-family: 'Nunito', sans-serif; font-size: 2rem; margin-top: 0; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🌪️ Storm Chasers</h1>
+        <div class="subtitle">A2 Flyers: Meteorological Mission</div>
+    </header>
+
+    <div id="glossary-container">
+        <h2 style="margin-top:0; color:var(--sky-blue); text-align:center; font-family:'Nunito', sans-serif; font-size:2rem;">📚 A2 Flyers Weather Database</h2>
+        <p style="text-align:center; color:#64748b; font-weight:600; margin-bottom:10px;">Review the target vocabulary and grammar forms before launch.</p>
+        
+        <div class="glossary-grid">
+            <div class="vocab-card"><div class="vocab-word">🥶 Freezing</div><div class="vocab-def">Extremely cold; turning to ice.</div><div class="vocab-ex">It's freezing outside, isn't it?</div></div>
+            <div class="vocab-card"><div class="vocab-word">🌫️ Fog</div><div class="vocab-def">Thick cloud close to the ground.</div><div class="vocab-ex">It was hard to see the road in the fog.</div></div>
+            <div class="vocab-card"><div class="vocab-word">⛈️ Thunderstorm</div><div class="vocab-def">A heavy storm with thunder and lightning.</div><div class="vocab-ex">The thunderstorm which hit us was loud.</div></div>
+            <div class="vocab-card"><div class="vocab-word">🌧️ Pouring</div><div class="vocab-def">Raining very heavily.</div><div class="vocab-ex">It started pouring while we were walking.</div></div>
+            <div class="vocab-card"><div class="vocab-word">🌡️ Temperature</div><div class="vocab-def">Measurement of how hot or cold it is.</div><div class="vocab-ex">The temperature is dropping quickly.</div></div>
+            <div class="vocab-card"><div class="vocab-word">⚡ Lightning</div><div class="vocab-def">A flash of bright electrical light in the sky.</div><div class="vocab-ex">Look at that bright flash of lightning!</div></div>
+            <div class="vocab-card"><div class="vocab-word">🌤️ Clear up</div><div class="vocab-def">When clouds go away and the sky is sunny.</div><div class="vocab-ex">I hope the weather will clear up soon.</div></div>
+            <div class="vocab-card"><div class="vocab-word">📺 Forecast</div><div class="vocab-def">A prediction of future weather.</div><div class="vocab-ex">The forecast says it will rain tomorrow.</div></div>
+        </div>
+
+        <button class="btn btn-primary" onclick="proceedToSetup()">Acknowledge Briefing & Proceed 🚀</button>
+        <div style="text-align:center; margin-top:15px;" class="author-sig">Designed by Angel Torres</div>
+    </div>
+
+    <div id="setup-container">
+        <h3 style="margin-top:0; font-size:1.5rem; color:var(--text-dark);">✈️ Assemble Flight Crew</h3>
+        <div class="input-group">
+            <label for="player-count">How many navigators are flying?</label>
+            <select id="player-count" onchange="adjustPlayerSetupInputs()">
+                <option value="1">1 Navigator</option>
+                <option value="2" selected>2 Navigators</option>
+                <option value="3">3 Navigators</option>
+            </select>
+        </div>
+        
+        <div id="player-names-inputs"></div>
+
+        <button class="btn" style="width:100%; margin-top:20px;" onclick="launchExpedition()">Launch Mission 📡</button>
+        <div style="text-align:center; margin-top:15px;" class="author-sig">Designed by Angel Torres</div>
+    </div>
+
+    <div id="game-container">
+        <div id="board-wrapper">
+            <div id="board-grid"></div>
+        </div>
+
+        <div id="controls-panel">
+            <div class="card" style="text-align:center;">
+                <div id="active-player-indicator" class="active-player-banner">Calibrating...</div>
+                
+                <div class="scene">
+                    <div class="cube" id="cube-die">
+                        <div class="cube-face face-1">1</div><div class="cube-face face-6">6</div>
+                        <div class="cube-face face-2">2</div><div class="cube-face face-5">5</div>
+                        <div class="cube-face face-3">3</div><div class="cube-face face-4">4</div>
+                    </div>
+                </div>
+
+                <div class="roll-badge" id="live-roll-readout">SYSTEM READY 🎲</div><br>
+                <button class="btn" id="roll-btn" onclick="executeDieRollAction()">Roll Die 🎲</button>
+            </div>
+
+            <div class="card">
+                <h4 style="margin:0 0 2px 0; text-transform:uppercase; color:#64748b; letter-spacing:0.5px;">📋 Radar Logs</h4>
+                <div class="author-sig">Designed by Angel Torres</div>
+                <div id="log-card">
+                    <div class="log-entry">Waiting for navigators to clear the runway...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="question-modal">
+        <div class="modal-task-box">
+            <h3 style="margin-top:0; color:var(--sky-blue); font-family:'Nunito',sans-serif; font-size:1.8rem; display:flex; align-items:center; justify-content:center; gap:10px;">📡 Weather Data Incoming!</h3>
+            <div id="task-question">Loading grammar check...</div>
+            
+            <div class="options-grid" id="multiple-choice-box"></div>
+            
+            <div id="text-input-area">
+                <input type="text" id="blank-input" placeholder="Type your answer here...">
+                <button class="btn" id="text-submit-btn" style="margin-top:18px; width:100%;" onclick="verifyTextInputAnswer()">Submit Verification</button>
+            </div>
+
+            <div id="hint-text" style="font-size:0.95rem; color:#64748b; font-style:italic; margin-top:15px; background:#f1f5f9; padding:10px; border-radius:12px;"></div>
+        </div>
+    </div>
+
+    <div id="popup-modal">
+        <div class="popup-content">
+            <h2 id="popup-title">Telemetry Alert</h2>
+            <p id="popup-text" style="font-size:1.2rem; margin:15px 0; font-weight:700; color:#334155;"></p>
+            <button class="btn" onclick="dismissPopupModalNotification()">Acknowledge</button>
+        </div>
+    </div>
+
+<script>
+    // --- INTEGRATED A2 FLYERS GRAMMAR & WEATHER QUESTIONS DATABASE ---
+    const weatherQuestionPool = [
+        { type: "multiple_choice", q: "If it ________ tomorrow, we will stay at home.", o: ["rains", "rain", "rained", "raining"], a: "rains", h: "First Conditional: Use the present simple tense after 'if'." },
+        { type: "multiple_choice", q: "While we were walking to school, it suddenly ________ to pour.", o: ["started", "starting", "start", "starts"], a: "started", h: "Past Continuous interrupted by Past Simple: Use the past tense." },
+        { type: "multiple_choice", q: "It's freezing outside today, ________ it?", o: ["isn't", "doesn't", "wasn't", "aren't"], a: "isn't", h: "Tag Question: If the sentence is positive ('It is'), the tag is negative." },
+        { type: "multiple_choice", q: "It is so hard to see the road because of the thick ________.", o: ["fog", "sun", "ice", "wind"], a: "fog", h: "Vocabulary: A thick cloud that touches the ground." },
+        { type: "multiple_choice", q: "Yesterday was the ________ day of the whole year!", o: ["hottest", "hotter", "hot", "more hot"], a: "hottest", h: "Superlative form: Comparing one day to all the other days in the year." },
+        { type: "multiple_choice", q: "Look at that bright flash of ________ in the sky!", o: ["lightning", "thunder", "rain", "snow"], a: "lightning", h: "Vocabulary: The bright electrical light during a storm." },
+        { type: "multiple_choice", q: "The storm ________ hit the town last night was very strong.", o: ["which", "who", "where", "whose"], a: "which", h: "Relative Clause: Use this word for things/events, not people." },
+        { type: "multiple_choice", q: "The water in the lake is so cold, it is starting to ________.", o: ["freeze", "melt", "boil", "burn"], a: "freeze", h: "Vocabulary: When liquid water turns into solid ice." },
+        { type: "multiple_choice", q: "The rain ________ finally stopped. We can go outside now!", o: ["has", "have", "had", "is"], a: "has", h: "Present Perfect: 'The rain' is singular, so use this helper verb." },
+        { type: "multiple_choice", q: "You can use a ________ to measure the temperature.", o: ["thermometer", "ruler", "clock", "compass"], a: "thermometer", h: "Vocabulary: The instrument used to check how hot or cold it is." },
+        { type: "multiple_choice", q: "Look at those dark clouds! It is ________ to rain very soon.", o: ["going", "go", "goes", "gone"], a: "going", h: "Future form: Use 'to be + _____ to' for predictions with evidence." },
+        { type: "multiple_choice", q: "I hope the weather will ________ up so we can play football.", o: ["clear", "clean", "wash", "look"], a: "clear", h: "Phrasal Verb: When bad weather goes away and it gets sunny." },
+        { type: "multiple_choice", q: "The wind is blowing ________ strongly today.", o: ["extremely", "extreme", "extreming", "extremest"], a: "extremely", h: "Adverb of degree: You need the 'ly' ending to modify 'strongly'." },
+        { type: "multiple_choice", q: "Listen to the loud ________! The storm is very close.", o: ["thunder", "lightning", "cloud", "fog"], a: "thunder", h: "Vocabulary: The loud sound you hear during a storm." },
+        { type: "multiple_choice", q: "We ________ our umbrellas because it was pouring.", o: ["opened", "open", "opening", "opens"], a: "opened", h: "Past Simple: The action happened in the past." },
+        { type: "multiple_choice", q: "It ________ be freezing outside; everyone is wearing huge coats.", o: ["must", "can't", "shouldn't", "wouldn't"], a: "must", h: "Modal of deduction: You are 100% sure because of the evidence." },
+        { type: "multiple_choice", q: "The weather ________ on the TV says it will be sunny tomorrow.", o: ["forecast", "news", "show", "screen"], a: "forecast", h: "Vocabulary: The scientific prediction of the weather." },
+        { type: "multiple_choice", q: "The old trees ________ blown down by the strong hurricane.", o: ["were", "was", "is", "has"], a: "were", h: "Past Passive: 'Trees' is plural, and the action is in the past." },
+        { type: "multiple_choice", q: "You will get completely wet if you ________ take your raincoat.", o: ["don't", "didn't", "won't", "doesn't"], a: "don't", h: "First Conditional: Negative present simple for 'you'." },
+        { type: "multiple_choice", q: "It is ________ heavily outside. We can't go to the park.", o: ["pouring", "dropping", "shining", "blowing"], a: "pouring", h: "Vocabulary: Another word for raining very hard." },
+        { type: "multiple_choice", q: "The weather in winter is much ________ than in autumn.", o: ["worse", "bad", "worst", "baddest"], a: "worse", h: "Comparative form: The irregular comparative of 'bad'." },
+        { type: "multiple_choice", q: "We are ________ to the beach tomorrow if it is sunny.", o: ["driving", "drive", "drives", "drove"], a: "driving", h: "Present Continuous for future plans: 'We are + verb-ing'." },
+        { type: "multiple_choice", q: "Be careful, there is ________ on the road. It is very slippery.", o: ["ice", "fog", "wind", "cloud"], a: "ice", h: "Vocabulary: Frozen water on the ground." },
+        { type: "multiple_choice", q: "________ the weather like in London today?", o: ["What's", "How's", "Who's", "Which is"], a: "What's", h: "Grammar form: Asking for a description of the weather." },
+        { type: "multiple_choice", q: "It is ________ windy to use an umbrella. It will break!", o: ["too", "enough", "very", "much"], a: "too", h: "Grammar: Meaning 'more than what is good or needed'." }
+    ];
+
+    // --- AUDIO ENGINE ---
+    let audioCtx = null;
+    function initAudioEngine() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+
+    function playSoundSynthEffect(type) {
+        if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator(); const gainNode = audioCtx.createGain();
+        osc.connect(gainNode); gainNode.connect(audioCtx.destination); const now = audioCtx.currentTime;
+
+        if (type === 'click') {
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(400, now); osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+            gainNode.gain.setValueAtTime(0.15, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.08); osc.start(now); osc.stop(now + 0.08);
+        } else if (type === 'dice') {
+            osc.type = 'square'; osc.frequency.setValueAtTime(160, now); osc.frequency.setValueAtTime(320, now + 0.04);
+            gainNode.gain.setValueAtTime(0.08, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.08); osc.start(now); osc.stop(now + 0.08);
+        } else if (type === 'boost') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(400, now); osc.frequency.exponentialRampToValueAtTime(1200, now + 0.4);
+            gainNode.gain.setValueAtTime(0.15, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.4); osc.start(now); osc.stop(now + 0.4);
+        } else if (type === 'hazard') {
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(100, now + 0.5);
+            gainNode.gain.setValueAtTime(0.15, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.5); osc.start(now); osc.stop(now + 0.5);
+        } else if (type === 'win') {
+            const chords = [523.25, 659.25, 783.99, 1046.50];
+            chords.forEach((freq, index) => {
+                const subOsc = audioCtx.createOscillator(); const subGain = audioCtx.createGain();
+                subOsc.connect(subGain); subGain.connect(audioCtx.destination); subOsc.type = 'sine';
+                subOsc.frequency.setValueAtTime(freq, now + (index * 0.1)); subGain.gain.setValueAtTime(0.15, now + (index * 0.1));
+                subGain.gain.linearRampToValueAtTime(0, now + 0.65); subOsc.start(now + (index * 0.1)); subOsc.stop(now + 0.65);
+            });
+        }
+    }
+
+    // --- GAME STATE VARIABLES ---
+    let gamePlayers = [];
+    let dynamicActiveTurnIndex = 0;
+    let indexCurrentSelectedQuestion = null;
+    let currentTurnRollValue = 0; 
+    let isProcessingAnswer = false; 
+
+    const boosterCellsMap = { 4: 2, 11: 3, 21: 2, 32: 3 };  
+    const hazardCellsMap = { 8: 2, 17: 3, 26: 2, 37: 4 };   
+
+    // --- FLOW CONTROLS ---
+    function proceedToSetup() {
+        document.getElementById('glossary-container').style.display = 'none';
+        document.getElementById('setup-container').style.display = 'block';
+        adjustPlayerSetupInputs();
+    }
+
+    function adjustPlayerSetupInputs() {
+        const count = parseInt(document.getElementById("player-count").value);
+        const container = document.getElementById("player-names-inputs");
+        container.innerHTML = "";
+        const tokens = ["🛩️", "🚁", "🛰️"];
+        const colors = ["#ef4444", "#3b82f6", "#eab308"];
+
+        for (let idx = 1; idx <= count; idx++) {
+            container.innerHTML += `
+                <div class="input-group" style="border-left: 5px solid ${colors[idx-1]}; padding-left: 10px;">
+                    <label>Pilot ${idx} Name ${tokens[idx-1]}:</label>
+                    <input type="text" id="player-name-${idx}" value="Pilot ${idx}" maxlength="12">
+                </div>
+            `;
+        }
+    }
+
+    function launchExpedition() {
+        initAudioEngine();
+        playSoundSynthEffect('click');
+        const count = parseInt(document.getElementById("player-count").value);
+        gamePlayers = [];
+        const tokens = ["🛩️", "🚁", "🛰️"];
+        const bgColors = ["#fee2e2", "#eff6ff", "#fefce8"];
+        const colors = ["#ef4444", "#3b82f6", "#eab308"];
+
+        for (let i = 1; i <= count; i++) {
+            const registeredValue = document.getElementById(`player-name-${i}`).value.trim();
+            gamePlayers.push({
+                id: i, name: registeredValue || `Pilot ${i}`, cell: 1,
+                token: tokens[i - 1], color: colors[i - 1], bg: bgColors[i - 1]
+            });
+        }
+
+        document.getElementById("setup-container").style.display = "none";
+        document.getElementById("game-container").style.display = "grid";
+        generateVisualBoardCells();
+        updateActiveTurnInterfaceDisplay();
+        addLogEntry("📡 Radar is clear! Navigators are authorized for takeoff.");
+    }
+
+    function generateVisualBoardCells() {
+        const gridElement = document.getElementById("board-grid");
+        gridElement.innerHTML = "";
+        const columnsCount = 7;
+        const totalRowsCount = 6;
+
+        const weatherIcons = {
+            1:'🛩️', 2:'☁️', 3:'🌤️', 4:'💨', 5:'🌧️', 6:'🌦️', 7:'⛅',
+            8:'⛈️', 9:'☁️', 10:'☀️', 11:'💨', 12:'🌧️', 13:'⛅', 14:'🌤️',
+            15:'☀️', 16:'❄️', 17:'⚡', 18:'☁️', 19:'🌦️', 20:'☀️', 21:'💨',
+            22:'🌧️', 23:'⛅', 24:'🌤️', 25:'☔', 26:'⛈️', 27:'☀️', 28:'☁️',
+            29:'❄️', 30:'🌤️', 31:'⛅', 32:'💨', 33:'🌧️', 34:'☀️', 35:'🌦️',
+            36:'☁️', 37:'🌪️', 38:'🌤️', 39:'☀️', 40:'⛅', 41:'🌧️', 42:'🌈'
+        };
+
+        for (let rowIdx = 0; rowIdx < totalRowsCount; rowIdx++) {
+            let rowVal = (totalRowsCount - 1) - rowIdx;
+            let startBase = rowVal * columnsCount + 1;
+            let isEvenRow = (rowVal % 2 === 0);
+            let rowCells = [];
+            for (let c = 0; c < columnsCount; c++) rowCells.push(startBase + c);
+            if (!isEvenRow) rowCells.reverse();
+
+            rowCells.forEach((cellNum, colIndex) => {
+                let arrowHTML = '';
+                if (cellNum === 42) { arrowHTML = `<span class="dir-arrow turn-up">🏁</span>`; }
+                else if (isEvenRow) { arrowHTML = (colIndex === columnsCount - 1) ? `<span class="dir-arrow turn-up">⬆</span>` : `<span class="dir-arrow">→</span>`; }
+                else { arrowHTML = (colIndex === 0 && rowIdx !== 0) ? `<span class="dir-arrow turn-up">⬆</span>` : `<span class="dir-arrow">←</span>`; }
+
+                let classCategory = ""; let specialLabel = "";
+                if (cellNum === 1)                   { classCategory = "cell-start";  specialLabel = "BASE"; }
+                else if (cellNum === 42)             { classCategory = "cell-finish"; specialLabel = "TARGET"; }
+                else if (boosterCellsMap[cellNum])   { classCategory = "cell-boost";  specialLabel = `JETSTREAM +${boosterCellsMap[cellNum]}`; }
+                else if (hazardCellsMap[cellNum])    { classCategory = "cell-hazard"; specialLabel = `TURBULENCE -${hazardCellsMap[cellNum]}`; }
+
+                const icon = weatherIcons[cellNum] || '☁️';
+                const skyClass = `sky-row-${rowIdx}`;
+
+                gridElement.innerHTML += `
+                    <div class="cell ${skyClass} ${classCategory}" id="board-cell-${cellNum}">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;position:relative;z-index:2;">
+                            <div class="cell-num">${String(cellNum).padStart(2,'0')}</div>
+                            ${arrowHTML}
+                        </div>
+                        <div class="cell-icon">${icon}</div>
+                        <div class="token-holder" id="token-zone-${cellNum}"></div>
+                        <div class="cell-type">${specialLabel}</div>
+                    </div>
+                `;
+            });
+        }
+        repositionPlayerTokensOnBoard();
+    }
+
+    function repositionPlayerTokensOnBoard() {
+        for (let i = 1; i <= 42; i++) {
+            const el = document.getElementById(`token-zone-${i}`);
+            if (el) el.innerHTML = "";
+        }
+        gamePlayers.forEach(p => {
+            const cellTarget = document.getElementById(`token-zone-${p.cell}`);
+            if (cellTarget) cellTarget.innerHTML += `<span class="player-token" style="color:${p.color};" title="${p.name}">${p.token}</span>`;
+        });
+    }
+
+    function updateActiveTurnInterfaceDisplay() {
+        const currentActiveShip = gamePlayers[dynamicActiveTurnIndex];
+        const indicator = document.getElementById("active-player-indicator");
+        indicator.innerText = `Turn: ${currentActiveShip.name} ${currentActiveShip.token}`;
+        indicator.style.backgroundColor = currentActiveShip.bg;
+        indicator.style.borderColor = currentActiveShip.color;
+        indicator.style.color = "#0f172a"; 
+        document.getElementById("roll-btn").disabled = false;
+        document.getElementById("live-roll-readout").innerText = "SYSTEM READY 🎲";
+        document.getElementById("live-roll-readout").style.color = "#475569";
+        document.getElementById("live-roll-readout").style.backgroundColor = "#f1f5f9";
+        document.getElementById("live-roll-readout").style.borderColor = "#cbd5e1";
+        document.getElementById("question-modal").style.display = "none";
+        isProcessingAnswer = false; 
+    }
+
+    function executeDieRollAction() {
+        playSoundSynthEffect('click');
+        document.getElementById("roll-btn").disabled = true;
+        const cube = document.getElementById("cube-die");
+        cube.className = "cube tumbling"; 
+        document.getElementById("live-roll-readout").innerText = "CALCULATING...";
+
+        const finalDiceRoll = Math.floor(Math.random() * 6) + 1;
+        let sfxTimer = setInterval(() => { playSoundSynthEffect('dice'); }, 120);
+
+        setTimeout(() => {
+            clearInterval(sfxTimer);
+            cube.className = "cube"; 
+            const preciseRotations = {
+                1: "rotateX(0deg) rotateY(0deg)", 6: "rotateX(180deg) rotateY(0deg)",
+                2: "rotateX(0deg) rotateY(-90deg)", 5: "rotateX(0deg) rotateY(90deg)",
+                3: "rotateX(-90deg) rotateY(0deg)", 4: "rotateX(90deg) rotateY(0deg)"
+            };
+            cube.style.transform = preciseRotations[finalDiceRoll];
+            document.getElementById("live-roll-readout").innerText = `ROLLED A: ${finalDiceRoll}`;
+            document.getElementById("live-roll-readout").style.backgroundColor = "var(--sun-yellow)";
+            document.getElementById("live-roll-readout").style.color = "#000";
+            document.getElementById("live-roll-readout").style.borderColor = "#ca8a04";
+
+            processPlayerMovementCalculation(finalDiceRoll);
+        }, 1000);
+    }
+
+    function processPlayerMovementCalculation(rolledAmount) {
+        currentTurnRollValue = rolledAmount;
+        const activeShip = gamePlayers[dynamicActiveTurnIndex];
+        addLogEntry(`📡 ${activeShip.name} rolled a ${rolledAmount}. Decoding transmission...`);
+        setTimeout(triggerMissionQuestionChallenge, 500);
+    }
+
+    function triggerMissionQuestionChallenge() {
+        indexCurrentSelectedQuestion = Math.floor(Math.random() * weatherQuestionPool.length);
+        const taskData = weatherQuestionPool[indexCurrentSelectedQuestion];
+
+        document.getElementById("question-modal").style.display = "flex";
+        document.getElementById("task-question").innerText = taskData.q;
+        document.getElementById("hint-text").innerText = `Hint: ${taskData.h}`;
+        const choiceBox = document.getElementById("multiple-choice-box");
+        const entryFieldArea = document.getElementById("text-input-area");
+        choiceBox.innerHTML = "";
+        document.getElementById("blank-input").value = "";
+        document.getElementById("text-submit-btn").disabled = false;
+
+        if (taskData.type === "multiple_choice") {
+            choiceBox.style.display = "flex"; entryFieldArea.style.display = "none";
+            // Create a copy and shuffle options so the correct answer isn't always visually first
+            let shuffledOptions = [...taskData.o].sort(() => Math.random() - 0.5);
+            shuffledOptions.forEach((opt) => {
+                const choiceBtn = document.createElement("button");
+                choiceBtn.className = "option-btn"; choiceBtn.innerText = `🔹 ${opt}`;
+                choiceBtn.onclick = function() { evaluateAnswerAction(opt); };
+                choiceBox.appendChild(choiceBtn);
+            });
+        } else {
+            choiceBox.style.display = "none"; entryFieldArea.style.display = "block";
+        }
+    }
+
+    function verifyTextInputAnswer() {
+        const studentInput = document.getElementById("blank-input").value.trim();
+        if (!studentInput) return;
+        evaluateAnswerAction(studentInput);
+    }
+
+    function evaluateAnswerAction(submittedText) {
+        if (isProcessingAnswer) return;
+        isProcessingAnswer = true;
+        document.getElementById("text-submit-btn").disabled = true;
+        const optionButtons = document.querySelectorAll(".option-btn");
+        optionButtons.forEach(btn => btn.disabled = true);
+        document.getElementById("question-modal").style.display = "none";
+
+        const activeShip = gamePlayers[dynamicActiveTurnIndex];
+        const taskData = weatherQuestionPool[indexCurrentSelectedQuestion];
+        const isMatchCorrect = submittedText.toLowerCase().trim() === taskData.a.toLowerCase().trim();
+
+        if (isMatchCorrect) {
+            playSoundSynthEffect('boost');
+            let calculatedTargetCell = activeShip.cell + currentTurnRollValue;
+            if (calculatedTargetCell > 42) calculatedTargetCell = 42;
+            activeShip.cell = calculatedTargetCell;
+            repositionPlayerTokensOnBoard();
+            
+            addLogEntry(`✅ Verified! ${activeShip.name} advanced ${currentTurnRollValue} sectors to cell ${activeShip.cell}.`);
+            setTimeout(() => { triggerCellModifierCheck(activeShip); }, 600);
+        } else {
+            playSoundSynthEffect('hazard');
+            addLogEntry(`❌ Error! ${activeShip.name} stalled engine. Remaining at cell ${activeShip.cell}.`);
+            displayNotificationPopup("Transmission Failed 🌧️", `Incorrect! You must hold position at space ${activeShip.cell}.`);
+        }
+    }
+
+    function triggerCellModifierCheck(shipObj) {
+        if (shipObj.cell === 42) { executeGameWinnerFanfare(shipObj); return; }
+
+        if (boosterCellsMap[shipObj.cell]) {
+            playSoundSynthEffect('boost');
+            const spacesForward = boosterCellsMap[shipObj.cell];
+            shipObj.cell += spacesForward;
+            if (shipObj.cell > 42) shipObj.cell = 42;
+            repositionPlayerTokensOnBoard();
+            addLogEntry(`💨 Jetstream engaged! Pushed forward to cell ${shipObj.cell}.`);
+            displayNotificationPopup("Jetstream! 💨", `Caught a high-altitude wind! ${shipObj.name} boosted to space ${shipObj.cell}!`);
+        } 
+        else if (hazardCellsMap[shipObj.cell]) {
+            playSoundSynthEffect('hazard');
+            const spacesBackward = hazardCellsMap[shipObj.cell];
+            shipObj.cell -= spacesBackward;
+            if (shipObj.cell < 1) shipObj.cell = 1;
+            repositionPlayerTokensOnBoard();
+            addLogEntry(`⚡ Turbulence! Knocked back to cell ${shipObj.cell}.`);
+            displayNotificationPopup("Turbulence! ⚡", `Severe weather encountered! ${shipObj.name} knocked back to space ${shipObj.cell}!`);
+        } else {
+            displayNotificationPopup("Position Secured 🌤️", `${shipObj.name} safely anchored at space ${shipObj.cell}.`);
+        }
+
+        if (shipObj.cell === 42) executeGameWinnerFanfare(shipObj);
+    }
+
+    function executeGameWinnerFanfare(winnerShipObj) {
+        playSoundSynthEffect('win');
+        addLogEntry(`🏆 TARGET REACHED! ${winnerShipObj.name} completed the A2 Weather Mission!`);
+        const title = document.getElementById("popup-title");
+        const text = document.getElementById("popup-text");
+        title.innerText = "🌈 MISSION ACCOMPLISHED!";
+        title.style.color = "#ea580c"; 
+        text.innerHTML = `⭐ Outstanding work, <strong>${winnerShipObj.name}</strong>! Your ${winnerShipObj.token} navigated all A2 Flyers grammar challenges perfectly and reached the target first!`;
+        document.getElementById("popup-modal").style.display = "flex";
+        document.getElementById("roll-btn").disabled = true;
+    }
+
+    function displayNotificationPopup(title, msg) {
+        if (gamePlayers[dynamicActiveTurnIndex].cell === 42) return;
+        document.getElementById("popup-title").innerText = title;
+        document.getElementById("popup-text").innerText = msg;
+        document.getElementById("popup-modal").style.display = "flex";
+    }
+
+    function dismissPopupModalNotification() {
+        playSoundSynthEffect('click');
+        document.getElementById("popup-modal").style.display = "none";
+        if (gamePlayers[dynamicActiveTurnIndex].cell === 42) return;
+        dynamicActiveTurnIndex = (dynamicActiveTurnIndex + 1) % gamePlayers.length;
+        updateActiveTurnInterfaceDisplay();
+    }
+
+    function addLogEntry(textString) {
+        const logBox = document.getElementById("log-card");
+        logBox.innerHTML += `<div class="log-entry">${textString}</div>`;
+        logBox.scrollTop = logBox.scrollHeight;
+    }
+</script>
+</body>
+</html>
