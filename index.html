@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mr.Towers | Central Hub</title>
+    <style>
+        :root {
+            --bg: linear-gradient(180deg, #001f3f 0%, #000b1a 100%);
+            --card: rgba(0, 31, 63, 0.85); 
+            --neon-blue: #00d4ff; 
+            --incorrect: #ff8c00;
+        }
+        
+        body { 
+            background: var(--bg); background-attachment: fixed; color: white; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; padding: 20px;
+        }
+
+        /* --- LAYOUT --- */
+        .hub-wrapper { 
+            max-width: 1000px; margin: auto; 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; 
+        }
+        
+        .column { 
+            background: var(--card); padding: 20px; border-radius: 20px; 
+            border: 2px solid rgba(0, 242, 255, 0.3);
+        }
+
+        @media (max-width: 768px) { .hub-wrapper { grid-template-columns: 1fr; } }
+        
+        h1 { text-align: center; color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); font-size: 1.5rem; }
+        
+        #timer-box { 
+            text-align: center; margin-bottom: 20px; font-weight: bold; 
+            font-size: 0.9rem; color: var(--neon-blue);
+        }
+
+        /* --- LINK CARDS --- */
+        .q-card { 
+            background: rgba(255, 255, 255, 0.05); 
+            margin: 15px 0; padding: 15px; border-radius: 12px; 
+            border-left: 5px solid var(--neon-blue);
+            transition: 0.3s;
+        }
+        .q-card:hover { transform: scale(1.02); background: rgba(255, 255, 255, 0.08); }
+        .q-card.warning { border-left-color: var(--incorrect); }
+
+        .btn-submit { 
+            display: block; text-align: center; text-decoration: none;
+            width: 100%; padding: 8px; background: linear-gradient(45deg, #0072ff, #00c6ff); 
+            border-radius: 8px; color: white; font-size: 0.8rem; font-weight: bold;
+            margin-top: 10px; transition: 0.3s;
+        }
+        .btn-submit:hover { filter: brightness(1.2); box-shadow: 0 0 10px var(--neon-blue); }
+    </style>
+</head>
+<body>
+
+    <h1 style="margin-bottom: 5px;">🇬🇧 Geltus Central Hub 👼🏼</h1>
+    <div id="timer-box">DATE: <span id="current-date"></span></div>
+
+    <div class="hub-wrapper">
+        <div class="column">
+            <h1>B1 - B2</h1>
+            <div class="q-card warning">
+                <h3>🗺️ Pathway Alpine B1</h3>
+                <a href="alpine.html" class="btn-submit">View Challenge</a>
+            </div>
+            <div class="q-card">
+                <h3>⛰️ Alpine Odyssey</h3>
+                <a href="adventure_game.html" class="btn-submit">Start Game</a>
+            </div>
+            <div class="q-card">
+                <h3>Alpine Odyssey (girls)</h3>
+                <a href="adventure_game_kawaii.html" class="btn-submit">Start Game</a>
+            </div>
+        </div>
+
+        <div class="column">
+            <h1>IELTS</h1>
+            <div class="q-card warning">
+                <h3>🗺️ Pathway IELTS</h3>
+                <a href="adventure_game_ielts.html" class="btn-submit">View Challenge</a>
+            </div>
+            <div class="q-card">
+                <h3>IELTS Quiz</h3>
+                <a href="ieltsQuiz.html" class="btn-submit">Play Quiz</a>
+            </div>
+            <div class="q-card">
+                <h3>Vocabulary Challenge</h3>
+                <a href="ielts_advanced_responsive.html" class="btn-submit">Do Challenge</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('current-date').innerText = new Date().toLocaleDateString();
+    </script>
+</body>
+</html>
