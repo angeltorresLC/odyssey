@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A1 Movers – Alpine Adventure! 🏔️</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Baloo+2:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Child-Friendly Alpine Palette */
+            --sky-deep:    #0c1a4e;
+            --sky-blue:    #38bdf8;
+            --peak-green:  #16a34a;
+            --snow-white:  #e0f2fe;
+            --sun-yellow:  #fbbf24;
+            --warm-orange: #f97316;
+            --meadow:      #4ade80;
+            --text-light:  #f0f9ff;
+            --correct:     #22c55e;
+            --wrong:       #ef4444;
+            --card-bg:     rgba(12, 26, 78, 0.78);
+            --card-border: rgba(56, 189, 248, 0.35);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            /* Bright sunny alpine meadow background */
+            background: linear-gradient(rgba(12, 26, 78, 0.30), rgba(12, 26, 78, 0.58)),
+                        url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-light);
+            font-family: 'Nunito', sans-serif;
+            margin: 0; padding: 20px;
+        }
+
+        #main-layout {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 1000px) {
+            #main-layout { grid-template-columns: 1fr; }
+            .telemetry-column { position: relative !important; top: 0 !important; margin-bottom: 25px; }
+        }
+
+        #exam-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(14px);
+            border-radius: 20px; padding: 40px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.6);
+            border: 2px solid var(--card-border);
+        }
+
+        /* --- Header --- */
+        .header {
+            text-align: center;
+            border-bottom: 4px solid var(--sun-yellow);
+            padding-bottom: 22px; margin-bottom: 30px;
+        }
+        .header h1 {
+            font-family: 'Baloo 2', cursive;
+            margin: 10px 0; font-size: 2.2rem;
+            color: var(--sun-yellow);
+            text-shadow: 0 3px 8px rgba(0,0,0,0.5);
+            letter-spacing: 1px;
+        }
+        .header p { color: var(--sky-blue); font-weight: 700; font-size: 1.05rem; }
+
+        /* --- Instructions --- */
+        .instructions {
+            background: linear-gradient(to right, rgba(22, 163, 74, 0.25), rgba(12, 26, 78, 0.25));
+            border-left: 6px solid var(--meadow);
+            padding: 20px; border-radius: 12px; margin-bottom: 40px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+        }
+        .instructions h3 { margin-top: 0; color: var(--meadow); font-family: 'Baloo 2', cursive; font-size: 1.2rem; }
+        .instructions ul { margin-bottom: 0; padding-left: 20px; line-height: 1.8; font-size: 1.05rem; }
+
+        /* --- Section Titles --- */
+        .section-title {
+            color: var(--sky-blue); font-size: 1.3rem; font-weight: 900;
+            margin: 40px 0 20px 0; padding-bottom: 10px;
+            border-bottom: 2px solid rgba(56, 189, 248, 0.3);
+            display: flex; align-items: center; gap: 10px;
+            font-family: 'Baloo 2', cursive;
+        }
+        .section-title i { color: var(--sun-yellow); font-size: 1.4rem; }
+
+        /* --- Part 1: Trail Signs --- */
+        .sign-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+        .trail-sign-container {
+            background: rgba(12, 26, 78, 0.65); padding: 20px;
+            border-radius: 16px; border: 1px solid var(--card-border);
+        }
+        .css-sign {
+            background: var(--sun-yellow); color: #1e1b00; font-weight: 900;
+            text-align: center; padding: 15px; border-radius: 12px;
+            border: 4px solid #d97706; margin-bottom: 15px;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.35); font-family: 'Baloo 2', cursive;
+            font-size: 1.05rem;
+        }
+        .css-sign.danger { background: #ef4444; border-color: #b91c1c; color: white; }
+        .css-sign.info   { background: #38bdf8; border-color: #0284c7; color: #0c1a4e; }
+        .css-sign i { font-size: 2.5rem; }
+
+        /* --- Part 3: Vocabulary Cards --- */
+        .gear-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 15px; }
+        .gear-card {
+            background: rgba(12, 26, 78, 0.65); padding: 16px;
+            border-radius: 14px; text-align: center;
+            border: 1px solid var(--card-border);
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .gear-card:hover { transform: translateY(-4px); border-color: var(--meadow); }
+        .gear-card i { font-size: 2.8rem; color: var(--sun-yellow); }
+        .gear-card p  { margin: 0; font-size: 0.95rem; line-height: 1.4; }
+
+        /* --- Inputs --- */
+        select, input[type="text"] {
+            background: #020c2e; color: var(--sky-blue);
+            border: 2px solid var(--peak-green);
+            padding: 8px; border-radius: 8px; font-size: 1rem;
+            width: 100%; box-sizing: border-box;
+            transition: border-color 0.3s;
+            font-family: 'Nunito', sans-serif;
+        }
+        select:focus, input[type="text"]:focus {
+            outline: none; border-color: var(--sun-yellow);
+            box-shadow: 0 0 8px rgba(251, 191, 36, 0.45);
+        }
+        select:disabled, input[type="text"]:disabled {
+            opacity: 0.8; cursor: not-allowed; border-color: rgba(56, 189, 248, 0.25);
+        }
+        .inline-input    { width: 90px  !important; padding: 2px 5px !important; display: inline-block; text-align: center; }
+        .transform-input { width: 140px !important; padding: 2px 5px !important; display: inline-block; text-align: center; }
+
+        .story-text {
+            line-height: 2.4; font-size: 1.1rem;
+            background: rgba(12, 26, 78, 0.6);
+            padding: 20px; border-radius: 14px; text-align: left;
+            border-left: 4px solid var(--sky-blue);
+            display: flex; flex-direction: column; gap: 14px;
+        }
+
+        /* --- Submit Button --- */
+        .btn-submit {
+            width: 100%; padding: 20px;
+            background: linear-gradient(135deg, var(--sun-yellow), #f97316);
+            border: none; border-radius: 12px; color: #1e1b00;
+            font-size: 1.5rem; font-weight: 900; font-family: 'Baloo 2', cursive;
+            cursor: pointer; transition: 0.3s; margin-top: 30px;
+            box-shadow: 0 4px 18px rgba(251, 191, 36, 0.45);
+        }
+        .btn-submit:hover { filter: brightness(1.1); transform: scale(1.01); }
+
+        .feedback { font-weight: bold; margin-left: 6px; font-size: 0.95rem; }
+        .correct-ans { color: var(--correct); }
+        .wrong-ans   { color: var(--wrong); }
+
+        /* --- Security Lock --- */
+        #security-lock {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(12, 26, 78, 0.98); z-index: 10000;
+            flex-direction: column; justify-content: center; align-items: center; text-align: center;
+        }
+        #security-lock button {
+            background: var(--peak-green); color: white; border: none; font-size: 1.2rem;
+            border-radius: 10px; padding: 15px 30px; font-weight: 900;
+            font-family: 'Baloo 2', cursive; cursor: pointer; margin-top: 20px;
+        }
+
+        /* --- Telemetry Panel --- */
+        .telemetry-column { position: sticky; top: 20px; height: max-content; display: flex; flex-direction: column; gap: 20px; }
+        .card {
+            background: rgba(12, 26, 78, 0.88);
+            border: 2px solid var(--card-border);
+            border-radius: 18px; padding: 24px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+            backdrop-filter: blur(12px);
+        }
+        .active-player-banner {
+            font-size: 1.2rem; font-weight: 900; margin-bottom: 18px;
+            padding: 14px; border-radius: 12px;
+            border: 2px solid var(--sky-blue); text-align: center;
+            color: var(--sun-yellow); background: rgba(0,0,0,0.3);
+            font-family: 'Baloo 2', cursive;
+        }
+        .stat-line {
+            display: flex; justify-content: space-between;
+            font-size: 1.05rem; font-weight: 700;
+            margin-bottom: 10px; padding-bottom: 10px;
+            border-bottom: 1px dashed rgba(56, 189, 248, 0.25);
+        }
+        .stat-value { color: var(--sun-yellow); }
+
+        /* --- 3D Cube --- */
+        .scene { width: 90px; height: 90px; perspective: 300px; margin: 20px auto 25px auto; }
+        .cube  { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.3, 1); }
+        @keyframes cubeTumble {
+            0%   { transform: rotateX(0deg)   rotateY(0deg)    rotateZ(0deg); }
+            100% { transform: rotateX(720deg) rotateY(1440deg) rotateZ(360deg); }
+        }
+        .tumbling { animation: cubeTumble 1s linear infinite; }
+
+        .cube-face {
+            position: absolute; width: 90px; height: 90px;
+            background: rgba(12, 26, 78, 0.95);
+            border: 3px solid var(--sky-blue);
+            border-radius: 12px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 3rem; color: var(--sky-blue);
+            box-shadow: inset 0 0 15px rgba(56, 189, 248, 0.25);
+            box-sizing: border-box;
+        }
+        .face-1 { transform: rotateY(0deg)   translateZ(45px); }
+        .face-6 { transform: rotateY(180deg)  translateZ(45px); }
+        .face-2 { transform: rotateY(90deg)   translateZ(45px); }
+        .face-5 { transform: rotateY(-90deg)  translateZ(45px); }
+        .face-3 { transform: rotateX(90deg)   translateZ(45px); }
+        .face-4 { transform: rotateX(-90deg)  translateZ(45px); }
+
+        /* --- Log Box --- */
+        #log-card {
+            max-height: 200px; overflow-y: auto;
+            font-size: 0.9rem; background: rgba(0,0,0,0.4);
+            border-radius: 10px; padding: 12px;
+            border: 1px solid var(--card-border); text-align: left; margin-top: 15px;
+        }
+        .log-entry {
+            padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,0.1);
+            font-weight: 700; color: var(--text-light);
+        }
+
+        /* --- Popup Modal --- */
+        #popup-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(12, 26, 78, 0.92); z-index: 99999;
+            justify-content: center; align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .popup-content {
+            background: var(--sky-deep); padding: 35px; border-radius: 22px;
+            border: 4px solid var(--sun-yellow); text-align: center;
+            max-width: 480px; width: 90%;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6); color: white;
+        }
+        #popup-title {
+            font-size: 2rem; margin-top: 0; color: var(--sun-yellow);
+            text-transform: uppercase; font-family: 'Baloo 2', cursive;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Security Lock Overlay -->
+<div id="security-lock">
+    <i class="fas fa-lock" style="font-size: 4rem; color: var(--wrong); margin-bottom: 20px;"></i>
+    <h1 style="font-family:'Baloo 2',cursive;">QUIZ LOCKED</h1>
+    <p style="color: var(--sky-blue);">You left the browser tab. For academic integrity, the test must be restarted.</p>
+    <button onclick="location.reload()">Restart test</button>
+</div>
+
+<!-- Level-Up Popup -->
+<div id="popup-modal">
+    <div class="popup-content">
+        <h2 id="popup-title">Level Up!</h2>
+        <p id="popup-text" style="font-size:1.2rem; margin:15px 0; font-weight:700; color:var(--sky-blue);"></p>
+        <button class="btn-submit" style="padding:10px 20px; width:auto; font-size:1.2rem; margin-top:15px;" onclick="dismissPopup()">Keep Going! ⛰️</button>
+    </div>
+</div>
+
+<div id="main-layout">
+
+    <!-- ===== MAIN EXAM PANEL ===== -->
+    <div id="exam-container">
+
+        <div class="header">
+            <i class="fas fa-mountain fa-3x" style="color: var(--sky-blue);"></i>
+            <h1>🏔️ Alpine Adventure! A1 Movers</h1>
+            <p>30 Questions · Vocabulary &amp; Grammar · Cambridge Young Learners</p>
+        </div>
+
+        <div class="instructions">
+            <h3><i class="fas fa-list-check"></i> How to Play</h3>
+            <ul>
+                <li>Your answers lock when you answer. No going back!</li>
+                <li>Get <strong>10 stars ⭐</strong> to become a Snow Bunny!</li>
+                <li><strong>Part 1:</strong> Choose the right meaning for each sign.</li>
+                <li><strong>Part 2:</strong> Type ONE word to complete each sentence.</li>
+                <li><strong>Part 3:</strong> Look at the picture and type the word.</li>
+                <li><strong>Part 4:</strong> Change the sentence. Use 1 or 2 words.</li>
+            </ul>
+        </div>
+
+        <div class="section-title"><i class="fas fa-map-signs"></i> Part 1: Mountain Signs</div>
+        <div class="sign-grid" id="render-part1"></div>
+
+        <div class="section-title"><i class="fas fa-pen-nib"></i> Part 2: Fill in the Gap</div>
+        <div class="story-text" id="render-part2"></div>
+
+        <div class="section-title"><i class="fas fa-star"></i> Part 3: What is the Word?</div>
+        <div class="gear-grid" id="render-part3"></div>
+
+        <div class="section-title"><i class="fas fa-arrows-left-right"></i> Part 4: Change the Sentence to negative</div>
+        <div class="trail-sign-container" id="render-part4"></div>
+
+        <button class="btn-submit" onclick="finalSummary()">🏁 FINISH MY ADVENTURE!</button>
+    </div>
+
+    <!-- ===== TELEMETRY / SIDE PANEL ===== -->
+    <div class="telemetry-column">
+        <div class="card" style="text-align:center;">
+            <div id="level-indicator" class="active-player-banner">🌱 Rank: Mountain Beginner</div>
+
+            <div class="stat-line"><span>⭐ Stars:</span><span class="stat-value" id="alt-tracker">0</span></div>
+            <div class="stat-line"><span>📋 Progress:</span><span class="stat-value" id="prog-tracker">0 / 30</span></div>
+
+            <div class="scene">
+                <div class="cube" id="cube-die">
+                    <div class="cube-face face-1">🏔️</div>
+                    <div class="cube-face face-6">🌲</div>
+                    <div class="cube-face face-2">❄️</div>
+                    <div class="cube-face face-5">🐇</div>
+                    <div class="cube-face face-3">☀️</div>
+                    <div class="cube-face face-4">🌸</div>
+                </div>
+            </div>
+
+            <div style="font-size:0.78rem; color:#94a3b8; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;">Engine by Angel Torres</div>
+        </div>
+
+        <div class="card">
+            <h4 style="margin:0; font-family:'Baloo 2',cursive; color:var(--sky-blue); letter-spacing:1px;">📡 Adventure Log</h4>
+            <div id="log-card">
+                <div class="log-entry">Waiting for your first answer… 🏕️</div>
+            </div>
+        </div>
+    </div>
+
+</div><!-- end #main-layout -->
+
+<script>
+    // ============================================================
+    //  A1 MOVERS ALPINE ADVENTURE — QUESTION DATABASE
+    // ============================================================
+
+    // --- PART 1: Trail Signs (10 items → 5 selected) ---
+    const dbPart1 = [
+        {
+            sign: "DANGER!<br>DO NOT ENTER",
+            cls: "danger", icon: "fas fa-triangle-exclamation",
+            q: "What does this sign mean?",
+            o: ["You must not go in.", "You can play here.", "The path is open."],
+            a: "You must not go in."
+        },
+        {
+            sign: "PICNIC AREA 🌿<br>EAT HERE!",
+            cls: "info", icon: "fas fa-utensils",
+            q: "What can you do here?",
+            o: ["You can eat your lunch here.", "You must swim here.", "You cannot stop here."],
+            a: "You can eat your lunch here."
+        },
+        {
+            sign: "NO DOGS 🐕<br>ON THE PATH",
+            cls: "danger", icon: "fas fa-dog",
+            q: "What does this sign say?",
+            o: ["Dogs cannot go on the path.", "Dogs can play here.", "Dogs must sit down."],
+            a: "Dogs cannot go on the path."
+        },
+        {
+            sign: "LOOK! 🐇<br>WILD RABBITS HERE",
+            cls: "info", icon: "fas fa-paw",
+            q: "Why is this sign here?",
+            o: ["There are wild rabbits in this area.", "You can catch rabbits here.", "Rabbits are not allowed here."],
+            a: "There are wild rabbits in this area."
+        },
+        {
+            sign: "CAFÉ ☕<br>OPEN EVERY DAY",
+            cls: "info", icon: "fas fa-mug-hot",
+            q: "What does this sign tell you?",
+            o: ["The café is open every day of the week.", "The café is closed today.", "You can only eat here on weekdays."],
+            a: "The café is open every day of the week."
+        },
+        {
+            sign: "SNOW PATH ❄️<br>WALK SLOWLY!",
+            cls: "danger", icon: "fas fa-snowflake",
+            q: "What must you do on this path?",
+            o: ["Walk slowly because there is snow.", "Run as fast as you can.", "Stop and go back home."],
+            a: "Walk slowly because there is snow."
+        },
+        {
+            sign: "LOST? 🏠<br>GO TO THE BLUE HUT",
+            cls: "info", icon: "fas fa-house",
+            q: "What should you do if you are lost?",
+            o: ["Go to the blue hut.", "Stay on the path and wait.", "Call the teacher at once."],
+            a: "Go to the blue hut."
+        },
+        {
+            sign: "NO BIKES 🚲<br>ON THIS PATH",
+            cls: "danger", icon: "fas fa-bicycle",
+            q: "What cannot you do here?",
+            o: ["Ride a bike on this path.", "Walk on this path.", "Run on this path."],
+            a: "Ride a bike on this path."
+        },
+        {
+            sign: "CLEAN UP! ♻️<br>PUT RUBBISH IN BIN",
+            cls: "info", icon: "fas fa-trash",
+            q: "What does this sign ask you to do?",
+            o: ["Put your rubbish in the bin.", "Take all rubbish home.", "Drop things on the ground."],
+            a: "Put your rubbish in the bin."
+        },
+        {
+            sign: "COLD WATER! 🥶<br>DO NOT SWIM",
+            cls: "danger", icon: "fas fa-water",
+            q: "What does this sign tell you?",
+            o: ["You cannot swim because the water is cold.", "You can swim here safely.", "The water is warm and clean."],
+            a: "You cannot swim because the water is cold."
+        }
+    ];
+
+    // --- PART 2: Grammar Gap-Fill (20 items → 10 selected) ---
+    const dbPart2 = [
+        { textPre: "There",           textPost: "a big mountain near our house.",           ans: ["is"] },
+        { textPre: "The children",    textPost: "playing in the snow.",                     ans: ["are"] },
+        { textPre: "She",             textPost: "not like the cold weather.",               ans: ["does"] },
+        { textPre: "The rabbit lives",textPost: "the big tree.",                            ans: ["near", "under", "by"] },
+        { textPre: "Yesterday, we",   textPost: "up the big hill together.",                ans: ["walked", "went"] },
+        { textPre: "I have got",      textPost: "apple in my bag.",                         ans: ["an"] },
+        { textPre: "My boots",        textPost: "too small for me.",                        ans: ["are"] },
+        { textPre: "We",              textPost: "go outside. It is snowing!",               ans: ["cannot", "can't"] },
+        { textPre: "How",             textPost: "trees are in the forest?",                 ans: ["many"] },
+        { textPre: "The bird",        textPost: "a nest in the tree.",                      ans: ["has", "has got"] },
+        { textPre: "We went",         textPost: "the mountains last summer.",               ans: ["to"] },
+        { textPre: "This flower",     textPost: "yellow and very beautiful.",               ans: ["is"] },
+        { textPre: "He",              textPost: "not bring his hat. Now he is cold!",       ans: ["did"] },
+        { textPre: "There are a lot", textPost: "animals on the mountain.",                 ans: ["of"] },
+        { textPre: "She is taller",   textPost: "her little sister.",                       ans: ["than"] },
+        { textPre: "I like mountains",textPost: "I do not like cold weather.",              ans: ["but"] },
+        { textPre: "Can you see",     textPost: "bear near the river?",                     ans: ["the", "a"] },
+        { textPre: "The path",        textPost: "very long and very pretty.",               ans: ["is"] },
+        { textPre: "It is",           textPost: "cold today. We need a hat!",               ans: ["very", "so", "too"] },
+        { textPre: "The dog",         textPost: "running in the snow.",                     ans: ["is"] }
+    ];
+
+    // --- PART 3: Vocabulary Cards (20 items → 10 selected) ---
+    const dbPart3 = [
+        { icon: "fas fa-snowflake",  hint: "It is white and cold. It falls from the sky in winter.", ph: "S _ O W",       ans: ["snow"] },
+        { icon: "fas fa-tree",       hint: "A tall green plant in the forest.",                       ph: "T _ E E",       ans: ["tree"] },
+        { icon: "fas fa-cloud",      hint: "White and fluffy. It floats in the sky.",                 ph: "C L _ U D",     ans: ["cloud"] },
+        { icon: "fas fa-paw",        hint: "A big animal with a lot of brown fur.",                   ph: "B _ A R",       ans: ["bear"] },
+        { icon: "fas fa-feather",    hint: "It has wings and can fly.",                               ph: "B _ R D",       ans: ["bird"] },
+        { icon: "fas fa-mountain",   hint: "A very, very big hill.",                                  ph: "M O U N _ _ I N", ans: ["mountain"] },
+        { icon: "fas fa-shoe-prints",hint: "You wear these on your feet for walking.",                ph: "B O _ T S",     ans: ["boots"] },
+        { icon: "fas fa-sun",        hint: "It is yellow and hot. It gives us light.",                ph: "S _ N",         ans: ["sun"] },
+        { icon: "fas fa-water",      hint: "Animals and people drink this. It is not hot.",           ph: "W _ T E R",     ans: ["water"] },
+        { icon: "fas fa-map",        hint: "You use this to find your way.",                          ph: "M _ P",         ans: ["map"] },
+        { icon: "fas fa-tent",       hint: "You sleep in this when you camp outside.",                ph: "T E _ T",       ans: ["tent"] },
+        { icon: "fas fa-bicycle",    hint: "You ride this. It has two wheels.",                       ph: "B I K _",       ans: ["bike"] },
+        { icon: "fas fa-wind",       hint: "Air that moves fast. It can be very cold!",               ph: "W _ N D",       ans: ["wind"] },
+        { icon: "fas fa-camera",     hint: "You use this to take photos.",                            ph: "C A M _ _ A",   ans: ["camera"] },
+        { icon: "fas fa-fish",       hint: "This animal lives in rivers and lakes.",                  ph: "F _ S H",       ans: ["fish"] },
+        { icon: "fas fa-moon",       hint: "It is in the sky at night. It is big and round.",         ph: "M O _ N",       ans: ["moon"] },
+        { icon: "fas fa-leaf",       hint: "It grows on trees. It is green.",                         ph: "L _ A F",       ans: ["leaf"] },
+        { icon: "fas fa-mug-hot",    hint: "A hot drink. You drink it on cold days.",                 ph: "T _ A",         ans: ["tea"] },
+        { icon: "fas fa-hat-cowboy", hint: "You wear this on your head.",                             ph: "H _ T",         ans: ["hat"] },
+        { icon: "fas fa-house",      hint: "A small, cosy building in the mountains.",                ph: "H _ T",         ans: ["hut"] }
+    ];
+
+    // --- PART 4: Sentence Transformations (15 items → 5 selected) ---
+    const dbPart4 = [
+        { orig: "I can ski.",                      pre: "I",              post: "ski.",              ans: ["cannot", "can't"] },
+        { orig: "She likes the snow.",             pre: "She",            post: "like the snow.",    ans: ["does not", "doesn't"] },
+        { orig: "He went up the hill.",            pre: "He",             post: "go up the hill.",   ans: ["did not", "didn't"] },
+        { orig: "The bird is flying.",             pre: "The bird",       post: "flying.",           ans: ["is not", "isn't"] },
+        { orig: "We have a map.",                  pre: "We",             post: "have a map.",       ans: ["do not", "don't"] },
+        { orig: "Tom and Anna are cold.",          pre: "Tom and Anna",   post: "cold.",             ans: ["are not", "aren't"] },
+        { orig: "It rained yesterday.",            pre: "It",             post: "rain yesterday.",   ans: ["did not", "didn't"] },
+        { orig: "The children can swim.",          pre: "The children",   post: "swim.",             ans: ["cannot", "can't"] },
+        { orig: "I like rabbits.",                 pre: "I",              post: "like rabbits.",     ans: ["do not", "don't"] },
+        { orig: "The mountain is near.",           pre: "The mountain",   post: "near.",             ans: ["is not", "isn't"] },
+        { orig: "We are going to camp.",           pre: "We",             post: "going to camp.",    ans: ["are not", "aren't"] },
+        { orig: "She has got a hat.",              pre: "She",            post: "got a hat.",        ans: ["has not", "hasn't"] },
+        { orig: "He plays in the snow.",           pre: "He",             post: "play in the snow.", ans: ["does not", "doesn't"] },
+        { orig: "They walked to the top.",         pre: "They",           post: "walk to the top.",  ans: ["did not", "didn't"] },
+        { orig: "The dog is big.",                 pre: "The dog",        post: "big.",              ans: ["is not", "isn't"] }
+    ];
+
+    // ============================================================
+    //  GAME ENGINE — IDENTICAL METHODOLOGY (Zero Interference)
+    // ============================================================
+    let score = 0;
+    let questionsAnswered = 0;
+    let currentLevel = 0;
+    let isQuizDone = false;
+    window.answerKeyMap = {};
+
+    // --- Audio Synth Engine ---
+    let audioCtx = null;
+    function initAudioEngine() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    function playSoundSynthEffect(type) {
+        if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+        if (type === 'boost') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.exponentialRampToValueAtTime(1200, now + 0.4);
+            gainNode.gain.setValueAtTime(0.15, now);
+            gainNode.gain.linearRampToValueAtTime(0, now + 0.4);
+            osc.start(now); osc.stop(now + 0.4);
+        } else if (type === 'hazard') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(300, now);
+            osc.frequency.linearRampToValueAtTime(100, now + 0.5);
+            gainNode.gain.setValueAtTime(0.15, now);
+            gainNode.gain.linearRampToValueAtTime(0, now + 0.5);
+            osc.start(now); osc.stop(now + 0.5);
+        } else if (type === 'win') {
+            const chords = [523.25, 659.25, 783.99, 1046.50];
+            chords.forEach((freq, index) => {
+                const subOsc = audioCtx.createOscillator();
+                const subGain = audioCtx.createGain();
+                subOsc.connect(subGain); subGain.connect(audioCtx.destination);
+                subOsc.type = 'sine';
+                subOsc.frequency.setValueAtTime(freq, now + (index * 0.1));
+                subGain.gain.setValueAtTime(0.15, now + (index * 0.1));
+                subGain.gain.linearRampToValueAtTime(0, now + 0.65);
+                subOsc.start(now + (index * 0.1)); subOsc.stop(now + 0.65);
+            });
+        }
+    }
+
+    function shuffle(array) { return array.sort(() => Math.random() - 0.5); }
+
+    // --- Quiz Initialiser ---
+    function initDynamicQuiz() {
+        const sP1 = shuffle([...dbPart1]).slice(0, 5);
+        const sP2 = shuffle([...dbPart2]).slice(0, 10);
+        const sP3 = shuffle([...dbPart3]).slice(0, 10);
+        const sP4 = shuffle([...dbPart4]).slice(0, 5);
+
+        let qCounter = 1;
+
+        // Render Part 1
+        let htmlP1 = '';
+        sP1.forEach((q) => {
+            let id = `q_${qCounter++}`;
+            window.answerKeyMap[id] = [q.a];
+            let opts = shuffle([...q.o]);
+            htmlP1 += `
+            <div class="trail-sign-container">
+                <div class="css-sign ${q.cls}"><i class="${q.icon}"></i><span>${q.sign}</span></div>
+                <p style="margin-top:10px; font-weight:bold;">${id.split('_')[1]}. ${q.q}</p>
+                <select id="${id}" onchange="evaluateAnswer('${id}', 'select')">
+                    <option value="">-- Choose --</option>
+                    <option value="${opts[0]}">${opts[0]}</option>
+                    <option value="${opts[1]}">${opts[1]}</option>
+                    <option value="${opts[2]}">${opts[2]}</option>
+                </select>
+            </div>`;
+        });
+        document.getElementById("render-part1").innerHTML = htmlP1;
+
+        // Render Part 2
+        let htmlP2 = '';
+        sP2.forEach((q) => {
+            let id = `q_${qCounter++}`;
+            window.answerKeyMap[id] = q.ans;
+            htmlP2 += `<div><strong>${id.split('_')[1]}.</strong> ${q.textPre} <input type="text" id="${id}" class="inline-input" onblur="evaluateAnswer('${id}', 'input')"> ${q.textPost}</div>`;
+        });
+        document.getElementById("render-part2").innerHTML = htmlP2;
+
+        // Render Part 3
+        let htmlP3 = '';
+        sP3.forEach((q) => {
+            let id = `q_${qCounter++}`;
+            window.answerKeyMap[id] = q.ans;
+            htmlP3 += `<div class="gear-card"><i class="${q.icon}"></i><p><strong>${id.split('_')[1]}.</strong> ${q.hint}</p><input type="text" id="${id}" placeholder="${q.ph}" onblur="evaluateAnswer('${id}', 'input')"></div>`;
+        });
+        document.getElementById("render-part3").innerHTML = htmlP3;
+
+        // Render Part 4
+        let htmlP4 = '';
+        sP4.forEach((q) => {
+            let id = `q_${qCounter++}`;
+            window.answerKeyMap[id] = q.ans;
+            htmlP4 += `<p style="margin-top:10px;"><strong>${id.split('_')[1]}.</strong> "${q.orig}"<br>→ ${q.pre} <input type="text" id="${id}" class="transform-input" onblur="evaluateAnswer('${id}', 'input')"> ${q.post}</p>`;
+        });
+        document.getElementById("render-part4").innerHTML = htmlP4;
+    }
+
+    // --- Answer Evaluator ---
+    function evaluateAnswer(id, type) {
+        initAudioEngine();
+        let el = document.getElementById(id);
+        if (el.disabled) return;
+
+        let userAns = el.value.trim().toLowerCase();
+        if (!userAns && type === 'input') return;
+
+        el.disabled = true;
+        questionsAnswered++;
+
+        let correctArr = window.answerKeyMap[id];
+        let isCorrect = correctArr.some(ans => ans.toLowerCase() === userAns);
+
+        let fb = document.createElement('span');
+        fb.className = 'feedback';
+
+        if (isCorrect) {
+            score++;
+            el.style.borderColor = "var(--correct)";
+            fb.innerHTML = "<i class='fas fa-check correct-ans'></i>";
+            playSoundSynthEffect('boost');
+            addLogEntry(`✅ Q${id.split('_')[1]} — Great job! ⭐ +1`);
+        } else {
+            el.style.borderColor = "var(--wrong)";
+            fb.innerHTML = `<i class='fas fa-times wrong-ans'></i> <span style="color:var(--sky-blue); font-weight:normal;">(${correctArr[0]})</span>`;
+            playSoundSynthEffect('hazard');
+            addLogEntry(`❌ Q${id.split('_')[1]} — Oops! Try to remember!`);
+        }
+
+        el.parentNode.insertBefore(fb, el.nextSibling);
+        updateTelemetry();
+        spin3DEngine();
+        checkLevelUp();
+    }
+
+    // --- Telemetry Updater ---
+    function updateTelemetry() {
+        document.getElementById('alt-tracker').innerText = score;
+        document.getElementById('prog-tracker').innerText = questionsAnswered + " / 30";
+    }
+
+    // --- 3D Cube Spinner ---
+    function spin3DEngine() {
+        const cube = document.getElementById("cube-die");
+        cube.className = "cube tumbling";
+        setTimeout(() => {
+            cube.className = "cube";
+            const randomFace = Math.floor(Math.random() * 6) + 1;
+            const rotations = {
+                1: "rotateX(0deg) rotateY(0deg)",
+                2: "rotateX(0deg) rotateY(-90deg)",
+                3: "rotateX(-90deg) rotateY(0deg)",
+                4: "rotateX(90deg) rotateY(0deg)",
+                5: "rotateX(0deg) rotateY(90deg)",
+                6: "rotateX(180deg) rotateY(0deg)"
+            };
+            cube.style.transform = rotations[randomFace];
+        }, 800);
+    }
+
+    // --- Log Entry ---
+    function addLogEntry(text) {
+        const logBox = document.getElementById("log-card");
+        logBox.innerHTML += `<div class="log-entry">${text}</div>`;
+        logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    // --- Level-Up Checker ---
+    function checkLevelUp() {
+        let title = "", msg = "";
+        if (score === 10 && currentLevel < 1) {
+            currentLevel = 1;
+            title = "Level Up! 🥉";
+            msg = "You reached Level 1: Snow Bunny! 🐇<br>Badge Unlocked: Bronze Snowflake ❄️";
+            document.getElementById("level-indicator").innerText = "🐇 Rank: Snow Bunny";
+        } else if (score === 20 && currentLevel < 2) {
+            currentLevel = 2;
+            title = "Level Up! 🥈";
+            msg = "You reached Level 2: Mountain Fox! 🦊<br>Badge Unlocked: Silver Pine Tree 🌲";
+            document.getElementById("level-indicator").innerText = "🦊 Rank: Mountain Fox";
+        } else if (score === 30 && currentLevel < 3) {
+            currentLevel = 3;
+            title = "You Did It! 🥇";
+            msg = "You reached the top: Alpine Champion! ⭐<br>Badge Unlocked: Golden Mountain 🏔️";
+            document.getElementById("level-indicator").innerText = "⭐ Rank: Alpine Champion";
+            playSoundSynthEffect('win');
+        }
+        if (title) displayPopup(title, msg);
+    }
+
+    // --- Popup Controls ---
+    function displayPopup(title, msg) {
+        document.getElementById("popup-title").innerText = title;
+        document.getElementById("popup-text").innerHTML = msg;
+        document.getElementById("popup-modal").style.display = "flex";
+        playSoundSynthEffect('win');
+    }
+    function dismissPopup() { document.getElementById("popup-modal").style.display = "none"; }
+
+    // --- Final Summary ---
+    function finalSummary() {
+        isQuizDone = true;
+        alert(`🏕️ Adventure Complete!\nQuestions Answered: ${questionsAnswered}/30\nStars Collected: ${score} ⭐\nFinal Rank: ${document.getElementById("level-indicator").innerText.split(': ')[1]}`);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // --- Security Blur Guard ---
+    window.addEventListener('blur', () => {
+        if (!isQuizDone && questionsAnswered < 30) {
+            document.getElementById('security-lock').style.display = 'flex';
+        }
+    });
+
+    // --- Init ---
+    window.onload = initDynamicQuiz;
+</script>
+
+</body>
+</html>

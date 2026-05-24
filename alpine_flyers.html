@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A2 Flyers Alpine Certification 🏔️</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --mtn-dark: #0f172a;
+            --alpine-pine: #059669; 
+            --alpine-ice: #e0f2fe; 
+            --alpine-slate: #334155; 
+            --alpine-sunset: #f59e0b; 
+            --alpine-earth: #92400e; 
+            --text-light: #f8fafc;
+            --correct: #10b981; 
+            --wrong: #ef4444;
+            --locked: #475569;
+        }
+
+        body {
+            background: linear-gradient(rgba(15, 23, 42, 0.5), rgba(15, 23, 42, 0.8)), 
+                        url('https://images.unsplash.com/photo-1516886635086-2b3c423c0947?q=80&w=2071') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-light);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0; padding: 20px;
+        }
+
+        #main-layout { display: grid; grid-template-columns: 1fr 380px; gap: 25px; max-width: 1400px; margin: 0 auto; }
+        @media (max-width: 1000px) { #main-layout { grid-template-columns: 1fr; } .telemetry-column { position: relative !important; top: 0 !important; margin-bottom: 25px; } }
+
+        #exam-container { background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(12px); border-radius: 16px; padding: 40px; box-shadow: 0 15px 50px rgba(0,0,0,0.6); border: 1px solid rgba(255, 255, 255, 0.1); position: relative; }
+
+        .header { text-align: center; border-bottom: 3px solid var(--alpine-sunset); padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { margin: 10px 0; text-transform: uppercase; letter-spacing: 2px; color: var(--alpine-sunset); text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .header p { color: var(--alpine-ice); font-weight: bold; font-size: 1.1rem; }
+
+        .btn-info { position: absolute; top: 30px; right: 30px; background: rgba(245, 158, 11, 0.2); color: var(--alpine-sunset); border: 2px solid var(--alpine-sunset); border-radius: 50%; width: 40px; height: 40px; font-size: 1.2rem; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; }
+        .btn-info:hover { background: var(--alpine-sunset); color: white; transform: scale(1.1); }
+
+        .section-title { color: var(--alpine-ice); font-size: 1.4rem; font-weight: bold; margin: 40px 0 20px 0; padding-bottom: 10px; border-bottom: 1px solid var(--alpine-slate); display: flex; align-items: center; gap: 10px; }
+        .section-title i { color: var(--alpine-sunset); }
+
+        .sign-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .trail-sign-container { background: rgba(15, 23, 42, 0.6); padding: 20px; border-radius: 12px; border: 1px solid var(--alpine-slate); }
+        .css-sign { background: #eab308; color: black; font-weight: bold; text-align: center; padding: 15px; border-radius: 8px; border: 4px solid #ca8a04; margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .css-sign.danger { background: #ef4444; border-color: #b91c1c; color: white; }
+        .css-sign.info { background: #3b82f6; border-color: #1d4ed8; color: white; }
+        .css-sign i { font-size: 2.5rem; }
+
+        .gear-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .gear-card { background: rgba(15, 23, 42, 0.6); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid var(--alpine-slate); display: flex; flex-direction: column; align-items: center; gap: 10px; transition: transform 0.2s, border-color 0.2s; }
+        .gear-card:hover { transform: translateY(-3px); border-color: var(--alpine-pine); }
+        .gear-card i { font-size: 3rem; color: var(--alpine-sunset); }
+
+        select, input[type="text"] { background: #020617; color: var(--alpine-ice); border: 1px solid var(--alpine-pine); padding: 8px; border-radius: 6px; font-size: 1rem; width: 100%; box-sizing: border-box; transition: border-color 0.3s; }
+        select:focus, input[type="text"]:focus { outline: none; border-color: var(--alpine-sunset); box-shadow: 0 0 8px rgba(245, 158, 11, 0.4); }
+        select:disabled, input[type="text"]:disabled { opacity: 0.8; cursor: not-allowed; border-color: var(--alpine-slate); }
+        
+        .inline-input { width: 90px !important; padding: 2px 5px !important; display: inline-block; text-align: center; }
+        .transform-input { width: 140px !important; padding: 2px 5px !important; display: inline-block; text-align: center; }
+
+        .story-text { line-height: 2.2; font-size: 1.1rem; background: rgba(15, 23, 42, 0.6); padding: 20px; border-radius: 12px; text-align: left; border-left: 3px solid var(--alpine-ice); display: flex; flex-direction: column; gap: 15px; }
+        .btn-submit { width: 100%; padding: 20px; background: linear-gradient(135deg, var(--alpine-sunset), #d97706); border: none; border-radius: 8px; color: white; font-size: 1.5rem; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 30px; box-shadow: 0 4px 15px rgba(217, 119, 6, 0.4); }
+        .btn-submit:hover { filter: brightness(1.1); transform: scale(1.01); }
+
+        .feedback { font-weight: bold; margin-left: 5px; font-size: 0.9rem; }
+        .correct-ans { color: var(--correct); }
+        .wrong-ans { color: var(--wrong); }
+
+        /* Modals */
+        #security-lock, #popup-modal, #rules-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; justify-content: center; align-items: center; text-align: center; backdrop-filter: blur(8px); }
+        #security-lock { display: none; background: rgba(15, 23, 42, 0.98); flex-direction: column; }
+        #popup-modal { display: none; background: rgba(15, 23, 42, 0.9); }
+        #rules-modal { display: flex; background: rgba(15, 23, 42, 0.95); } 
+        
+        .popup-content { background: var(--mtn-dark); padding: 35px; border-radius: 20px; border: 4px solid var(--alpine-sunset); text-align: center; max-width: 480px; width: 90%; box-shadow: 0 30px 60px rgba(0,0,0,0.6); color: white;}
+        #popup-title { font-size: 2rem; margin-top: 0; color: var(--alpine-sunset); text-transform: uppercase;}
+        .rules-content { text-align: left; max-width: 650px; }
+        .rules-content h2 { text-align: center; margin-top: 0; font-size: 2.2rem; color: var(--alpine-sunset); }
+        .rules-list { font-size: 1.15rem; line-height: 1.8; color: var(--alpine-ice); padding-left: 20px; }
+        .rules-list li { margin-bottom: 15px; }
+        .rules-list i { color: var(--alpine-sunset); width: 25px; text-align: center; margin-right: 10px;}
+
+        /* Telemetry */
+        .telemetry-column { position: sticky; top: 20px; height: max-content; display: flex; flex-direction: column; gap: 20px; }
+        .card { background: rgba(30, 41, 59, 0.85); border: 2px solid var(--alpine-slate); border-radius: 16px; padding: 24px; box-shadow: 0 15px 30px rgba(0,0,0,0.5); backdrop-filter: blur(12px); }
+        .active-player-banner { font-size: 1.3rem; font-weight: 700; margin-bottom: 18px; padding: 14px; border-radius: 12px; border: 2px solid var(--alpine-ice); text-align: center; color: var(--alpine-ice); background: rgba(0,0,0,0.3);}
+        .stat-line { display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: bold; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed var(--alpine-slate); }
+        .stat-value { color: var(--alpine-sunset); font-size: 1.2rem;}
+        
+        .trophy-room { margin-top: 15px; display: flex; flex-wrap: wrap; justify-content: space-evenly; gap: 10px; }
+        .badge { width: 50px; height: 50px; background: var(--mtn-dark); border: 2px solid var(--locked); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; color: var(--locked); transition: all 0.5s ease; position: relative; }
+        .badge.unlocked { border-color: var(--alpine-sunset); color: var(--alpine-sunset); background: rgba(245, 158, 11, 0.1); box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); animation: popBadge 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .badge::after { content: attr(data-pts); position: absolute; bottom: -18px; font-size: 0.7rem; font-weight: bold; color: var(--alpine-ice); }
+        @keyframes popBadge { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .scene { width: 90px; height: 90px; perspective: 300px; margin: 20px auto 10px auto; cursor: help; }
+        .cube { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.3, 1); }
+        @keyframes cubeTumble { 0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); } 100% { transform: rotateX(720deg) rotateY(1440deg) rotateZ(360deg); } }
+        .tumbling { animation: cubeTumble 1s linear infinite; }
+        .cube-face { position: absolute; width: 90px; height: 90px; background: rgba(15, 23, 42, 0.95); border: 3px solid var(--alpine-ice); border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 3rem; color: var(--alpine-ice); box-shadow: inset 0 0 15px rgba(186, 230, 253, 0.2); box-sizing: border-box; }
+        .face-1 { transform: rotateY(0deg) translateZ(45px); } .face-6 { transform: rotateY(180deg) translateZ(45px); }
+        .face-2 { transform: rotateY(90deg) translateZ(45px); } .face-5 { transform: rotateY(-90deg) translateZ(45px); }
+        .face-3 { transform: rotateX(90deg) translateZ(45px); } .face-4 { transform: rotateX(-90deg) translateZ(45px); }
+        .die-hint { text-align: center; font-size: 0.75rem; color: #94a3b8; margin-bottom: 25px; }
+        #log-card { max-height: 180px; overflow-y: auto; font-size: 0.9rem; background: rgba(0,0,0,0.4); border-radius: 8px; padding: 12px; border: 1px solid var(--alpine-slate); text-align: left; margin-top: 15px;}
+        .log-entry { padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,0.1); font-weight: bold; color: var(--text-light);}
+    </style>
+</head>
+<body>
+
+<div id="security-lock">
+    <i class="fas fa-lock" style="font-size: 4rem; color: var(--wrong); margin-bottom: 20px;"></i>
+    <h1>QUIZ LOCKED</h1>
+    <p style="color: var(--alpine-ice);">You left the browser tab. For academic integrity, the test must be restarted.</p>
+    <button onclick="location.reload()">Restart test</button>
+</div>
+
+<div id="popup-modal">
+    <div class="popup-content">
+        <h2 id="popup-title">Perk Unlocked!</h2>
+        <div id="popup-icon" style="font-size: 4rem; color: var(--alpine-sunset); margin: 15px 0;"></div>
+        <p id="popup-text" style="font-size:1.2rem; margin:15px 0; font-weight:700; color:var(--alpine-ice);"></p>
+        <button class="btn-submit" style="padding: 10px 20px; width: auto; font-size: 1.2rem; margin-top: 15px;" onclick="dismissPopup()">Continue Climb</button>
+    </div>
+</div>
+
+<div id="rules-modal">
+    <div class="popup-content rules-content">
+        <h2><i class="fas fa-clipboard-list"></i> Mission Briefing</h2>
+        <p style="font-size: 1.2rem; border-bottom: 1px solid var(--alpine-slate); padding-bottom: 15px; margin-bottom: 20px;">
+            <strong>Objective:</strong> Reach the Alpine Summit by completing 25 English A2 Flyers challenges!
+        </p>
+        <ul class="rules-list" style="list-style-type: none; padding: 0;">
+            <li><i class="fas fa-keyboard"></i> <strong>Finish Line:</strong> Complete 25 questions to finish your ascent.</li>
+            <li><i class="fas fa-medal"></i> <strong>Gear Unlocks:</strong> Every 5 correct answers, you unlock a special piece of Alpine Gear!</li>
+            <li><i class="fas fa-dice"></i> <strong>The Lucky Die:</strong> Every correct answer triggers a lucky roll for bonus altitude.</li>
+            <li><i class="fas fa-eye"></i> <strong>Stay Focused:</strong> Do not switch tabs during the climb!</li>
+        </ul>
+        <button class="btn-submit" onclick="startClimb()" style="font-size: 1.8rem; box-shadow: 0 5px 20px rgba(245, 158, 11, 0.5);">START CLIMB 🧗‍♂️</button>
+    </div>
+</div>
+
+<div id="main-layout">
+    <div id="exam-container">
+        <button class="btn-info" onclick="showRules()" title="View Mission Rules"><i class="fas fa-question"></i></button>
+        <div class="header">
+            <i class="fas fa-mountain fa-3x" style="color: var(--alpine-ice);"></i>
+            <h1>A2 Flyers Alpine Certification</h1>
+            <p>25 Randomized Challenge Questions</p>
+        </div>
+        <div class="section-title"><i class="fas fa-map-signs"></i> Part 1: Trail Notices</div>
+        <div class="sign-grid" id="render-part1"></div>
+        <div class="section-title"><i class="fas fa-pen-nib"></i> Part 2: Trail Log Book (Grammar)</div>
+        <div class="story-text" id="render-part2"></div>
+        <div class="section-title"><i class="fas fa-toolbox"></i> Part 3: Alpine Gear & Environment</div>
+        <div class="gear-grid" id="render-part3"></div>
+        <div class="section-title"><i class="fas fa-exchange-alt"></i> Part 4: Sentence Transformations</div>
+        <div class="trail-sign-container" id="render-part4"></div>
+        <button class="btn-submit" onclick="finalSummary()">SUBMIT QUIZ 🏁</button>
+    </div>
+
+    <div class="telemetry-column">
+        <div class="card" style="text-align:center;">
+            <div id="level-indicator" class="active-player-banner">Rank: Base Camp Junior</div>
+            <div class="stat-line"><span>Altitude:</span> <span class="stat-value" id="alt-tracker">0m</span></div>
+            <div class="stat-line"><span>Progress:</span> <span class="stat-value" id="prog-tracker">0 / 25</span></div>
+
+            <h4 style="margin: 20px 0 10px 0; color: var(--alpine-ice); text-transform: uppercase; font-size: 0.9rem;">🏆 Virtual Gear Room</h4>
+            <div class="trophy-room">
+                <div class="badge" id="badge-5" data-pts="5"><i class="fas fa-compass"></i></div>
+                <div class="badge" id="badge-10" data-pts="10"><i class="fas fa-anchor"></i></div>
+                <div class="badge" id="badge-15" data-pts="15"><i class="fas fa-link"></i></div>
+                <div class="badge" id="badge-20" data-pts="20"><i class="fas fa-person-snowboarding"></i></div>
+                <div class="badge" id="badge-25" data-pts="25"><i class="fas fa-crown"></i></div>
+            </div>
+
+            <div class="scene" title="Correct answers trigger a lucky roll for bonus altitude!">
+                <div class="cube" id="cube-die">
+                    <div class="cube-face face-1">🏔️</div><div class="cube-face face-6">🧭</div>
+                    <div class="cube-face face-2">🚲</div><div class="cube-face face-5">⛺</div>
+                    <div class="cube-face face-3">🌲</div><div class="cube-face face-4">❄️</div>
+                </div>
+            </div>
+            <div class="die-hint">🎲 Correct Answers Roll For Bonus Altitude!</div>
+            <div style="font-size: 0.8rem; color: #94a3b8; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase;">A2 Engine Active - by Angel T.</div>
+        </div>
+
+        <div class="card">
+            <h4 style="margin:0; text-transform:uppercase; color:var(--alpine-ice); letter-spacing:1px;">📡 Telemetry Log</h4>
+            <div id="log-card"><div class="log-entry">Awaiting first answer...</div></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const dbPart1 = [
+        { sign: "PLEASE DON'T RUN", cls: "danger", icon: "fas fa-person-running", q: "What does this sign mean?", o: ["You must walk.", "You can run fast.", "You cannot walk here."], a: "You must walk." },
+        { sign: "NO FOOD IN TENTS", cls: "danger", icon: "fas fa-hamburger", q: "Where should you eat?", o: ["Eat outside the tent.", "Eat inside the tent.", "Don't eat today."], a: "Eat outside the tent." },
+        { sign: "BIKES FOR RENT: £10 A DAY", cls: "info", icon: "fas fa-bicycle", q: "According to this notice:", o: ["You pay £10 to use a bike for a day.", "Bikes are free today.", "You can buy a bike for £10."], a: "You pay £10 to use a bike for a day." },
+        { sign: "DANGER: DEEP WATER", cls: "danger", icon: "fas fa-water", q: "What must you do?", o: ["Do not go swimming.", "Drink the water.", "Wash your clothes here."], a: "Do not go swimming." },
+        { sign: "SHUT THE GATE PLEASE", cls: "info", icon: "fas fa-door-closed", q: "What does this mean?", o: ["Close the door behind you.", "Open the gate.", "The gate is broken."], a: "Close the door behind you." },
+        { sign: "PICNIC AREA", cls: "info", icon: "fas fa-basket-shopping", q: "You can:", o: ["Sit and eat your lunch here.", "Buy food here.", "Sleep here."], a: "Sit and eat your lunch here." },
+        { sign: "BEAR AREA: DON'T LEAVE TRASH", cls: "danger", icon: "fas fa-paw", q: "What is the rule?", o: ["Take your rubbish with you.", "Feed the bears.", "Leave food for animals."], a: "Take your rubbish with you." },
+        { sign: "ICE! WALK CAREFULLY", cls: "danger", icon: "fas fa-snowflake", q: "You need to:", o: ["Go slowly because it is slippery.", "Run very fast.", "Wear shorts."], a: "Go slowly because it is slippery." },
+        { sign: "HUT OPEN 9:00 TO 17:00", cls: "info", icon: "fas fa-house", q: "When can you go in?", o: ["You can go inside at 10:00.", "It is open at night.", "You can go inside at 18:00."], a: "You can go inside at 10:00." },
+        { sign: "WEAR A HELMET", cls: "info", icon: "fas fa-helmet-safety", q: "This notice tells you:", o: ["You must protect your head.", "Helmets are not needed.", "Take off your hat."], a: "You must protect your head." },
+        { sign: "RIVER PATH CLOSED TODAY", cls: "danger", icon: "fas fa-route", q: "This means:", o: ["You cannot walk by the river today.", "The river is very nice.", "Everyone must walk by the river."], a: "You cannot walk by the river today." },
+        { sign: "TOILETS: 5 MINUTES WALK", cls: "info", icon: "fas fa-restroom", q: "Where are the toilets?", o: ["They are a short walk away.", "They are right here.", "There are no toilets."], a: "They are a short walk away." },
+        { sign: "CAUTION: FALLING ROCKS", cls: "danger", icon: "fas fa-mountain", q: "What is the danger?", o: ["Stones might drop from above.", "People are throwing rocks.", "Do not throw stones."], a: "Stones might drop from above." },
+        { sign: "DRINKING WATER", cls: "info", icon: "fas fa-faucet-drip", q: "What can you do here?", o: ["You can fill your bottle here.", "You can swim here.", "You cannot drink this."], a: "You can fill your bottle here." },
+        { sign: "QUIET PLEASE: ANIMALS SLEEPING", cls: "info", icon: "fas fa-moon", q: "You must:", o: ["Not make loud noises.", "Sing a song.", "Wake up the animals."], a: "Not make loud noises." }
+    ];
+
+    const dbPart2 = [
+        { textPre: "I have never ", textPost: " a horse in the mountains.", ans: ["ridden"] },
+        { textPre: "He is taller ", textPost: " his older brother.", ans: ["than"] },
+        { textPre: "Yesterday, we ", textPost: " to the big lake.", ans: ["went"] },
+        { textPre: "We didn't see ", textPost: " bears in the forest.", ans: ["any"] },
+        { textPre: "I ", textPost: " eating a sandwich when it started to rain.", ans: ["was"] },
+        { textPre: "My sister is very good ", textPost: " climbing trees.", ans: ["at"] },
+        { textPre: "There are ", textPost: " of tall trees near our camp.", ans: ["lots", "plenty"] },
+        { textPre: "If it rains, we ", textPost: " stay in the tent.", ans: ["will", "can", "must"] },
+        { textPre: "She ", textPost: " lived in the Alps for three years.", ans: ["has"] },
+        { textPre: "I think mountain biking is the ", textPost: " exciting sport.", ans: ["most"] },
+        { textPre: "Where ", textPost: " you go for your holiday last year?", ans: ["did"] },
+        { textPre: "This backpack belongs ", textPost: " my father.", ans: ["to"] },
+        { textPre: "It is very cold, ", textPost: " put on your jacket.", ans: ["so"] },
+        { textPre: "We couldn't walk further ", textPost: " we were too tired.", ans: ["because", "as"] },
+        { textPre: "Look ", textPost: " those beautiful birds in the sky!", ans: ["at"] },
+        { textPre: "Have you ", textPost: " seen a real glacier?", ans: ["ever"] },
+        { textPre: "They arrived ", textPost: " the cabin at 6 o'clock.", ans: ["at"] },
+        { textPre: "I want to buy a new map ", textPost: " I lost mine.", ans: ["because", "as"] },
+        { textPre: "The sun was shining ", textPost: " the sky was blue.", ans: ["and"] },
+        { textPre: "Would you ", textPost: " to come with us to the river?", ans: ["like"] }
+    ];
+
+    const dbPart3 = [
+        { icon: "fas fa-helmet-safety", hint: "A hard hat to protect your head.", ph: "H E _ _ _ T", ans: ["helmet"] },
+        { icon: "fas fa-tent", hint: "A house made of cloth for sleeping outside.", ph: "T E _ T", ans: ["tent"] },
+        { icon: "fas fa-backpack", hint: "A bag you carry on your back.", ph: "R U _ _ _ _ C K", ans: ["rucksack", "backpack"] },
+        { icon: "fas fa-map", hint: "A paper that shows roads and mountains.", ph: "M _ P", ans: ["map"] },
+        { icon: "fas fa-shoe-prints", hint: "Strong shoes for walking.", ph: "B O _ T S", ans: ["boots"] },
+        { icon: "fas fa-mitten", hint: "You wear these on your hands when it's cold.", ph: "G L _ _ E S", ans: ["gloves"] },
+        { icon: "fas fa-camera", hint: "You use this to take photos.", ph: "C A _ _ R A", ans: ["camera"] },
+        { icon: "fas fa-compass", hint: "This tells you where North is.", ph: "C O _ _ _ S S", ans: ["compass"] },
+        { icon: "fas fa-snowflake", hint: "White stuff that falls in winter.", ph: "S N _ W", ans: ["snow"] },
+        { icon: "fas fa-bridge", hint: "You walk over a river on this.", ph: "B R _ _ G E", ans: ["bridge"] },
+        { icon: "fas fa-tree", hint: "A very tall plant with green leaves.", ph: "T R _ E", ans: ["tree"] },
+        { icon: "fas fa-sun", hint: "It is yellow and hot in the sky.", ph: "S U _", ans: ["sun"] },
+        { icon: "fas fa-bottle-water", hint: "You put water in this.", ph: "B O _ _ L E", ans: ["bottle"] },
+        { icon: "fas fa-paw", hint: "A big, brown, furry wild animal.", ph: "B E _ R", ans: ["bear"] },
+        { icon: "fas fa-cloud-rain", hint: "Water that falls from the sky.", ph: "R A _ N", ans: ["rain"] },
+        { icon: "fas fa-fire", hint: "You build this to stay warm at night.", ph: "F I _ E", ans: ["fire"] },
+        { icon: "fas fa-mountain", hint: "A very high hill.", ph: "M O _ _ _ A I N", ans: ["mountain"] },
+        { icon: "fas fa-person-walking", hint: "A narrow road in the forest for walking.", ph: "P A _ H", ans: ["path"] },
+        { icon: "fas fa-shirt", hint: "A warm piece of clothing with long sleeves.", ph: "S W _ _ T E R", ans: ["sweater", "jumper"] },
+        { icon: "fas fa-bicycle", hint: "It has two wheels and you ride it.", ph: "B I _ E", ans: ["bike"] }
+    ];
+
+    const dbPart4 = [
+        { orig: "The bag is very heavy. I can't carry it.", pre: "The bag is too ", post: " to carry.", ans: ["heavy"] },
+        { orig: "There are five trees in the garden.", pre: "The garden ", post: " five trees.", ans: ["has"] },
+        { orig: "Tom is older than Mary.", pre: "Mary is ", post: " than Tom.", ans: ["younger"] },
+        { orig: "We stayed in the tent because of the rain.", pre: "It was raining, ", post: " we stayed in the tent.", ans: ["so"] },
+        { orig: "I don't have a bike.", pre: "I haven't ", post: " a bike.", ans: ["got"] },
+        { orig: "The book is £5 and the map is £2.", pre: "The book is more ", post: " than the map.", ans: ["expensive"] },
+        { orig: "Riding a bike is easy.", pre: "It is easy ", post: " a bike.", ans: ["to ride"] },
+        { orig: "She walks very fast.", pre: "She is a ", post: " walker.", ans: ["fast"] },
+        { orig: "Let's go to the lake.", pre: "Why don't we ", post: " to the lake?", ans: ["go"] },
+        { orig: "I liked the trip a lot.", pre: "I really ", post: " the trip.", ans: ["liked", "enjoyed"] },
+        { orig: "My tent is bigger than his tent.", pre: "His tent is ", post: " than my tent.", ans: ["smaller"] },
+        { orig: "It started raining an hour ago.", pre: "It has been raining ", post: " an hour.", ans: ["for"] },
+        { orig: "This is my first time in the mountains.", pre: "I have ", post: " been in the mountains before.", ans: ["never"] },
+        { orig: "He plays football very well.", pre: "He is very ", post: " at playing football.", ans: ["good"] },
+        { orig: "What is your name?", pre: "What are you ", post: "?", ans: ["called"] }
+    ];
+
+    let score = 0; let extraAltitude = 0; let questionsAnswered = 0; let isQuizDone = false; let rulesSeen = false; window.answerKeyMap = {};
+    let audioCtx = null;
+    function initAudioEngine() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    
+    function playSoundSynthEffect(type) {
+        if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+        if (type === 'boost') { const osc = audioCtx.createOscillator(); const gainNode = audioCtx.createGain(); osc.connect(gainNode); gainNode.connect(audioCtx.destination); osc.type = 'sine'; osc.frequency.setValueAtTime(500, now); osc.frequency.exponentialRampToValueAtTime(1000, now + 0.3); gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.3); osc.start(now); osc.stop(now + 0.3); } 
+        else if (type === 'hazard') { const osc = audioCtx.createOscillator(); const gainNode = audioCtx.createGain(); osc.connect(gainNode); gainNode.connect(audioCtx.destination); osc.type = 'sawtooth'; osc.frequency.setValueAtTime(250, now); osc.frequency.linearRampToValueAtTime(150, now + 0.4); gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.4); osc.start(now); osc.stop(now + 0.4); } 
+        else if (type === 'claps') { const frameCount = audioCtx.sampleRate * 0.5; const buffer = audioCtx.createBuffer(1, frameCount, audioCtx.sampleRate); const data = buffer.getChannelData(0); for (let i = 0; i < frameCount; i++) { data[i] = Math.random() * 2 - 1; } for (let c = 0; c < 12; c++) { setTimeout(() => { if (audioCtx.state === 'suspended') return; const noiseSource = audioCtx.createBufferSource(); noiseSource.buffer = buffer; const filter = audioCtx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = 1200; const gainNode = audioCtx.createGain(); noiseSource.connect(filter); filter.connect(gainNode); gainNode.connect(audioCtx.destination); gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15); noiseSource.start(audioCtx.currentTime); }, Math.random() * 400); } }
+    }
+
+    function showRules() { document.getElementById('rules-modal').style.display = 'flex'; }
+    function startClimb() { document.getElementById('rules-modal').style.display = 'none'; initAudioEngine(); if (!rulesSeen) { addLogEntry("🚀 Mission Started! Good luck."); rulesSeen = true; } }
+    function shuffle(array) { return array.sort(() => Math.random() - 0.5); }
+
+    function initDynamicQuiz() {
+        const sP1 = shuffle([...dbPart1]).slice(0, 5); // 5
+        const sP2 = shuffle([...dbPart2]).slice(0, 7); // 7
+        const sP3 = shuffle([...dbPart3]).slice(0, 7); // 7
+        const sP4 = shuffle([...dbPart4]).slice(0, 6); // 6 (Total 25)
+
+        let qCounter = 1;
+        let htmlP1 = ''; sP1.forEach((q) => { let id = `q_${qCounter++}`; window.answerKeyMap[id] = [q.a]; let opts = shuffle([...q.o]); htmlP1 += `<div class="trail-sign-container"><div class="css-sign ${q.cls}"><i class="${q.icon}"></i><span>${q.sign}</span></div><p style="margin-top:10px; font-weight:bold;">${id.split('_')[1]}. ${q.q}</p><select id="${id}" onchange="evaluateAnswer('${id}', 'select')"><option value="">-- Select --</option><option value="${opts[0]}">${opts[0]}</option><option value="${opts[1]}">${opts[1]}</option><option value="${opts[2]}">${opts[2]}</option></select></div>`; }); document.getElementById("render-part1").innerHTML = htmlP1;
+        let htmlP2 = ''; sP2.forEach((q) => { let id = `q_${qCounter++}`; window.answerKeyMap[id] = q.ans; htmlP2 += `<div><strong>Log #${id.split('_')[1]}:</strong> ${q.textPre} <input type="text" id="${id}" class="inline-input" onblur="evaluateAnswer('${id}', 'input')"> ${q.textPost}</div>`; }); document.getElementById("render-part2").innerHTML = htmlP2;
+        let htmlP3 = ''; sP3.forEach((q) => { let id = `q_${qCounter++}`; window.answerKeyMap[id] = q.ans; htmlP3 += `<div class="gear-card"><i class="${q.icon}"></i><p style="margin:5px 0; font-size:0.9rem;"><strong>${id.split('_')[1]}.</strong> ${q.hint}</p><input type="text" id="${id}" placeholder="${q.ph}" onblur="evaluateAnswer('${id}', 'input')"></div>`; }); document.getElementById("render-part3").innerHTML = htmlP3;
+        let htmlP4 = ''; sP4.forEach((q) => { let id = `q_${qCounter++}`; window.answerKeyMap[id] = q.ans; htmlP4 += `<p style="margin-top:10px;"><strong>${id.split('_')[1]}.</strong> "${q.orig}"<br>-> ${q.pre} <input type="text" id="${id}" class="transform-input" onblur="evaluateAnswer('${id}', 'input')"> ${q.post}</p>`; }); document.getElementById("render-part4").innerHTML = htmlP4;
+    }
+
+    function evaluateAnswer(id, type) {
+        initAudioEngine(); let el = document.getElementById(id); if (el.disabled) return; 
+        let userAns = el.value.trim().toLowerCase(); if (!userAns && type === 'input') return; 
+        el.disabled = true; questionsAnswered++;
+        let correctArr = window.answerKeyMap[id]; let isCorrect = correctArr.some(ans => ans.toLowerCase() === userAns);
+        let fb = document.createElement('span'); fb.className = 'feedback';
+        if (isCorrect) { score++; el.style.borderColor = "var(--correct)"; fb.innerHTML = "<i class='fas fa-check correct-ans'></i>"; playSoundSynthEffect('boost'); addLogEntry(`✅ Q${id.split('_')[1]} Good job! +10m.`); checkLevelUp(); } 
+        else { el.style.borderColor = "var(--wrong)"; fb.innerHTML = `<i class='fas fa-times wrong-ans'></i> <span style="color:var(--alpine-ice); font-weight:normal;">(${correctArr[0]})</span>`; playSoundSynthEffect('hazard'); addLogEntry(`❌ Q${id.split('_')[1]} Oops.`); }
+        el.parentNode.insertBefore(fb, el.nextSibling); updateTelemetry(); spin3DEngine(isCorrect);
+    }
+
+    function updateTelemetry() { let currentAlt = (score * 10) + extraAltitude; document.getElementById('alt-tracker').innerText = currentAlt + "m"; document.getElementById('prog-tracker').innerText = questionsAnswered + " / 25"; }
+
+    function spin3DEngine(isCorrect) {
+        if (!isCorrect) return; const cube = document.getElementById("cube-die"); cube.className = "cube tumbling";
+        setTimeout(() => { cube.className = "cube"; const randomFace = Math.floor(Math.random() * 6) + 1; const rotations = { 1: "rotateX(0deg) rotateY(0deg)", 2: "rotateX(0deg) rotateY(-90deg)", 3: "rotateX(-90deg) rotateY(0deg)", 4: "rotateX(90deg) rotateY(0deg)", 5: "rotateX(0deg) rotateY(90deg)", 6: "rotateX(180deg) rotateY(0deg)" }; cube.style.transform = rotations[randomFace];
+            let bonusVal = [50, 20, 10, 0, 30, 40][randomFace-1]; if (bonusVal > 0) { extraAltitude += bonusVal; addLogEntry(`🎲 Lucky Roll! (+${bonusVal}m)`); updateTelemetry(); } else { addLogEntry(`🎲 Rolled Snow Delay.`); }
+        }, 800);
+    }
+
+    function addLogEntry(text) { const logBox = document.getElementById("log-card"); logBox.innerHTML += `<div class="log-entry">${text}</div>`; logBox.scrollTop = logBox.scrollHeight; }
+
+    function checkLevelUp() {
+        if (score > 0 && score % 5 === 0) {
+            let badgeEl = document.getElementById(`badge-${score}`);
+            if (badgeEl && !badgeEl.classList.contains('unlocked')) {
+                badgeEl.classList.add('unlocked');
+                let rankName = ["Trail Starter", "Trail Walker", "Hiker", "Explorer", "Alpine Champion"][Math.floor(score/5)-1];
+                document.getElementById("level-indicator").innerText = "Rank: " + rankName;
+                displayPopup("Level Up! 🌟", `You reached ${score} points! New Rank: ${rankName}`, badgeEl.children[0].className);
+            }
+        }
+    }
+
+    function displayPopup(title, msg, iconClass) { document.getElementById("popup-title").innerText = title; document.getElementById("popup-text").innerHTML = msg; document.getElementById("popup-icon").className = iconClass; document.getElementById("popup-modal").style.display = "flex"; playSoundSynthEffect('claps'); }
+    function dismissPopup() { document.getElementById("popup-modal").style.display = "none"; }
+    function finalSummary() { isQuizDone = true; let finalAlt = (score * 10) + extraAltitude; alert(`Mission Log Finalized!\nQuestions Attempted: ${questionsAnswered}/25\nFinal Correct: ${score}\nFinal Altitude: ${finalAlt}m\nRank: ${document.getElementById("level-indicator").innerText.split(': ')[1]}`); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    window.addEventListener('blur', () => { if(!isQuizDone && questionsAnswered < 25 && rulesSeen) { document.getElementById('security-lock').style.display = 'flex'; } });
+    window.onload = initDynamicQuiz;
+</script>
+</body>
+</html>
