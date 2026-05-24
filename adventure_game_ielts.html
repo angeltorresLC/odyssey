@@ -535,7 +535,7 @@
         'blackbear':  'img/blackbear.png',    
         'aunty':      'img/aunty.png', 
         'junction':   'img/junction.png',         
-        'windy':      'img/windyu.png',
+        'windy':      'img/windy.png',
         'windy_down':  'img/highpeak.png',
         'oak_forest': 'img/oakforest.png'
     };
@@ -969,7 +969,7 @@
             options.innerHTML = `<button class="option-btn" onclick="startPath('descent')">📉 INITIATE DESCENT</button>`;
         } else if (currentPath === 'descent') {
             story.innerHTML = "<strong style='color:#94a3b8;'>SECTOR 3: CAMPGROUND TRAIL</strong><br>Entering deep backcountry territory.";
-            options.innerHTML = `<button class="option-btn" onclick="startPath('campground')">⛺ PUSH TO CAMPGROUND</button>`;
+            options.innerHTML = `<button class="option-btn" onclick="startPath('campground')">⛺ LEAVING CAMPGROUND</button>`;
         } else if (currentPath === 'campground') {
             story.innerHTML = "<strong style='color:#94a3b8;'>SECTOR 4: BLACKBEAR RUN</strong><br>Apex predator zone. Maintain speed and awareness.";
             options.innerHTML = `<button class="option-btn" onclick="startPath('blackbear')">🐻 ENTER BLACKBEAR RUN</button>`;
