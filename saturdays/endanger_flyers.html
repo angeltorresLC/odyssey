@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wildlife Defenders: A2 Flyers (Endangered Animals)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap');
+        
+        :root {
+            /* Anime/Cute Palette */
+            --bg-color: #e0f7fa;
+            --panel-bg: #ffffff;
+            --primary: #00a8ff;
+            --primary-dark: #0097e6;
+            --secondary: #4cd137;
+            --danger: #e84118;
+            --text-main: #2f3640;
+            --text-light: #718093;
+            --border-color: #dcdde1;
+            --shadow: 0 8px 15px rgba(0,0,0,0.1);
+            --bubble-bg: #f5f6fa;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0; padding: 0; font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-color); color: var(--text-main);
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            background-image: radial-gradient(circle at top right, #c7ecee, #e0f7fa);
+        }
+
+        h1, h2, h3 { color: var(--primary-dark); font-weight: 900; margin-top: 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.05); }
+        h1 { font-size: 2.5rem; text-align: center;}
+
+        #hud {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 40px; background: var(--panel-bg); border-bottom: 4px solid var(--primary);
+            box-shadow: var(--shadow); z-index: 100; border-radius: 0 0 20px 20px;
+        }
+
+        .hud-stat { display: flex; align-items: center; gap: 15px; font-size: 1.4rem; font-weight: 900; color: var(--text-light);}
+        .hud-stat span { color: var(--primary); font-size: 1.8rem; }
+        
+        .stamina-wrapper { display: flex; align-items: center; gap: 10px; }
+        .stamina-container { width: 250px; height: 30px; background: #eee; border-radius: 15px; overflow: hidden; position: relative; border: 3px solid var(--border-color); box-shadow: inset 0 3px 6px rgba(0,0,0,0.1);}
+        .stamina-bar { height: 100%; background: var(--secondary); width: 100%; transition: width 0.3s, background-color 0.3s; }
+        .stamina-text { position: absolute; width: 100%; text-align: center; top: 3px; font-size: 1rem; font-weight: 900; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);}
+
+        #game-container { flex: 1; display: flex; position: relative; overflow: hidden; }
+
+        #sidebar {
+            width: 280px; background: var(--panel-bg); border-right: 3px solid var(--border-color);
+            display: flex; flex-direction: column; z-index: 10; border-radius: 0 20px 0 0; margin-top: 10px;
+        }
+        
+        .sidebar-section { padding: 20px; }
+        
+        .stage-list { display: flex; flex-direction: column; gap: 12px; }
+        .stage-item { 
+            padding: 15px; border-radius: 15px; background: var(--bubble-bg);
+            color: var(--text-light); font-weight: 900; border: 3px solid transparent;
+            transition: 0.3s; font-size: 1.1rem;
+        }
+        .stage-item.active { background: #e3f2fd; border-color: var(--primary); color: var(--primary); transform: scale(1.05); }
+        .stage-item.cleared { background: #e8f8f5; border-color: var(--secondary); color: var(--secondary); }
+
+        #level-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+        
+        .level-screen { display: none; width: 100%; max-width: 900px; background: var(--panel-bg); padding: 40px; border-radius: 30px; box-shadow: var(--shadow); border: 4px solid #fff; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .level-screen.active { display: block; }
+
+        @keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        .bubble {
+            background: #ffffff; border: 3px solid var(--primary); border-radius: 25px;
+            padding: 15px 25px; font-size: 1.3rem; font-weight: 900; color: var(--primary);
+            cursor: pointer; text-align: center; transition: all 0.2s; user-select: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .bubble:hover { background: var(--primary); color: #ffffff; transform: translateY(-3px) scale(1.02); }
+        .bubble.selected { background: #ffeaa7; border-color: #fdcb6e; color: #d63031; }
+        .bubble.matched { background: var(--secondary); border-color: var(--secondary); color: #ffffff; pointer-events: none; opacity: 0.7; }
+
+        .image-icon { font-size: 2.5rem; line-height: 1; }
+
+        .action-btn {
+            background: var(--primary); color: #ffffff; border: none;
+            padding: 15px 40px; font-family: 'Nunito', sans-serif; font-size: 1.5rem; font-weight: 900;
+            cursor: pointer; transition: 0.3s; margin-top: 30px; border-radius: 30px;
+            width: 100%; max-width: 350px; display: block; margin-left: auto; margin-right: auto;
+            box-shadow: 0 6px 15px rgba(0, 168, 255, 0.4);
+        }
+        .action-btn:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0, 168, 255, 0.5); }
+        .action-btn.danger { background: var(--danger); box-shadow: 0 6px 15px rgba(232, 65, 24, 0.4); }
+        .action-btn.danger:hover:not(:disabled) { background: #c23616; }
+        .action-btn:disabled { background: #b2bec3; box-shadow: none; cursor: not-allowed; transform: none; }
+
+        .hint-btn {
+            background: #fbc531; color: #fff; border: 2px solid #e1b12c; border-radius: 50%;
+            width: 35px; height: 35px; font-size: 1.2rem; font-weight: 900; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center; margin-left: 10px;
+            transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); flex-shrink: 0;
+        }
+        .hint-btn:hover { transform: scale(1.1); background: #e1b12c; }
+
+        .dd-grid { display: flex; gap: 30px; margin-top: 20px;}
+        .dd-col { flex: 1; display: flex; flex-direction: column; gap: 15px; }
+        .drop-zone { border: 4px dashed var(--border-color); border-radius: 20px; padding: 20px; min-height: 90px; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: 900; font-size: 1.3rem; background: var(--bubble-bg); transition: 0.2s; color: var(--text-main);}
+        .drop-zone.drag-over { border-color: var(--primary); background: #e3f2fd; transform: scale(1.02); }
+        .drop-zone.correct { border: 4px solid var(--secondary); background: #e8f8f5; color: #27ae60; }
+        .draggable-bubble { width: 100%; font-size: 1.3rem; }
+        
+        .sentence-container { display: flex; align-items: center; background: #f8f9fa; padding: 20px; margin-bottom: 15px; border-left: 8px solid var(--primary); border-radius: 15px; box-shadow: 0 3px 6px rgba(0,0,0,0.05); }
+        .sentence { font-size: 1.4rem; font-weight: 800; flex: 1; }
+        select { background: #ffffff; color: var(--primary); border: 3px solid var(--primary); padding: 10px 15px; font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.2rem; outline: none; border-radius: 12px; cursor: pointer; margin: 0 10px;}
+        select.correct { border-color: var(--secondary); background: #e8f8f5; color: var(--secondary); }
+        select.wrong { border-color: var(--danger); background: #ffeaeb; color: var(--danger); }
+        select:disabled { cursor: not-allowed; opacity: 0.9; }
+
+        .reading-box { background: #ffffff; padding: 25px; border: 3px solid var(--primary); border-radius: 20px; font-size: 1.25rem; line-height: 1.8; color: #333; margin-bottom: 30px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.05); font-weight: 600;}
+        .tfng-question { margin-bottom: 25px; font-size: 1.3rem; font-weight: 900; background: #f5f6fa; padding: 15px; border-radius: 15px;}
+        .tfng-question:last-of-type { margin-bottom: 5px; }
+        .tfng-options { display: flex; gap: 20px; margin-top: 15px; }
+        .tfng-options label { cursor: pointer; color: var(--text-main); font-weight: 900; display: flex; align-items: center; gap: 10px; background: #ffffff; padding: 10px 20px; border-radius: 12px; border: 3px solid var(--border-color); transition: 0.2s;}
+        .tfng-options label:hover { border-color: var(--primary); transform: translateY(-2px); }
+        input[type="radio"] { transform: scale(1.5); accent-color: var(--primary); }
+        input[type="radio"]:disabled { cursor: not-allowed; }
+        
+        .memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 20px; }
+        .memory-card { height: 130px; perspective: 1000px; cursor: pointer; }
+        .memory-inner { width: 100%; height: 100%; transition: transform 0.5s; transform-style: preserve-3d; }
+        .memory-card.flipped .memory-inner { transform: rotateY(180deg); }
+        .memory-front, .memory-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; text-align: center; padding: 15px; border-radius: 20px; font-weight: 900; box-shadow: 0 4px 8px rgba(0,0,0,0.15);}
+        .memory-front { background: var(--primary); color: #ffffff; font-size: 3rem;}
+        .memory-back { background: #ffffff; border: 4px solid var(--primary); color: var(--text-main); transform: rotateY(180deg); font-size: 1.3rem; line-height: 1.4; display: flex; flex-direction: column; gap: 5px;}
+
+        .scramble-row { display: flex; align-items: center; gap: 20px; margin-bottom: 15px; background: #f8f9fa; padding: 15px 25px; border-radius: 15px; border: 2px solid var(--border-color);}
+        .scrambled { font-weight: 900; color: #8e44ad; font-size: 1.8rem; letter-spacing: 5px; width: 40%; text-align: right;}
+        .scramble-input { background: #ffffff; border: 3px solid var(--primary); color: var(--primary-dark); padding: 12px; font-size: 1.5rem; font-weight: 900; width: 40%; text-transform: uppercase; outline: none; border-radius: 12px; text-align: center;}
+        .scramble-input.correct { border-color: var(--secondary); background: #e8f8f5; color: var(--secondary); }
+        .scramble-input:disabled { cursor: not-allowed; opacity: 0.9; }
+
+        .quiz-item { background: #f5f6fa; padding: 25px; border: 3px solid var(--border-color); margin-bottom: 20px; border-radius: 20px;}
+        .quiz-q { font-size: 1.5rem; margin-bottom: 20px; font-weight: 900; color: var(--primary-dark); display: flex; align-items: center; gap: 15px;}
+        .quiz-opt { background: #ffffff; border: 3px solid var(--border-color); padding: 15px 20px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; border-radius: 15px; font-weight: 800; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;}
+        .quiz-opt:hover { border-color: var(--primary); background: #e3f2fd; transform: scale(1.01); }
+        .quiz-opt.selected { background: var(--primary); color: #ffffff; border-color: var(--primary); }
+        .quiz-opt.locked { cursor: not-allowed; }
+
+        .overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; text-align: center; backdrop-filter: blur(8px);}
+        .overlay-screen.active { display: flex; animation: fadeIn 0.3s ease; }
+        
+        .hint-modal-content { background: white; padding: 30px; border-radius: 30px; border: 5px solid var(--primary); box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-width: 500px; text-align: center;}
+        .hint-modal-content p { font-size: 1.5rem; font-weight: 800; margin: 20px 0; color: var(--text-main); }
+
+        .text-danger { color: var(--danger); }
+        .text-success { color: var(--secondary); }
+        .text-primary { color: var(--primary); }
+
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-10px);} 75% {transform: translateX(10px);} }
+        .damage-flash { animation: flash-red 0.4s; }
+        @keyframes flash-red { 0% { box-shadow: inset 0 0 0 10px var(--danger); } 100% { box-shadow: none; } }
+
+    </style>
+</head>
+<body>
+
+    <div id="hud">
+        <div class="stamina-wrapper">
+            <span style="font-weight: 900; color: var(--text-main); font-size: 1.4rem;">❤️ HEALTH</span>
+            <div class="stamina-container">
+                <div class="stamina-bar" id="stamina-fill"></div>
+                <div class="stamina-text" id="stamina-text">100 / 100</div>
+            </div>
+        </div>
+        <div class="hud-stat" style="color: var(--primary-dark); font-size: 1.8rem;" id="hud-stage">LEVEL 1</div>
+        <div class="hud-stat">⭐ SCORE: <span id="score-display">0</span></div>
+    </div>
+
+    <div id="game-container">
+        <div id="sidebar">
+            <div class="sidebar-section">
+                <h3>🌲 Adventure Map</h3>
+                <div class="stage-list">
+                    <div class="stage-item active" id="nav-s1">1. Word Match</div>
+                    <div class="stage-item" id="nav-s2">2. Picture Match</div>
+                    <div class="stage-item" id="nav-s3">3. Grammar Bridge</div>
+                    <div class="stage-item" id="nav-s4">4. Reading Story</div>
+                    <div class="stage-item" id="nav-s5">5. Magic Cards</div>
+                    <div class="stage-item" id="nav-s6">6. Secret Letters</div>
+                    <div class="stage-item" id="nav-s7">7. The Summit!</div>
+                </div>
+            </div>
+            
+            <div class="sidebar-section" style="flex: 1; display: flex; flex-direction: column; border-top: 3px solid var(--border-color); padding-top: 15px;">
+                <h3 style="color: var(--secondary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">🏆 Top Defenders</h3>
+                <div id="lb-content" style="flex: 1; overflow-y: auto; font-size: 1rem; display: flex; flex-direction: column; gap: 10px;">
+                    Loading live records... ⏳
+                </div>
+            </div>
+        </div>
+
+        <div id="level-area">
+            
+            <div id="stage-1" class="level-screen active">
+                <h1>📚 Level 1: Word Definitions</h1>
+                <p style="font-size: 1.4rem; color: var(--text-light); text-align: center;">Drag the words to match their descriptions! <b>Careful: There is one extra description!</b> (5 words)</p>
+                <div class="dd-grid">
+                    <div class="dd-col" id="dd-terms" style="justify-content: center;"></div>
+                    <div class="dd-col" id="dd-zones"></div>
+                </div>
+            </div>
+
+            <div id="stage-2" class="level-screen">
+                <h1>📸 Level 2: Picture Match</h1>
+                <p style="font-size: 1.4rem; color: var(--text-light); text-align: center;">Match the vocabulary to the correct picture! <br><b class="text-danger">Careful: There are 2 extra distractor pictures!</b> (5 words)</p>
+                <div class="dd-grid" style="flex-direction: row; align-items: center;">
+                    <div class="dd-col" id="syn-words"></div>
+                    <div class="dd-col" id="syn-syns" style="align-items: center;"></div>
+                </div>
+            </div>
+
+            <div id="stage-3" class="level-screen">
+                <h1>🌉 Level 3: Grammar Bridge</h1>
+                <p style="font-size: 1.4rem; color: var(--text-light); text-align: center;">Choose the right word to finish the sentence! (5 questions)</p>
+                <div id="sentences-container" style="margin-top: 20px;"></div>
+                <button class="action-btn" id="btn-s3" onclick="checkStage3()">Cross the Bridge</button>
+            </div>
+
+            <div id="stage-4" class="level-screen">
+                <h1>🐼 Level 4: The Giant Panda</h1>
+                <p style="font-size: 1.4rem; color: var(--text-light); text-align: center;">Read the passage carefully and answer True or False. (5 questions)</p>
+                <div class="reading-box" id="s4-passage">
+                    The giant panda is a beautiful black and white bear. It lives in the high mountains of China. Pandas love to eat bamboo. They can eat for up to 14 hours every day! <br><br>
+                    Sadly, pandas are in danger because people are cutting down the bamboo forests. If they don't have bamboo, they cannot survive. Today, many good people are working hard to protect these amazing bears. They are planting new trees and keeping the pandas safe in special nature parks.
+                </div>
+                <div id="tfng-container"></div>
+                <button class="action-btn" id="btn-s4" onclick="checkStage4()">Submit Answers</button>
+            </div>
+
+            <div id="stage-5" class="level-screen">
+                <h1>🃏 Level 5: Magic Cards</h1>
+                <p style="font-size: 1.4rem; color: var(--text-light); text-align: center;">Find the matching pairs! (5 pairs)</p>
+                <div class="memory-grid" id="memory-container"></div>
+            </div>
+
+            <div id="stage-6" class="level-screen">
+                <h1>🧩 Level 6: Secret Letters</h1>
+                <p style="font-size: 1.4rem; color: var(--text-light); text-align: center;">Unscramble the letters to make a word! (5 questions)</p>
+                <div id="scramble-container" style="margin-top: 20px;"></div>
+                <button class="action-btn" id="btn-s6" onclick="checkStage6()">Check Words</button>
+            </div>
+
+            <div id="stage-7" class="level-screen">
+                <h1 class="text-danger">🏔️ Level 7: The Summit!</h1>
+                <p style="font-size: 1.4rem; color: var(--text-light); text-align: center;">Answer the mixed questions to reach the top! (5 questions)</p>
+                <div id="quiz-container" style="margin-top: 20px;"></div>
+                <button class="action-btn danger" id="btn-s7" onclick="checkStage7()">Plant the Flag!</button>
+            </div>
+
+            <div id="hint-overlay" class="overlay-screen" style="z-index: 400;">
+                <div class="hint-modal-content">
+                    <h2 style="font-size: 2.5rem; color: #f39c12; margin-top: 0;">💡 Helpful Hint!</h2>
+                    <p id="hint-text">This is a hint.</p>
+                    <button class="action-btn" onclick="closeHint()" style="margin-top: 20px; padding: 10px 30px;">Got it!</button>
+                </div>
+            </div>
+
+            <div id="mini-modal-overlay" class="overlay-screen" style="z-index: 350;">
+                <div class="hint-modal-content" style="border-color: var(--danger);">
+                    <h2 style="font-size: 2.2rem; color: var(--danger); margin-top: 0;">⚠️ Incorrect!</h2>
+                    <p id="mini-modal-text" style="font-size: 1.3rem;">Correct answer info goes here.</p>
+                    <button class="action-btn danger" onclick="closeMiniModal()" style="margin-top: 20px; padding: 10px 30px;">Understand (-5 Pts)</button>
+                </div>
+            </div>
+
+            <div id="feedback-overlay" class="overlay-screen" style="z-index: 300;">
+                <div class="hint-modal-content" style="border-color: var(--danger); max-width: 650px;">
+                    <h2 style="font-size: 2.5rem; color: var(--danger); margin-top: 0;">⚠️ Needs Improvement!</h2>
+                    <p style="font-size: 1.2rem; color: var(--text-main);">You lost some health and points. Review the correct answers you missed before moving on:</p>
+                    <div id="feedback-list" style="text-align: left; background: #f5f6fa; padding: 20px; border-radius: 15px; max-height: 250px; overflow-y: auto; font-size: 1.2rem; margin-bottom: 20px; border: 2px solid var(--border-color);"></div>
+                    <button class="action-btn danger" onclick="closeFeedbackAndContinue()">Accept Penalty & Continue</button>
+                </div>
+            </div>
+
+            <div id="transition-screen" class="overlay-screen" style="z-index: 500;">
+                <h1 class="text-success" style="font-size: 5rem;">🎉 LEVEL CLEARED 🎉</h1>
+                <h2 id="trans-reward" style="font-size: 2.5rem; color: var(--primary);">+100 Points</h2>
+                <button class="action-btn" onclick="nextStage()">Next Level ➔</button>
+            </div>
+
+            <div id="game-over-screen" class="overlay-screen" style="z-index: 600;">
+                <h1 class="text-danger" style="font-size: 5rem;">😢 OH NO!</h1>
+                <p style="font-size: 1.8rem; font-weight: 900; color: var(--text-light);">You lost all your health.</p>
+                <button class="action-btn danger" onclick="restartStage()">Try Again</button>
+            </div>
+
+            <div id="victory-screen" class="overlay-screen" style="z-index: 600;">
+                <h1 class="text-primary" style="font-size: 5rem;">🏆 YOU WIN! 🏆</h1>
+                <h2 style="font-size: 3rem; color: var(--text-main);">Final Score: <span id="final-score-display" style="color: var(--secondary);"></span></h2>
+                <p id="saving-status" style="font-size: 1.3rem; font-weight: 900; color: var(--text-light); max-width: 600px; margin: 10px auto;">Saving your score to the database...</p>
+                <button class="action-btn" onclick="location.reload()" style="margin-top: 20px;">Play Again</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- GOOGLE SHEETS DATABASE CONNECTION ---
+        const GOOGLE_SHEETS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxpZMXmjV-GzTzqtdSVs2rRy8-Jyzj7Jocjvyfo_9vJ9I_DtQsdG34Nk48tQ9ihdvlp/exec"; 
+        
+        function loadLeaderboard(localPlayerName = "") {
+            const lbContainer = document.getElementById('lb-content');
+            lbContainer.innerHTML = "Fetching... ⏳";
+            
+            fetch(GOOGLE_SHEETS_WEB_APP_URL)
+            .then(response => response.json())
+            .then(data => {
+                let html = "";
+                if (Array.isArray(data) && data.length > 0) {
+                    data.sort((a, b) => b.score - a.score);
+                    const top5Scores = data.slice(0, 5);
+                    
+                    top5Scores.forEach((entry, index) => {
+                        let highlights = (localPlayerName && entry.playerName === localPlayerName) 
+                            ? 'style="color: var(--primary); font-weight:900; background: #e3f2fd; padding: 8px; border-radius: 8px;"' 
+                            : 'style="padding: 8px; border-bottom: 2px dashed #eee;"';
+                        
+                        html += `
+                        <div style="display: flex; justify-content: space-between; font-weight: 800; align-items: center;">
+                            <span ${highlights}>${index + 1}. ${entry.playerName}</span> 
+                            <span style="color: var(--secondary);">${entry.score} ⭐</span>
+                        </div>`;
+                    });
+                } else {
+                    html = "<div style='color: var(--text-light); font-weight: bold; text-align: center; margin-top: 20px; padding: 20px; background: #fff; border-radius: 15px;'>No scores yet! Be the first!</div>";
+                }
+                lbContainer.innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Leaderboard fetch error:', error);
+                lbContainer.innerHTML = `
+                    <div style="color: var(--danger); font-size: 0.9rem; text-align:center; padding: 10px; background: #ffeaa7; border-radius: 10px; font-weight: bold;">
+                        Error connecting to database.<br>Check Google Apps Script permissions!
+                    </div>`;
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => { loadLeaderboard(); });
+
+        function submitScore(name, finalScore) {
+            document.getElementById('saving-status').innerText = "Sending score to database... ⏳";
+            fetch(GOOGLE_SHEETS_WEB_APP_URL, {
+                method: 'POST', mode: 'no-cors', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ playerName: name, score: finalScore })
+            }).then(() => {
+                document.getElementById('saving-status').innerText = "Score Saved! Check the Leaderboard on the left.";
+                loadLeaderboard(name);
+            }).catch(error => {
+                document.getElementById('saving-status').innerText = "Connection Error. Please show your score to your teacher!";
+            });
+        }
+
+        // --- GAME ENGINE ---
+        let currentStage = 1;
+        let score = 0;
+        let maxStamina = 100;
+        let currentStamina = 100;
+        let questionsNeeded = { s1: 5, s2: 5, s3: 5, s4: 5, s5: 5, s6: 5, s7: 5 }; 
+        const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
+
+        // --- A2 FLYERS ENDANGERED ANIMALS POOLS ---
+        const pools = {
+            s1: [
+                { id: "s1_1", t: "Protect", d: "To keep an animal safe from danger.", hint: "Good people do this for wild animals." },
+                { id: "s1_2", t: "Jungle", d: "A hot, wet place with many tall trees and wild animals.", hint: "Monkeys and tigers live here." },
+                { id: "s1_3", t: "Extinct", d: "When a kind of animal does not live in the world anymore.", hint: "Dinosaurs are this." },
+                { id: "s1_4", t: "Hunt", d: "To chase and kill wild animals.", hint: "Bad people do this for money." },
+                { id: "s1_5", t: "Forest", d: "A large area of land covered with trees.", hint: "Bears and wolves live here." },
+                { id: "s1_6", t: "Pollution", d: "Dirty air or water that is bad for animals and plants.", hint: "Plastic in the sea is an example." },
+                { id: "s1_7", t: "Ocean", d: "A very big sea where whales and sharks live.", hint: "It is full of salty water." },
+                { id: "s1_8", t: "Ice", d: "Frozen water where polar bears live.", hint: "It is very cold and white." }
+            ],
+            s2: [
+                { w: "Panda", img: "🐼", hint: "It is a black and white bear." },
+                { w: "Tiger", img: "🐅", hint: "A big, wild cat with orange and black stripes." },
+                { w: "Rhino", img: "🦏", hint: "A large animal with one or two horns on its nose." },
+                { w: "Whale", img: "🐋", hint: "The biggest animal in the sea." },
+                { w: "Elephant", img: "🐘", hint: "A very large animal with big ears and a long trunk." },
+                { w: "Turtle", img: "🐢", hint: "It has a hard shell and swims in the ocean." },
+                { w: "Polar Bear", img: "🐻‍❄️", hint: "A large white bear that lives in the cold ice." },
+                { w: "Gorilla", img: "🦍", hint: "A very large, strong ape that lives in the forest." }
+            ],
+            s3: [
+                { q: "The blue whale is the ___ animal in the world.", a: "biggest", o: ["biggest", "bigger", "big"], hint: "Superlative form." },
+                { q: "We must ___ the pandas before they disappear.", a: "save", o: ["save", "saves", "saving"], hint: "Use the base form after 'must'." },
+                { q: "Yesterday, we ___ a documentary about wild tigers.", a: "watched", o: ["watched", "watch", "watching"], hint: "Past simple tense." },
+                { q: "If we cut down trees, the monkeys ___ lose their homes.", a: "will", o: ["will", "did", "are"], hint: "First conditional future." },
+                { q: "There are not ___ rhinos left in the wild.", a: "many", o: ["many", "much", "some"], hint: "Used with plural countable nouns in negative sentences." },
+                { q: "The elephant is ___ than the lion.", a: "heavier", o: ["heavier", "heaviest", "heavy"], hint: "Comparative form." },
+                { q: "People shouldn't ___ rubbish in the ocean.", a: "throw", o: ["throw", "throwing", "threw"], hint: "Use the base form after 'shouldn't'." },
+                { q: "He is ___ to help the animals next week.", a: "going", o: ["going", "go", "goes"], hint: "Future plan using 'be going to'." }
+            ],
+            s4: [ 
+                { q: "Pandas live in the mountains of China.", a: "T", hint: "Check where the passage says they live." },
+                { q: "Pandas only eat for one hour a day.", a: "F", hint: "How long can they eat every day?" },
+                { q: "Pandas are black and brown.", a: "F", hint: "What colors are the pandas?" },
+                { q: "People are cutting down the bamboo forests.", a: "T", hint: "Why are they in danger?" },
+                { q: "Nobody is trying to help the pandas.", a: "F", hint: "Are people working hard to protect them?" },
+                { q: "Pandas are a kind of bear.", a: "T", hint: "What animal family do they belong to?" },
+                { q: "Nature parks are safe places for the animals.", a: "T", hint: "Why do people put them in these parks?" },
+                { q: "If pandas have no bamboo, they will be fine.", a: "F", hint: "Can they survive without their food?" }
+            ],
+            s5: [ 
+                { id: "m1", t: "Elephant", img: "🐘", hint: "Has a trunk." },
+                { id: "m2", t: "Panda", img: "🐼", hint: "Eats bamboo." },
+                { id: "m3", t: "Whale", img: "🐋", hint: "Huge sea animal." },
+                { id: "m4", t: "Tiger", img: "🐅", hint: "Big cat with stripes." },
+                { id: "m5", t: "Turtle", img: "🐢", hint: "Swims with a shell." },
+                { id: "m6", t: "Rhino", img: "🦏", hint: "Has a horn." },
+                { id: "m7", t: "Polar Bear", img: "🐻‍❄️", hint: "White bear in the cold." },
+                { id: "m8", t: "Gorilla", img: "🦍", hint: "Strong forest ape." }
+            ],
+            s6: [
+                { w: "SAVE", hint: "To protect someone from danger." },
+                { w: "TIGER", hint: "A big, wild cat with orange and black stripes." },
+                { w: "WORLD", hint: "The Earth and all the people and animals on it." },
+                { w: "FOREST", hint: "A big area of land with many trees." },
+                { w: "OCEAN", hint: "A very large sea of salt water." },
+                { w: "HELP", hint: "To make it easier for someone to do something." },
+                { w: "WATER", hint: "Fish need this to swim in." },
+                { w: "ANIMAL", hint: "A dog, cat, lion, or elephant, for example." }
+            ],
+            s7: [
+                { q: "Which animal is black and white and eats bamboo?", o: ["Panda", "Tiger", "Elephant"], a: "Panda", hint: "They live in China." },
+                { q: "Where do whales and sea turtles live?", o: ["In the ocean", "In the jungle", "In the desert"], a: "In the ocean", hint: "They need deep salt water." },
+                { q: "What does 'extinct' mean?", o: ["The animal is gone forever", "The animal is sleeping", "The animal is fast"], a: "The animal is gone forever", hint: "Dinosaurs are an example." },
+                { q: "Why are polar bears in danger?", o: ["The ice is melting", "They are too cold", "They eat too much"], a: "The ice is melting", hint: "They need the cold environment to survive." },
+                { q: "What should we do to help the Earth?", o: ["Plant trees", "Throw rubbish", "Cut forests"], a: "Plant trees", hint: "This gives animals homes and clean air." },
+                { q: "Which animal has a very long nose called a trunk?", o: ["Elephant", "Rhino", "Gorilla"], a: "Elephant", hint: "It is the biggest land animal." },
+                { q: "What is a 'forest'?", o: ["A place with many trees", "A hot, dry desert", "A busy city"], a: "A place with many trees", hint: "Birds and bears live here." },
+                { q: "How can we keep the oceans clean?", o: ["Don't throw plastic in the water", "Put more rubbish in", "Catch all the fish"], a: "Don't throw plastic in the water", hint: "Turtles often mistake this for food." }
+            ]
+        };
+
+        // --- AUDIO & EFFECTS ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSfx(type) {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            if(type === 'correct') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime+0.1);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+0.1);
+                osc.start(); osc.stop(audioCtx.currentTime+0.1);
+            } else if(type === 'damage') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(80, audioCtx.currentTime+0.2);
+                gain.gain.setValueAtTime(0.4, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime+0.2);
+                osc.start(); osc.stop(audioCtx.currentTime+0.2);
+                
+                const levelArea = document.getElementById('level-area');
+                levelArea.classList.remove('damage-flash');
+                void levelArea.offsetWidth;
+                levelArea.classList.add('damage-flash');
+            } else if(type === 'clear') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(554, audioCtx.currentTime+0.1); osc.frequency.setValueAtTime(659, audioCtx.currentTime+0.2);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime+0.5);
+                osc.start(); osc.stop(audioCtx.currentTime+0.5);
+            }
+        }
+
+        // --- MODAL SYSTEMS ---
+        function showHint(text) {
+            document.getElementById('hint-text').innerText = text;
+            document.getElementById('hint-overlay').classList.add('active');
+        }
+        function closeHint() { document.getElementById('hint-overlay').classList.remove('active'); }
+
+        function showMiniModal(htmlContent) {
+            document.getElementById('mini-modal-text').innerHTML = htmlContent;
+            document.getElementById('mini-modal-overlay').classList.add('active');
+        }
+        function closeMiniModal() { document.getElementById('mini-modal-overlay').classList.remove('active'); }
+
+        let feedbackContinueCallback = null;
+        function showFeedbackModal(errorsList, continueFunc) {
+            let html = errorsList.map(e => `<div style="margin-bottom: 12px; border-bottom: 2px dashed #dcdde1; padding-bottom: 8px;">
+                <b style="color: var(--text-main);">Question:</b> ${e.q}<br>
+                <b class="text-success">Correct Answer:</b> ${e.a}
+            </div>`).join('');
+            document.getElementById('feedback-list').innerHTML = html;
+            document.getElementById('feedback-overlay').classList.add('active');
+            feedbackContinueCallback = continueFunc;
+        }
+        function closeFeedbackAndContinue() {
+            document.getElementById('feedback-overlay').classList.remove('active');
+            if(feedbackContinueCallback) feedbackContinueCallback();
+        }
+
+        // --- HUD & PROGRESS ---
+        function updateHUD() {
+            document.getElementById('score-display').innerText = score;
+            const staminaPercent = (currentStamina / maxStamina) * 100;
+            const sBar = document.getElementById('stamina-fill');
+            sBar.style.width = Math.max(0, staminaPercent) + '%';
+            document.getElementById('stamina-text').innerText = `${Math.max(0, currentStamina)} / ${maxStamina}`;
+            
+            if(staminaPercent > 50) sBar.style.backgroundColor = 'var(--secondary)';
+            else if(staminaPercent > 20) sBar.style.backgroundColor = '#f39c12';
+            else sBar.style.backgroundColor = 'var(--danger)';
+        }
+
+        function addScore(points) { score += points; updateHUD(); playSfx('correct'); }
+        function deductScore(points) { score = Math.max(0, score - points); updateHUD(); }
+        function takeDamage(amount) {
+            currentStamina -= amount; playSfx('damage'); updateHUD();
+            if(currentStamina <= 0) document.getElementById('game-over-screen').classList.add('active');
+        }
+
+        // --- LEVEL TRANSITION ---
+        function stageClear(bonus) {
+            if(document.getElementById('transition-screen').classList.contains('active')) return;
+            addScore(bonus); playSfx('clear');
+            
+            let rewardText = document.getElementById('trans-reward');
+            if (bonus > 0) {
+                rewardText.innerText = `+${bonus} Points!`;
+                rewardText.style.color = 'var(--primary)';
+            } else {
+                rewardText.innerText = `Too many errors. No bonus points!`;
+                rewardText.style.color = 'var(--danger)';
+            }
+
+            document.getElementById('nav-s'+currentStage).classList.replace('active', 'cleared');
+            document.getElementById('transition-screen').classList.add('active');
+        }
+
+        function nextStage() {
+            document.getElementById('transition-screen').classList.remove('active');
+            document.getElementById('stage-'+currentStage).classList.remove('active');
+            currentStage++;
+            if(currentStage <= 7) {
+                document.getElementById('stage-'+currentStage).classList.add('active');
+                document.getElementById('nav-s'+currentStage).classList.add('active');
+                document.getElementById('hud-stage').innerText = "LEVEL " + currentStage;
+                currentStamina = Math.min(maxStamina, currentStamina + 30); 
+                updateHUD();
+            } else { triggerVictory(); }
+        }
+
+        function restartStage() {
+            currentStamina = maxStamina;
+            score = Math.max(0, score - 50); 
+            updateHUD();
+            document.getElementById('game-over-screen').classList.remove('active');
+        }
+
+        function triggerVictory() {
+            document.getElementById('victory-screen').classList.add('active');
+            document.getElementById('final-score-display').innerText = score;
+            playSfx('clear');
+            setTimeout(() => {
+                const playerName = prompt("Summit Conquered! Enter your name to save your score to the Database:");
+                if (playerName && playerName.trim() !== "") submitScore(playerName.trim(), score);
+                else document.getElementById('saving-status').innerText = "Score not saved (No name entered).";
+            }, 800);
+        }
+
+        // --- INIT STAGES DYNAMICALLY ---
+        
+        // Stage 1
+        let s1PoolShuffle = shuffle(pools.s1);
+        let s1Active = s1PoolShuffle.slice(0, questionsNeeded.s1);
+        let s1Distractor = s1PoolShuffle[questionsNeeded.s1];
+        let s1ZonesData = shuffle([...s1Active, s1Distractor]);
+        const ddTerms = document.getElementById('dd-terms'), ddZones = document.getElementById('dd-zones');
+        let s1Correct = 0, s1Errors = 0, dragEl = null;
+        
+        shuffle(s1Active).forEach(d => { ddTerms.innerHTML += `<div class="bubble draggable-bubble" draggable="true" data-id="${d.id}">${d.t}</div>`; });
+        s1ZonesData.forEach(d => {
+            ddZones.innerHTML += `<div style="display:flex; align-items:center; gap:10px;">
+                <div class="drop-zone" style="flex:1;" data-match="${d.id}">${d.d}</div>
+                <button class="hint-btn" onclick="showHint('${d.hint}')">❓</button>
+            </div>`;
+        });
+
+        document.querySelectorAll('.draggable-bubble').forEach(b => {
+            b.addEventListener('dragstart', () => { dragEl = b; setTimeout(()=>b.style.opacity='0.5',0); });
+            b.addEventListener('dragend', () => { dragEl.style.opacity='1'; dragEl=null; });
+        });
+        document.querySelectorAll('.drop-zone').forEach(z => {
+            z.addEventListener('dragover', e => { e.preventDefault(); if(!z.classList.contains('correct') && !z.classList.contains('locked')) z.classList.add('drag-over'); });
+            z.addEventListener('dragleave', () => z.classList.remove('drag-over'));
+            z.addEventListener('drop', e => {
+                e.preventDefault(); z.classList.remove('drag-over');
+                if (dragEl && !z.classList.contains('correct') && !z.classList.contains('locked')) {
+                    if (dragEl.dataset.id === z.dataset.match) {
+                        z.innerHTML = dragEl.innerHTML; z.classList.add('correct'); dragEl.style.display='none';
+                        addScore(50); s1Correct++;
+                        if(s1Correct === questionsNeeded.s1) {
+                            let bonus = (s1Errors / questionsNeeded.s1 > 0.4) ? 0 : 100;
+                            setTimeout(() => stageClear(bonus), 500);
+                        }
+                    } else {
+                        s1Errors++;
+                        takeDamage(10); deductScore(5);
+                        let correctObj = s1PoolShuffle.find(x => x.id === dragEl.dataset.id);
+                        let correctDef = s1ZonesData.find(x => x.id === dragEl.dataset.id)?.d;
+                        if(correctDef) showMiniModal(`<b>${correctObj.t}</b> actually matches with:<br><i>"${correctDef}"</i>`);
+                    }
+                } 
+            });
+        });
+
+        // Stage 2
+        let s2PoolShuffle = shuffle(pools.s2);
+        let s2Active = s2PoolShuffle.slice(0, questionsNeeded.s2);
+        let s2Distractors = s2PoolShuffle.slice(questionsNeeded.s2, questionsNeeded.s2 + 2);
+        let s2ImagesData = shuffle([...s2Active, ...s2Distractors]);
+        const sw = document.getElementById('syn-words'), ss = document.getElementById('syn-syns');
+        let s2C = 0, s2Errors = 0, sW = null, sS = null;
+
+        shuffle(s2Active).forEach(d => {
+            sw.innerHTML += `<div style="display:flex; align-items:center; gap:10px; flex:1;">
+                <div class="bubble syn-w" style="flex:1;" data-val="${d.w}">${d.w}</div>
+                <button class="hint-btn" onclick="showHint('${d.hint}')">❓</button>
+            </div>`;
+        });
+        
+        s2ImagesData.forEach(d => { 
+            ss.innerHTML += `<div class="bubble syn-s image-icon" data-val="${d.w}">${d.img}</div>`; 
+        });
+
+        document.querySelectorAll('.syn-w').forEach(b => b.addEventListener('click', function() { if(this.classList.contains('matched')) return; document.querySelectorAll('.syn-w').forEach(x=>x.classList.remove('selected')); this.classList.add('selected'); sW=this.dataset.val; checkS2(); }));
+        document.querySelectorAll('.syn-s').forEach(b => b.addEventListener('click', function() { if(this.classList.contains('matched')) return; document.querySelectorAll('.syn-s').forEach(x=>x.classList.remove('selected')); this.classList.add('selected'); sS=this.dataset.val; checkS2(); }));
+        
+        function checkS2() {
+            if(sW && sS) {
+                if(sW === sS) {
+                    document.querySelector(`.syn-w[data-val="${sW}"]`).classList.replace('selected','matched');
+                    document.querySelector(`.syn-s[data-val="${sS}"]`).classList.replace('selected','matched');
+                    addScore(50); s2C++; 
+                    if(s2C === questionsNeeded.s2) {
+                        let bonus = (s2Errors / questionsNeeded.s2 > 0.4) ? 0 : 100;
+                        setTimeout(() => stageClear(bonus), 500);
+                    }
+                } else { 
+                    s2Errors++;
+                    takeDamage(10); deductScore(5);
+                    let correctImgObj = s2PoolShuffle.find(x => x.w === sW);
+                    showMiniModal(`The word <b>${sW}</b> goes with the <b class="image-icon" style="font-size:2rem; vertical-align:middle;">${correctImgObj.img}</b> picture!`);
+                    document.querySelectorAll('.selected').forEach(x=>x.classList.remove('selected')); 
+                }
+                sW=sS=null;
+            }
+        }
+
+        // Stage 3
+        let s3Active = shuffle(pools.s3).slice(0, questionsNeeded.s3);
+        const s3c = document.getElementById('sentences-container');
+        s3Active.forEach((d,i) => {
+            let opts = shuffle(d.o).map(x=>`<option value="${x}">${x}</option>`).join('');
+            s3c.innerHTML += `<div class="sentence-container">
+                <div class="sentence">${i+1}. ${d.q.replace('___', `<select id="s3-${i}"><option value="">---</option>${opts}</select>`)}</div>
+                <button class="hint-btn" onclick="showHint('${d.hint}')">❓</button>
+            </div>`;
+        });
+        
+        function checkStage3() {
+            let errs = 0; let errorDetails = [];
+            s3Active.forEach((d,i) => {
+                let sel = document.getElementById(`s3-${i}`);
+                sel.disabled = true;
+                if(sel.value === d.a) { sel.className='correct'; } 
+                else { 
+                    sel.className='wrong'; 
+                    errorDetails.push({q: d.q.replace('___', '___'), a: d.a});
+                    sel.value = d.a; 
+                    errs++; deductScore(5);
+                }
+            });
+            if(errs === 0) { 
+                document.getElementById('btn-s3').disabled = true; stageClear(150); 
+            } else { 
+                takeDamage(errs * 10); 
+                document.getElementById('btn-s3').innerText = "Continue";
+                let bonus = (errs / questionsNeeded.s3 > 0.4) ? 0 : 50;
+                document.getElementById('btn-s3').onclick = () => stageClear(bonus);
+                showFeedbackModal(errorDetails, null);
+            }
+        }
+
+        // Stage 4
+        let s4Active = shuffle(pools.s4).slice(0, questionsNeeded.s4);
+        const s4c = document.getElementById('tfng-container');
+        s4Active.forEach((d,i) => {
+            let tfOpts = shuffle([{v:'T', l:'True'}, {v:'F', l:'False'}]);
+            let radios = tfOpts.map(opt => `<label><input type="radio" name="tfng${i}" value="${opt.v}"> ${opt.l}</label>`).join('');
+            s4c.innerHTML += `<div class="tfng-question">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>${i+1}. ${d.q}</div>
+                    <button class="hint-btn" onclick="showHint('${d.hint}')">❓</button>
+                </div>
+                <div class="tfng-options">${radios}</div></div>`;
+        });
+        
+        function checkStage4() {
+            let errs = 0; let errorDetails = [];
+            s4Active.forEach((d,i) => {
+                let chk = document.querySelector(`input[name="tfng${i}"]:checked`);
+                let box = document.querySelectorAll('.tfng-question')[i];
+                document.querySelectorAll(`input[name="tfng${i}"]`).forEach(r => r.disabled = true);
+                
+                if(chk && chk.value === d.a) { 
+                    box.style.background = '#e8f8f5'; box.style.borderLeft = '6px solid var(--secondary)'; 
+                } else { 
+                    box.style.background = '#ffeaeb'; box.style.borderLeft = '6px solid var(--danger)'; 
+                    let correctRadio = document.querySelector(`input[name="tfng${i}"][value="${d.a}"]`);
+                    if(correctRadio) correctRadio.checked = true;
+                    errorDetails.push({q: d.q, a: d.a === 'T' ? 'True' : 'False'});
+                    errs++; deductScore(5);
+                }
+            });
+            if(errs === 0) { 
+                document.getElementById('btn-s4').disabled = true; stageClear(150); 
+            } else { 
+                takeDamage(errs * 10); 
+                document.getElementById('btn-s4').innerText = "Continue";
+                let bonus = (errs / questionsNeeded.s4 > 0.4) ? 0 : 50;
+                document.getElementById('btn-s4').onclick = () => stageClear(bonus);
+                showFeedbackModal(errorDetails, null);
+            }
+        }
+
+        // Stage 5
+        let s5Active = shuffle(pools.s5).slice(0, questionsNeeded.s5);
+        let s5Pairs = [];
+        s5Active.forEach(p => {
+            s5Pairs.push({id: p.id, type: 't', val: p.t, hint: p.hint});
+            s5Pairs.push({id: p.id, type: 'img', val: p.img, hint: p.hint});
+        });
+        s5Pairs = shuffle(s5Pairs);
+        const s5c = document.getElementById('memory-container');
+        s5Pairs.forEach((p,i) => {
+            let backContent = p.type === 'img' ? `<span class="image-icon">${p.val}</span>` : p.val;
+            s5c.innerHTML += `<div class="memory-card" data-id="${p.id}" onclick="flipCard(this)">
+                <div class="memory-inner"><div class="memory-front">?</div>
+                <div class="memory-back">${backContent}</div></div></div>`;
+        });
+        
+        let c1=null, c2=null, s5C=0, s5Errors = 0;
+        function flipCard(card) {
+            if(card.classList.contains('flipped') || c2) return;
+            card.classList.add('flipped');
+            if(!c1) { c1 = card; } 
+            else { 
+                c2 = card;
+                if(c1.dataset.id === c2.dataset.id) {
+                    addScore(50); s5C++; c1=null; c2=null;
+                    if(s5C === questionsNeeded.s5) {
+                        let bonus = (s5Errors / questionsNeeded.s5 > 0.4) ? 0 : 100;
+                        setTimeout(() => stageClear(bonus), 500);
+                    }
+                } else {
+                    s5Errors++;
+                    takeDamage(5); deductScore(5);
+                    let correctObj = s5Active.find(x => x.id === c1.dataset.id);
+                    showMiniModal(`The cards didn't match! <b>${correctObj.t}</b> goes with <b>${correctObj.img}</b>.`);
+                    setTimeout(() => { c1.classList.remove('flipped'); c2.classList.remove('flipped'); c1=null; c2=null; }, 800);
+                }
+            }
+        }
+
+        // Stage 6
+        let s6Active = shuffle(pools.s6).slice(0, questionsNeeded.s6);
+        const s6c = document.getElementById('scramble-container');
+        s6Active.forEach((d,i) => {
+            let scr = d.w.split('').sort(()=>Math.random()-0.5).join('');
+            s6c.innerHTML += `<div class="scramble-row">
+                <div class="scrambled">${scr}</div>
+                <input type="text" class="scramble-input" id="scr-${i}">
+                <button class="hint-btn" onclick="showHint('${d.hint}')">❓</button>
+            </div>`;
+        });
+        
+        function checkStage6() {
+            let errs = 0; let errorDetails = [];
+            s6Active.forEach((d,i) => {
+                let inp = document.getElementById(`scr-${i}`);
+                inp.disabled = true;
+                if(inp.value.toUpperCase().trim() === d.w) { inp.classList.add('correct'); } 
+                else { 
+                    inp.classList.remove('correct'); 
+                    inp.style.borderColor = 'var(--danger)'; inp.style.backgroundColor = '#ffeaeb'; inp.style.color = 'var(--danger)';
+                    errorDetails.push({q: `Unscramble these letters`, a: d.w});
+                    inp.value = d.w;
+                    errs++; deductScore(5);
+                }
+            });
+            if(errs === 0) { 
+                document.getElementById('btn-s6').disabled = true; stageClear(150); 
+            } else { 
+                takeDamage(errs*10); 
+                document.getElementById('btn-s6').innerText = "Continue";
+                let bonus = (errs / questionsNeeded.s6 > 0.4) ? 0 : 50;
+                document.getElementById('btn-s6').onclick = () => stageClear(bonus);
+                showFeedbackModal(errorDetails, null);
+            }
+        }
+
+        // Stage 7
+        let s7Active = shuffle(pools.s7).slice(0, questionsNeeded.s7);
+        const s7c = document.getElementById('quiz-container');
+        let s7Ans = Array(questionsNeeded.s7).fill(null);
+        
+        s7Active.forEach((d,i) => {
+            let html = `<div class="quiz-item" id="q7-${i}">
+                <div class="quiz-q">${i+1}. ${d.q} <button class="hint-btn" onclick="showHint('${d.hint}')">❓</button></div>`;
+            shuffle(d.o).forEach((opt) => { html += `<div class="quiz-opt" data-val="${opt}" onclick="s7Sel(this,${i})">${opt}</div>`; });
+            s7c.innerHTML += html + `</div>`;
+        });
+        
+        function s7Sel(btn, q) {
+            if(btn.classList.contains('locked')) return;
+            btn.parentElement.querySelectorAll('.quiz-opt').forEach(x=>x.classList.remove('selected'));
+            btn.classList.add('selected'); s7Ans[q] = btn.dataset.val; playSfx('correct');
+        }
+        
+        function checkStage7() {
+            if(s7Ans.includes(null) && document.getElementById('btn-s7').innerText !== "Finish!") { alert("Please answer all questions!"); return; }
+            let errs = 0; let errorDetails = [];
+            s7Ans.forEach((a,i) => { 
+                let item = document.getElementById(`q7-${i}`);
+                item.querySelectorAll('.quiz-opt').forEach(optEl => {
+                    optEl.classList.add('locked'); optEl.style.pointerEvents = 'none';
+                    if (optEl.dataset.val === s7Active[i].a) {
+                        optEl.style.background = '#e8f8f5'; optEl.style.borderColor = 'var(--secondary)'; optEl.style.color = 'var(--secondary)';
+                    } else if (optEl.classList.contains('selected') && a !== s7Active[i].a) {
+                        optEl.style.background = '#ffeaeb'; optEl.style.borderColor = 'var(--danger)'; optEl.style.color = 'var(--danger)';
+                    }
+                });
+                if(a !== s7Active[i].a) { errorDetails.push({q: s7Active[i].q, a: s7Active[i].a}); errs++; deductScore(5); }
+            });
+            if(errs === 0) { 
+                document.getElementById('btn-s7').disabled = true; stageClear(200); 
+            } else { 
+                takeDamage(errs * 15); 
+                document.getElementById('btn-s7').innerText = "Finish!";
+                let bonus = (errs / questionsNeeded.s7 > 0.4) ? 0 : 100;
+                document.getElementById('btn-s7').onclick = () => stageClear(bonus);
+                showFeedbackModal(errorDetails, null);
+            }
+        }
+
+    </script>
+</body>
+</html>
