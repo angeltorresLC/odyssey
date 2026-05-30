@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IELTS strategies 🌊</title>
+    <script src="ieltsquiz.js"></script>
+    <style>
+        :root {
+            --neon-blue: #00f2ff;
+            --bg: linear-gradient(180deg, #001f3f 0%, #000b1a 100%);
+            --card: rgba(0, 31, 63, 0.85); 
+            --correct: #00d4ff; 
+            --incorrect: #ff8c00;
+        }
+        
+        body { 
+            background: var(--bg); background-attachment: fixed; color: white; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; 
+            user-select: none; overflow-x: hidden; min-height: 100vh; margin: 0; padding: 20px;
+        }
+
+        /* --- BUBBLES --- */
+        .bubble-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; }
+        .bubble { position: absolute; bottom: -100px; background: rgba(255, 255, 255, 0.2); box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5); border-radius: 50%; animation: rise linear infinite; }
+        @keyframes rise { 0% { bottom: -100px; opacity: 0; } 20% { opacity: 0.6; } 100% { bottom: 110vh; opacity: 0; } }
+
+        /* --- UI CONTAINER --- */
+        #main-container { 
+            max-width: 800px; width: 95%; background: var(--card); 
+            border: 2px solid rgba(0, 242, 255, 0.3); border-radius: 25px; 
+            padding: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px); margin-top: 10px;
+        }
+        
+        h1 { text-align: center; color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue); font-size: 2.2rem; margin-bottom: 10px;}
+        
+        #timer-box { 
+            background: rgba(0, 242, 255, 0.2); border: 1px solid var(--neon-blue);
+            padding: 10px 20px; border-radius: 50px; font-weight: bold; float: right; font-size: 1.1rem; color: var(--neon-blue);
+        }
+
+        /* --- SONAR PROGRESS BAR --- */
+        .sonar-container { width: 100%; height: 12px; background: rgba(0, 242, 255, 0.1); border-radius: 10px; border: 1px solid rgba(0, 242, 255, 0.3); margin: 20px 0; overflow: hidden; position: relative; }
+        #sonar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #0072ff, #00f2ff); box-shadow: 0 0 15px #00f2ff; transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; }
+        #sonar-fill::after { content: ''; position: absolute; top: 0; right: 0; width: 20px; height: 100%; background: white; filter: blur(5px); opacity: 0.6; animation: sonar-ping 2s infinite; }
+        @keyframes sonar-ping { 0% { transform: translateX(-100%); opacity: 0; } 50% { opacity: 0.8; } 100% { transform: translateX(100%); opacity: 0; } }
+
+        /* --- QUESTION CARDS --- */
+        .q-card { background: rgba(255, 255, 255, 0.05); margin: 25px 0; padding: 20px; border-radius: 15px; border-left: 5px solid var(--neon-blue); }
+        .input-area { margin-top: 15px; }
+
+        /* Inputs */
+        input[type="text"], .underwater-select { 
+            width: 100%; max-width: 350px; background: rgba(0,0,0,0.4); color: white; 
+            border: 1px solid var(--neon-blue); padding: 12px; border-radius: 10px; font-size: 1rem; outline: none;
+        }
+        .underwater-select option { background: #001f3f; color: white; }
+        .mcq-option, .checkbox-label { display: block; margin: 8px 0; cursor: pointer; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; }
+        
+        .btn-submit { width: 100%; padding: 18px; background: linear-gradient(45deg, #0072ff, #00c6ff); border: none; border-radius: 12px; color: white; font-size: 1.3rem; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px;}
+        .btn-submit:hover { filter: brightness(1.2); }
+
+        /* Grading Reveals */
+        .blue-mark { border-left: 10px solid var(--correct) !important; background: rgba(0, 212, 255, 0.15) !important; }
+        .orange-mark { border-left: 10px solid var(--incorrect) !important; background: rgba(255, 140, 0, 0.15) !important; }
+        .feedback-hidden { display: none; margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.5); border-radius: 8px; color: var(--neon-blue); line-height: 1.5; font-weight: bold;}
+        
+        #security-warning { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.9); z-index: 9999; justify-content: center; align-items: center; font-size: 2.5rem; font-weight: bold; text-align: center; }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+<div class="bubble-wrap" id="bubble-bg"></div>
+<div id="security-warning">⛔ TAB LEFT DETECTED!<br>RESETTING MISSION... ⛔</div>
+
+<div id="main-container">
+    <div id="timer-box">⏳ 20:00</div>
+    <h1>Ielts strategies 🏴󠁧󠁢󠁥󠁮󠁧󠁿</h1>
+     <text>By: Angel T.👼🏼</text>
+    
+    
+    
+    <div id="quiz-flow"></div>
+    <div class="sonar-container"><div id="sonar-fill"></div></div>
+
+    <div id="footer-input" style="text-align: center; margin-top: 30px;">
+        <input type="text" id="playerName" placeholder="Enter Explorer Name..." style="text-align: center; margin-bottom: 5px;">
+        <p id="name-reminder" style="color: #ff8c00; display: none; font-weight: bold;">⚠️ Please enter your name to see answers!</p>
+        <button class="btn-submit" onclick="gradeQuiz()">FINISH 🚢</button>
+    </div>
+
+    <div id="results-area" style="display: none; margin-top: 30px; text-align: center; border-top: 1px solid var(--neon-blue); padding-top: 20px;">
+        <h2 id="finalScore"></h2>
+        <div id="grammarReport"></div>
+        <button class="btn-submit" style="background: #004e92;" onclick="location.reload()">NEW EVALUATION 🔄</button>
+    </div>
+</div>
+
+<script>
+    let activeQuestions = [];
+    let timeLeft = 1200; 
+    let timerInterval;
+    let quizSubmitted = false;
+    const pressedKeys = new Set();
+
+    // Generate Dynamic Bubbles
+    const bg = document.getElementById('bubble-bg');
+    for(let i=0; i<12; i++) {
+        let b = document.createElement('div');
+        b.className = 'bubble';
+        b.style.left = Math.random() * 100 + "%";
+        b.style.width = b.style.height = (Math.random() * 60 + 10) + "px";
+        b.style.animationDuration = (Math.random() * 8 + 6) + "s";
+        b.style.animationDelay = Math.random() * 5 + "s";
+        bg.appendChild(b);
+    }
+
+    function init() {
+        if (typeof questionBank === 'undefined') { alert("Error: ieltsquiz.js not loaded."); return; }
+        
+        quizSubmitted = false;
+        pressedKeys.clear();
+        document.getElementById('quiz-flow').innerHTML = "";
+        document.getElementById('sonar-fill').style.width = "0%";
+        timeLeft = 1200;
+        
+        // Randomize 20 questions
+        activeQuestions = [...questionBank].sort(() => 0.5 - Math.random()).slice(0, 7);
+
+        const flow = document.getElementById('quiz-flow');
+        activeQuestions.forEach((q, i) => {
+            let inputHtml = "";
+            let feedbackHtml = `🎯 Correct: ${q.answer}`;
+
+            // 1. MATCHING
+            if (q.type === "matching") {
+                const options = q.pairs.map(p => p.right).sort(() => 0.5 - Math.random());
+                inputHtml = `<div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px;">`;
+                q.pairs.forEach((pair, j) => {
+                    inputHtml += `
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
+                        <div style="flex:1; min-width:150px;"><strong>${pair.left}</strong></div>
+                        <div style="flex:1; min-width:150px;">
+                            <select id="ans-${i}-${j}" class="underwater-select" onchange="updateSonar()">
+                                <option value="" disabled selected>Select match...</option>
+                                ${options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>`;
+                });
+                inputHtml += `</div>`;
+                let feedbackText = q.pairs.map(p => `${p.left} ➡️ <span style="color:#fff;">${p.right}</span>`).join('<br>');
+                feedbackHtml = `🎯 Correct Matches:<br>${feedbackText}`;
+            } 
+            // 2. CHECKBOX (Select Multiple)
+            else if (q.type === "checkbox") {
+                inputHtml = `<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">`;
+                inputHtml += q.options.map(opt => `
+                    <label class="checkbox-label"><input type="checkbox" name="q-${i}" value="${opt}" onclick="updateSonar()"> ${opt}</label>
+                `).join('');
+                inputHtml += `</div>`;
+                feedbackHtml = `🎯 Correct: ${q.answer.join(', ')}`;
+            }
+            // 3. TRUE / FALSE
+            else if (q.type === "true_false") {
+                inputHtml = `
+                    <div style="display: flex; gap: 15px;">
+                        <label style="flex: 1; text-align: center; background: rgba(0, 212, 255, 0.1); padding: 15px; border-radius: 10px; border: 1px solid var(--neon-blue); cursor: pointer;">
+                            <input type="radio" name="q-${i}" value="True" onclick="updateSonar()"> TRUE ✅
+                        </label>
+                        <label style="flex: 1; text-align: center; background: rgba(255, 140, 0, 0.1); padding: 15px; border-radius: 10px; border: 1px solid var(--incorrect); cursor: pointer;">
+                            <input type="radio" name="q-${i}" value="False" onclick="updateSonar()"> FALSE ❌
+                        </label>
+                    </div>`;
+            }
+            // 4. DROPDOWN
+            else if(q.type === "dropdown") {
+                inputHtml = `<select id="ans-${i}" class="underwater-select" onchange="updateSonar()"><option value="" disabled selected>Select...</option>${q.options.map(o => `<option value="${o}">${o}</option>`).join('')}</select>`;
+            } 
+            // 5. MCQ
+            else if(q.type === "mcq") {
+                inputHtml = q.options.map(opt => `<label class="mcq-option"><input type="radio" name="q-${i}" value="${opt}" onclick="updateSonar()"> ${opt}</label>`).join('');
+            } 
+            // 7. UNSCRAMBLE (Word Order)
+            else if (q.type === "unscramble") {
+                // Shuffle the words just in case you typed them in order in the JS file!
+                let shuffledWords = [...q.words].sort(() => 0.5 - Math.random());
+                
+                let scrambledHtml = `<div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:15px; justify-content:center;">`;
+                shuffledWords.forEach(w => {
+                    scrambledHtml += `<span style="background:rgba(0,242,255,0.1); padding:8px 12px; border-radius:8px; border:1px dashed var(--neon-blue); font-weight:bold; letter-spacing:1px;">${w}</span>`;
+                });
+                scrambledHtml += `</div>`;
+                
+                inputHtml = scrambledHtml + `<input type="text" id="ans-${i}" oninput="updateSonar()" autocomplete="off" placeholder="Type the full sentence here...">`;
+            }
+            // 6. TEXT (Open Cloze)
+            else {
+                inputHtml = `<input type="text" id="ans-${i}" oninput="updateSonar()" autocomplete="off" placeholder="Type response...">`;
+            }
+
+            flow.innerHTML += `
+                <div class="q-card" id="card-${i}">
+                    <p><strong>Q${i+1} [${q.grammar}]</strong></p>
+                    <p>${q.question}</p>
+                    <div class="input-area">${inputHtml}</div>
+                    <div class="feedback-hidden" id="feed-${i}">${feedbackHtml}</div>
+                </div>`;
+        });
+        startTimer();
+    }
+
+    // UPDATE SONAR PROGRESS BAR
+    function updateSonar() {
+        const total = activeQuestions.length;
+        let answered = 0;
+
+        activeQuestions.forEach((q, i) => {
+            if (q.type === "matching") {
+                let allAnswered = true;
+                for (let j = 0; j < q.pairs.length; j++) { if (document.getElementById(`ans-${i}-${j}`).value === "") allAnswered = false; }
+                if (allAnswered) answered++;
+            } else if (q.type === "checkbox") {
+                if (document.querySelectorAll(`input[name="q-${i}"]:checked`).length > 0) answered++;
+            } else if (q.type === "mcq" || q.type === "true_false") {
+                if (document.querySelector(`input[name="q-${i}"]:checked`)) answered++;
+            } else {
+                if (document.getElementById(`ans-${i}`).value.trim() !== "") answered++;
+            
+            }
+        });
+
+        document.getElementById('sonar-fill').style.width = ((answered / total) * 100) + "%";
+    }
+
+    // GRADE SUBMISSION
+    function gradeQuiz() {
+        const nameInput = document.getElementById('playerName');
+        const reminder = document.getElementById('name-reminder');
+        
+        if (nameInput.value.trim() === "") {
+            reminder.style.display = "block";
+            nameInput.style.border = "2px solid #ff8c00";
+            nameInput.focus();
+            return;
+        }
+
+        if(quizSubmitted) return;
+        quizSubmitted = true;
+        reminder.style.display = "none";
+        clearInterval(timerInterval);
+
+        let score = 0;
+        let errors = {};
+
+        activeQuestions.forEach((q, i) => {
+            const card = document.getElementById(`card-${i}`);
+            let isCorrect = false;
+
+            if (q.type === "matching") {
+                isCorrect = true;
+                for (let j = 0; j < q.pairs.length; j++) {
+                    const subAns = document.getElementById(`ans-${i}-${j}`);
+                    subAns.disabled = true; 
+                    if (subAns.value !== q.pairs[j].right) isCorrect = false;
+                }
+            } else if (q.type === "checkbox") {
+                const checkedNodes = document.querySelectorAll(`input[name="q-${i}"]:checked`);
+                checkedNodes.forEach(n => n.disabled = true);
+                document.querySelectorAll(`input[name="q-${i}"]`).forEach(n => n.disabled = true);
+                const userVals = Array.from(checkedNodes).map(n => n.value);
+                isCorrect = (userVals.slice().sort().join(',') === q.answer.slice().sort().join(','));
+            } else if (q.type === "mcq" || q.type === "true_false") {
+                const checked = document.querySelector(`input[name="q-${i}"]:checked`);
+                document.querySelectorAll(`input[name="q-${i}"]`).forEach(n => n.disabled = true);
+                const userVal = checked ? checked.value : "";
+                isCorrect = (userVal.toLowerCase() === q.answer.toLowerCase());
+            } 
+            // Grade Text Inputs and Unscramble
+            else {
+                const input = document.getElementById(`ans-${i}`);
+                input.disabled = true;
+                
+                // .replace(/\s+/g, ' ') removes accidental double-spaces
+                // .replace(/[.,]/g, '') removes accidental periods or commas
+                let userVal = input.value.trim().toLowerCase().replace(/\s+/g, ' ').replace(/[.,]/g, '');
+                let correctVal = q.answer.toLowerCase().replace(/[.,]/g, '');
+                
+                isCorrect = (userVal === correctVal);
+            }
+
+            if (isCorrect) {
+                score++;
+                card.dataset.status = "correct";
+                card.classList.add('blue-mark');
+            } else {
+                card.dataset.status = "incorrect";
+                errors[q.grammar] = (errors[q.grammar] || 0) + 1;
+                card.classList.add('orange-mark');
+            }
+
+            // Show the answer feedback automatically
+            document.getElementById(`feed-${i}`).style.display = "block";
+        });
+
+        document.getElementById('footer-input').style.display = 'none';
+        document.getElementById('results-area').style.display = 'block';
+        document.getElementById('finalScore').innerText = `${nameInput.value.trim()}'s Score: ${score} / 20`;
+        
+        let report = "<h3>Mission Briefing:</h3>";
+        for(let topic in errors) { report += `<p>❌ Focus on: ${topic}</p>`; }
+        document.getElementById('grammarReport').innerHTML = report || "<p>Legendary Performance! 🔱</p>";
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            let m = Math.floor(timeLeft / 60);
+            let s = timeLeft % 60;
+            document.getElementById('timer-box').innerText = `⏳ ${m}:${s < 10 ? '0' : ''}${s}`;
+            if(timeLeft <= 0) gradeQuiz();
+        }, 1000);
+    }
+
+    // --- NON-DESTRUCTIVE SECURITY (REFRESH ON RETURN) ---
+    window.addEventListener('blur', () => { 
+        if(!quizSubmitted) document.getElementById('security-warning').style.display = 'flex'; 
+    });
+    window.addEventListener('focus', () => { 
+        if(!quizSubmitted) {
+            setTimeout(() => { location.reload(); }, 1000); // 1 second penalty then resets the quiz
+        } else {
+            document.getElementById('security-warning').style.display = 'none';
+        }
+    });
+
+    // --- SECRET COMBO (Q+W+T) ---
+    window.addEventListener('keydown', (e) => {
+        pressedKeys.add(e.key.toLowerCase());
+        if (pressedKeys.has('q') && pressedKeys.has('w') && pressedKeys.has('t') && quizSubmitted) {
+            activeQuestions.forEach((q, i) => {
+                const card = document.getElementById(`card-${i}`);
+                document.getElementById(`feed-${i}`).style.display = "block";
+                if(card.dataset.status === "correct") card.classList.add('blue-mark');
+                else card.classList.add('orange-mark');
+            });
+        }
+    });
+    window.addEventListener('keyup', (e) => pressedKeys.delete(e.key.toLowerCase()));
+
+    window.onload = init;
+</script>
+</body>
+</html>
